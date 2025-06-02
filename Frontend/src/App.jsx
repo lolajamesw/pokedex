@@ -12,10 +12,12 @@ function App() {
     <div>
       <table>
         <thead>
-          <th>ID</th>
-          <th>First Name</th>
-          <th>Last Name</th>
-          <th>Favourite Colour</th>
+          <tr>
+            <th>ID</th>
+            <th>First Name</th>
+            <th>Last Name</th>
+            <th>Favourite Colour</th>
+          </tr>
         </thead>
         <tbody>
           {data.map((d, index) => (
