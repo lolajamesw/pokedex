@@ -24,4 +24,4 @@ dist-ssr
 *.sw?
 
 # individual setup files
-.env
+Backend/.env
