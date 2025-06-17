@@ -4,6 +4,8 @@ DROP TABLE IF EXISTS `pokedex`.`CurrentAttacks`;
 DROP TABLE IF EXISTS `pokedex`.`LearnableAttacks`;
 DROP TABLE IF EXISTS `pokedex`.`Attacks`;
 DROP TABLE IF EXISTS `pokedex`.`MyPokemon`;
+DROP TABLE IF EXISTS `pokedex`.`Pokemon_Instances`;
+DROP TABLE IF EXISTS `pokedex`.`Owns`;
 DROP TABLE IF EXISTS `pokedex`.`Evolutions`;
 DROP TABLE IF EXISTS `pokedex`.`Pokedex`;
 DROP TABLE IF EXISTS `pokedex`.`User`;
@@ -53,19 +55,6 @@ CREATE TABLE `pokedex`.`Evolutions` (
     pIDinto INT NOT NULL REFERENCES `pokedex`.`Pokedex`(pID),
     PRIMARY KEY(pIDfrom, pIDinto)
 );
-CREATE TABLE pokedex.MyPokemon(
-	pID INT NOT NULL REFERENCES `pokedex`.`Pokedex`(pID),
-    uID INT NOT NULL REFERENCES `pokedex`.`User`(uID),
-    instanceID INT NOT NULL AUTO_INCREMENT,
-    nickname VARCHAR(30),
-    `level` INT,
-    favourite BIT,
-    onteam BIT,
-    showcase BIT,
-    dateAdded DATETIME,
-    PRIMARY KEY(instanceID),
-    CHECK (level>0)
-);
 
 CREATE TABLE pokedex.Attacks(
 	aID INT NOT NULL PRIMARY KEY, 
@@ -85,11 +74,29 @@ CREATE TABLE pokedex.LearnableAttacks(
     PRIMARY KEY (pID, aID)
 );
 
+CREATE TABLE Pokemon_Instances(
+    instanceID INT PRIMARY KEY AUTO_INCREMENT,
+	pID INT NOT NULL REFERENCES `pokedex`.`Pokedex`(pID),
+    nickname VARCHAR(30),
+    `level` INT,
+    CHECK (level>0)
+);
+
+CREATE TABLE Owns(
+    uID INT NOT NULL REFERENCES `pokedex`.`User`(uID),
+    instanceId INT NOT NULL REFERENCES pokedex.Pokemon_Instances,
+    favourite BIT,
+    onteam BIT,
+    showcase BIT,
+    dateAdded DATETIME,
+    PRIMARY KEY(uid, instanceId)
+);
+
 CREATE TABLE pokedex.CurrentAttacks(
     instanceID INT NOT NULL,
     aID INT NOT NULL REFERENCES pokedex.Attacks(aID),
     PRIMARY KEY (instanceID, aID),
-    FOREIGN KEY (instanceID) REFERENCES pokedex.MyPokemon(instanceID)
+    FOREIGN KEY (instanceID) REFERENCES pokedex.Pokemon_Instances(instanceID)
 );
 
 DELIMITER //
@@ -116,9 +123,9 @@ CREATE TABLE pokedex.Trades(
 	buyer_id INT, 
 	buyer_pokemon_instance_id INT, 
 	`status` VARCHAR(15) NOT NULL,
-    FOREIGN KEY (seller_pokemon_instance_id) REFERENCES pokedex.MyPokemon(instanceID),
+    FOREIGN KEY (seller_pokemon_instance_id) REFERENCES pokedex.Pokemon_Instances(instanceID),
     FOREIGN KEY (seller_id) REFERENCES pokedex.User(uid),
-    FOREIGN KEY (buyer_pokemon_instance_id) REFERENCES pokedex.MyPokemon(instanceID),
+    FOREIGN KEY (buyer_pokemon_instance_id) REFERENCES pokedex.Pokemon_Instances(instanceID),
     FOREIGN KEY (buyer_id) REFERENCES pokedex.User(uid)
 );
 
@@ -128,6 +135,6 @@ CREATE TABLE pokedex.Market(
     request_description VARCHAR(100),
     reply_pokemon_instance_id INT NOT NULL,
     reply_user_id INT NOT NULL,
-	FOREIGN KEY (offered_pokemon_instance_id) REFERENCES pokedex.MyPokemon(instanceID),
-	FOREIGN KEY (reply_pokemon_instance_id) REFERENCES pokedex.MyPokemon(instanceID)
+	FOREIGN KEY (offered_pokemon_instance_id) REFERENCES pokedex.Pokemon_Instances(instanceID),
+	FOREIGN KEY (reply_pokemon_instance_id) REFERENCES pokedex.Pokemon_Instances(instanceID)
 );
