@@ -55,3 +55,8 @@ INSERT INTO MyPokemon (pid, uid, nickname, favourite, onteam, level, showcase) V
 (2, 6, 'Bloomy', 0, 0, 25, 0),
 (3, 6, 'VineBoss', 0, 1, 45, 1);
 
+INSERT INTO Evolutions (pIDfrom, pIDinto) VALUES
+(1, 2), 
+(2, 3), 
+(4, 5);
+
