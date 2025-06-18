@@ -23,7 +23,7 @@ CREATE TABLE pokedex.TypeFX(
 );
 
 CREATE TABLE `pokedex`.`User` (
-	`uID` INT NOT NULL PRIMARY KEY,
+	`uID` INT AUTO_INCREMENT PRIMARY KEY,
     `name` VARCHAR(40) NOT NULL,
     `tradeCount` INT NOT NULL,
     `username` VARCHAR(30) UNIQUE NOT NULL,
@@ -33,7 +33,7 @@ CREATE TABLE `pokedex`.`User` (
 );
 
 CREATE TABLE `pokedex`.`Pokedex` (
-	`pID` INT NOT NULL PRIMARY KEY,
+	`pID` INT AUTO_INCREMENT PRIMARY KEY,
     `name` VARCHAR(40) NOT NULL,
     type1 VARCHAR(10) NOT NULL REFERENCES `pokedex`.`Types`(`type`),
     type2 VARCHAR(10) REFERENCES `pokedex`.`Types`(`type`),
@@ -56,19 +56,18 @@ CREATE TABLE `pokedex`.`Evolutions` (
 CREATE TABLE pokedex.MyPokemon(
 	pID INT NOT NULL REFERENCES `pokedex`.`Pokedex`(pID),
     uID INT NOT NULL REFERENCES `pokedex`.`User`(uID),
-    instanceID INT NOT NULL AUTO_INCREMENT,
+    instanceID INT AUTO_INCREMENT PRIMARY KEY,
     nickname VARCHAR(30),
     `level` INT,
-    favourite BIT,
-    onteam BIT,
-    showcase BIT,
-    dateAdded DATETIME,
-    PRIMARY KEY(instanceID),
+    favourite BIT DEFAULT 0,
+    onteam BIT DEFAULT 0,
+    showcase BIT DEFAULT 0,
+    dateAdded DATETIME DEFAULT '2000-01-01',
     CHECK (level>0)
 );
 
 CREATE TABLE pokedex.Attacks(
-	aID INT NOT NULL PRIMARY KEY, 
+	aID INT AUTO_INCREMENT PRIMARY KEY, 
 	attack_name VARCHAR(50) NOT NULL, 
 	`type` VARCHAR(10) NOT NULL REFERENCES pokedex.`Types`(`type`), 
 	category VARCHAR(20), 
@@ -110,7 +109,7 @@ END
 DELIMITER ;
 
 CREATE TABLE pokedex.Trades(
-	trade_id INT NOT NULL PRIMARY KEY,
+	trade_id INT AUTO_INCREMENT PRIMARY KEY,
 	seller_pokemon_instance_id INT NOT NULL, 
 	seller_id INT NOT NULL, 
 	buyer_id INT, 
@@ -123,7 +122,7 @@ CREATE TABLE pokedex.Trades(
 );
 
 CREATE TABLE pokedex.Market(
-    offered_pokemon_instance_id INT NOT NULL,
+    offered_pokemon_instance_id INT PRIMARY KEY,
     offering_user_id INT NOT NULL,
     request_description VARCHAR(100),
     reply_pokemon_instance_id INT NOT NULL,
