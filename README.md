@@ -1,14 +1,15 @@
 # pokedex
 
-The file pokedexBackup.sql is a MySQL dump file for our sample database. To create and load this database,
+The file SQL/pokedexBackup.sql is a MySQL dump file for our sample database. To create and load this database,
 1. downlad the dump file or clone this repo
 2. Open MySQL Workbench
 3. Go to Server > Data Import > Import From Disk
 4. Select "Import Self-Contained File" and enter the path to pokedexBackup.sql
-5. For the Default Target Schema feild, click the "New" button and enter the name you would like to give your copy of the database.
+5. For the Default Target Schema feild, click the "New" button and enter "pokedex".
 6. In the bottom-right corner of the screen, click "Start Import"
 
-Once the import is complete, you should be able to select from the singular table in the database (for now): group_members.
+Once the import is complete, the database should contain all the tables defined in our relational schema, along with some test data.
+An overview of the sample data set can be found in the file SQL/showSampleData.out.
 
 
 To get the project running, you need to separately run the backend and frontend
@@ -21,7 +22,7 @@ To get the project running, you need to separately run the backend and frontend
 DB_HOST=localhost
 DB_USER=root
 DB_PASSWORD=your_password
-DB_NAME=pokedexBackup
+DB_NAME=pokedex
 DB_PORT=your_port_number
 6. from the Backend folder run the command "node server.js" --> You can verify this worked by checking the web address http://localhost:8081 in a web browser
 7. Verify the database is connecting by checking for the table details in http://localhost:8081/group_members
