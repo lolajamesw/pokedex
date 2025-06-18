@@ -28,5 +28,6 @@ app.get('/group_members', (req, res)=> {
 
 app.listen(8081, ()=> {
     console.log("listening on port 8081");
-    console.log("View output at http://localhost:8081/group_members")
+    console.log("View output at http://localhost:8081");
+    console.log("read table at http://localhost:8081/group_members")
 })
