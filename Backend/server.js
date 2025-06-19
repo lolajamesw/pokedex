@@ -26,6 +26,38 @@ app.get('/group_members', (req, res)=> {
     })
 })
 
+app.get('/pokemon', (req, res) => {
+  const uid = 4;
+
+  const sql = `
+  SELECT pID AS id, name, type1, type2, hp, atk, def, spAtk, spDef, speed 
+  FROM Pokedex
+  `;
+
+      db.query(sql, (err, results) => {
+        if (err) {
+            console.error("Error fetching Pokémon data:", err);
+            return res.status(500).json({ error: "Database error" });
+        }
+
+        const formatted = results.map((row) => ({
+            id: row.id,
+            number: row.id,
+            name: row.name,
+            types: row.type2 ? [row.type1, row.type2] : [row.type1],
+            stats: { hp: row.hp,
+            attack: row.atk,
+            defense: row.def,
+            spAttack: row.spAtk,
+            spDefense: row.spDef,
+            speed: row.speed,
+            },
+            caught: false,
+        }));
+    return res.json(formatted);
+  });
+});
+
 app.listen(8081, ()=> {
     console.log("listening on port 8081");
     console.log("View output at http://localhost:8081");
