@@ -9,6 +9,9 @@ DROP TABLE IF EXISTS Pokedex;
 DROP TABLE IF EXISTS User;
 DROP TABLE IF EXISTS TypeFX;
 DROP TABLE IF EXISTS Types;
+DROP TRIGGER IF EXISTS limit_attacks;
+DROP TRIGGER IF EXISTS max_6_onTeam;
+DROP TRIGGER IF EXISTS max_6_showcase;
 
 CREATE TABLE Types(type VARCHAR(10) NOT NULL PRIMARY KEY);
 
@@ -91,23 +94,6 @@ CREATE TABLE CurrentAttacks(
     FOREIGN KEY (instanceID) REFERENCES MyPokemon(instanceID)
 );
 
-DELIMITER //
-
-CREATE TRIGGER limit_attacks
-BEFORE INSERT ON CurrentAttacks
-FOR EACH ROW
-BEGIN
-	DECLARE atkCount INT;
-    SELECT COUNT(DISTINCT(pID, instanceID, uID)) INTO atkCount
-    FROM CurrentAttacks
-    
-    IF atkCount >= 4 THEN 
-		SIGNAL SQLSTATE '45000'
-		SET MESSAGE_TEXT = 'Pokemon cannot learn more than 4 moves';
-    END IF
-END
-DELIMITER ;
-
 CREATE TABLE Trades(
 	trade_id INT AUTO_INCREMENT PRIMARY KEY,
 	seller_pokemon_instance_id INT NOT NULL, 
@@ -130,3 +116,57 @@ CREATE TABLE Market(
 	FOREIGN KEY (offered_pokemon_instance_id) REFERENCES MyPokemon(instanceID),
 	FOREIGN KEY (reply_pokemon_instance_id) REFERENCES MyPokemon(instanceID)
 );
+
+DELIMITER //
+
+CREATE TRIGGER limit_attacks
+BEFORE INSERT ON CurrentAttacks
+FOR EACH ROW
+BEGIN
+	DECLARE atkCount INT;
+    SELECT COUNT(DISTINCT(pID, instanceID, uID)) INTO atkCount
+    FROM CurrentAttacks;
+    
+    IF atkCount >= 4 THEN 
+		SIGNAL SQLSTATE '45000'
+		SET MESSAGE_TEXT = 'Pokemon cannot learn more than 4 moves';
+    END IF;
+END //
+
+-- enforces that a user can have no more than 6 pokemon showcased at a time
+CREATE TRIGGER max_6_showcase 
+BEFORE UPDATE ON MyPokemon
+FOR EACH ROW
+BEGIN
+	DECLARE numShowcased INT;
+	IF OLD.showcase = 0 AND NEW.showcase = 1 THEN
+		SELECT COUNT(instanceID) INTO numShowcased 
+			FROM MyPokemon 
+			WHERE uid = OLD.uid AND showcase = 1;
+
+		IF numShowcased >= 6 THEN
+			SIGNAL SQLSTATE '45000'
+			SET MESSAGE_TEXT = 'A user cannot showcase more than 6 pokemon at a time';
+		END IF;
+	END IF;
+END //
+
+
+-- enforces that a user can have no more than 6 pokemon on their team
+CREATE TRIGGER max_6_onTeam 
+BEFORE UPDATE ON MyPokemon
+FOR EACH ROW
+BEGIN
+	DECLARE numTeam INT;
+    IF OLD.onTeam = 0 AND NEW.onTeam = 1 THEN
+		SELECT COUNT(instanceID) INTO numTeam 
+			FROM MyPokemon 
+			WHERE uid = OLD.uid AND onTeam = 1;
+			
+		IF numTeam >= 6 AND NEW.onTeam = 1 THEN
+			SIGNAL SQLSTATE '45000'
+			SET MESSAGE_TEXT = 'The maximum team size is 6.';
+		END IF;
+	END IF;
+END //
+
