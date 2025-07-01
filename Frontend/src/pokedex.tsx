@@ -2,54 +2,61 @@
 
 import { useState, useEffect, useMemo } from "react"
 import { Search, SortAsc, SortDesc } from "lucide-react"
+import { Link } from "react-router-dom"
 import "./pokedex.css"
 
 function PokemonCard({ pokemon }) {
   return (
     <div className="pokemon-card">
-      <div className="pokemon-card-header">
-        <div className="pokemon-title-row">
-          <h3 className="pokemon-title">
-            #{pokemon.number.toString().padStart(3, "0")} {pokemon.name}
-          </h3>
-          <div className="pokemon-badges">{pokemon.caught && <span className="badge badge-caught">Caught</span>}</div>
-        </div>
-        <div className="pokemon-types">
-          {pokemon.types.map((type) => (
-            <span key={type} className={`type-badge type-${type.toLowerCase()}`}>
-              {type}
-            </span>
-          ))}
-        </div>
-      </div>
-      <div className="pokemon-card-content">
-        <div className="pokemon-stats">
-          <div className="stat-row">
-            <span className="stat-label">HP:</span>
-            <span className="stat-value">{pokemon.stats.hp}</span>
+      <Link
+        to={`/pokedex/${pokemon.number}`}
+        key={pokemon.number}
+        style={{ textDecoration:"none", color: "inherit" }}
+      >
+        <div className="pokemon-card-header">
+          <div className="pokemon-title-row">
+            <h3 className="pokemon-title">
+              #{pokemon.number.toString().padStart(3, "0")} {pokemon.name}
+            </h3>
+            <div className="pokemon-badges">{pokemon.caught && <span className="badge badge-caught">Caught</span>}</div>
           </div>
-          <div className="stat-row">
-            <span className="stat-label">Attack:</span>
-            <span className="stat-value">{pokemon.stats.attack}</span>
-          </div>
-          <div className="stat-row">
-            <span className="stat-label">Defense:</span>
-            <span className="stat-value">{pokemon.stats.defense}</span>
-          </div>
-          <div className="stat-row">
-            <span className="stat-label">Sp. Atk:</span>
-            <span className="stat-value">{pokemon.stats.spAttack}</span>
-          </div>
-          <div className="stat-row">
-            <span className="stat-label">Sp. Def:</span>
-            <span className="stat-value">{pokemon.stats.spDefense}</span>
-          </div>
-          <div className="stat-row">
-            <span className="stat-label">Speed:</span>
-            <span className="stat-value">{pokemon.stats.speed}</span>
+          <div className="pokemon-types">
+            {pokemon.types.map((type) => (
+              <span key={type} className={`type-badge type-${type.toLowerCase()}`}>
+                {type}
+              </span>
+            ))}
           </div>
         </div>
-      </div>
+        <div className="pokemon-card-content">
+          <div className="pokemon-stats">
+            <div className="stat-row">
+              <span className="stat-label">HP:</span>
+              <span className="stat-value">{pokemon.stats.hp}</span>
+            </div>
+            <div className="stat-row">
+              <span className="stat-label">Attack:</span>
+              <span className="stat-value">{pokemon.stats.attack}</span>
+            </div>
+            <div className="stat-row">
+              <span className="stat-label">Defense:</span>
+              <span className="stat-value">{pokemon.stats.defense}</span>
+            </div>
+            <div className="stat-row">
+              <span className="stat-label">Sp. Atk:</span>
+              <span className="stat-value">{pokemon.stats.spAttack}</span>
+            </div>
+            <div className="stat-row">
+              <span className="stat-label">Sp. Def:</span>
+              <span className="stat-value">{pokemon.stats.spDefense}</span>
+            </div>
+            <div className="stat-row">
+              <span className="stat-label">Speed:</span>
+              <span className="stat-value">{pokemon.stats.speed}</span>
+            </div>
+          </div>
+        </div>
+      </Link>
     </div>
   )
 }
