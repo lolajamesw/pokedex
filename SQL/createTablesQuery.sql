@@ -1,5 +1,6 @@
-DROP TABLE IF EXISTS Market;
 DROP TABLE IF EXISTS Trades;
+DROP TABLE IF EXISTS Reply;
+DROP TABLE IF EXISTS Listing;
 DROP TABLE IF EXISTS CurrentAttacks;
 DROP TABLE IF EXISTS LearnableAttacks;
 DROP TABLE IF EXISTS Attacks;
@@ -52,10 +53,10 @@ CREATE TABLE Pokedex (
 );
     
 CREATE TABLE Evolutions (
-	base INT NOT NULL REFERENCES Pokedex(pID),
-    stage1 INT NOT NULL REFERENCES Pokedex(pID),
-    stage2 INT NOT NULL REFERENCES Pokedex(pID),
-    PRIMARY KEY(stage1)
+	base INT REFERENCES Pokedex(pID),
+    stage1 INT REFERENCES Pokedex(pID),
+    stage2 INT REFERENCES Pokedex(pID),
+    PRIMARY KEY(base, stage1)
 );
 CREATE TABLE MyPokemon(
 	pID INT NOT NULL REFERENCES Pokedex(pID),
@@ -95,27 +96,26 @@ CREATE TABLE CurrentAttacks(
     FOREIGN KEY (instanceID) REFERENCES MyPokemon(instanceID)
 );
 
-CREATE TABLE Trades(
-	trade_id INT AUTO_INCREMENT PRIMARY KEY,
-	seller_pokemon_instance_id INT NOT NULL, 
-	seller_id INT NOT NULL, 
-	buyer_id INT, 
-	buyer_pokemon_instance_id INT, 
-	status VARCHAR(15) NOT NULL,
-    FOREIGN KEY (seller_pokemon_instance_id) REFERENCES MyPokemon(instanceID),
-    FOREIGN KEY (seller_id) REFERENCES User(uid),
-    FOREIGN KEY (buyer_pokemon_instance_id) REFERENCES MyPokemon(instanceID),
-    FOREIGN KEY (buyer_id) REFERENCES User(uid)
+CREATE TABLE Listing(
+	listingID INT AUTO_INCREMENT PRIMARY KEY,
+    instanceID INT NOT NULL REFERENCES MyPokemon(instanceID),
+    sellerID INT NOT NULL REFERENCES User(uID),
+    description VARCHAR(100)
 );
 
-CREATE TABLE Market(
-    offered_pokemon_instance_id INT PRIMARY KEY,
-    offering_user_id INT NOT NULL,
-    request_description VARCHAR(100),
-    reply_pokemon_instance_id INT NOT NULL,
-    reply_user_id INT NOT NULL,
-	FOREIGN KEY (offered_pokemon_instance_id) REFERENCES MyPokemon(instanceID),
-	FOREIGN KEY (reply_pokemon_instance_id) REFERENCES MyPokemon(instanceID)
+CREATE TABLE Reply(
+	replyID INT AUTO_INCREMENT PRIMARY KEY,
+    listingID INT NOT NULL REFERENCES Listing(listingID),
+    instanceID INT NOT NULL REFERENCES MyPokemon(instanceID),
+    respondantID INT NOT NULL REFERENCES User(uID)
+);
+
+CREATE TABLE Trades(
+	tradeID INT AUTO_INCREMENT PRIMARY KEY,
+	listingID INT NOT NULL,
+    replyID INT NOT NULL,
+    FOREIGN KEY (listingID) REFERENCES Listing(listingID),
+    FOREIGN KEY (replyID) REFERENCES Reply(replyID)
 );
 
 DELIMITER //

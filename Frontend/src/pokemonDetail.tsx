@@ -6,6 +6,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./com
 import { Progress } from "./components/ui/progress"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./components/ui/tabs.tsx"
 import { ArrowRight, Shield, Zap, Swords, Eye, Footprints } from "lucide-react"
+import { cn } from "./lib/utils.ts"
+import "./pokedex.css"
+import "./details.css"
 
 type PokemonStatType = {
     hp: number,
@@ -18,7 +21,7 @@ type PokemonStatType = {
 
 type AttackStatType = {
     power: number,
-    acuracy: number,
+    accuracy: number,
     pp: number
 }
 
@@ -36,6 +39,7 @@ type PokemonDetailType = {
   name: string;
   types: string[],
   stats: PokemonStatType,
+  legendary: boolean,
   description: string,
   attacks: AttackDetailType[]
 };
@@ -45,6 +49,10 @@ type PokemonSummary = {
     name: string,
     types: string[],
     image: string
+}
+
+function PokemonSummary(id, name, types, img) {
+  this.id = id; this.name = name; this.types=types; this.image=img;
 }
 
 type Evolution = {
@@ -57,7 +65,7 @@ const PokemonDetail = () => {
     const { id } = useParams<{ id: string}>();
     const [pokemon, setPokemonDetail] = useState<PokemonDetailType | null>(null);
     const [evolutions, setEvolutions] = useState<Evolution[] | null>(null);
-    const isBranchingEvolution = 133 <= Number(id) && 136 >= Number(id);
+    const isBranchingEvolution = 133 == Number(id);
     
     useEffect(() => {
         const fetchData = async () => {
@@ -66,7 +74,7 @@ const PokemonDetail = () => {
                 const overviewData = await overviewRes.json();
 
                 const attackRes = await fetch(`http://localhost:8081/pokemon/attacks/${id}`);
-                const attackData = await overviewRes.json();
+                const attackData = await attackRes.json();
 
                 const combined: PokemonDetailType = {
                     ...overviewData,
@@ -75,23 +83,27 @@ const PokemonDetail = () => {
 
                 setPokemonDetail(combined);
 
-                const evolutionRes = await fetch(`http://localhost:8081/evolutions/${id}`);
+                const evolutionRes = await fetch(`http://localhost:8081/pokemon/evolutions/${id}`);
                 const evolutionData = await evolutionRes.json();
+                console.log("fetched evolution data");
                 setEvolutions(evolutionData);
             } catch (error) {
                 console.error(error);
             }
         };
+        fetchData();
     }, [id])
 
-    if (!pokemon) return <div>Loading...</div>;
+    if (!pokemon) return <div>Loading...first {id}</div>;
+    const placeholderImg = "/placeholder.png";    
     var evolutionaryLine: PokemonSummary[] = [];
+    console.log("evolutions state: ", evolutions);
     if (evolutions) {
-        evolutionaryLine = isBranchingEvolution ? [evolutions[0].base] : [
-            evolutions[0].base, evolutions[0].stage1, evolutions[0].stage2
-        ];
+      if (evolutions.length == 0) evolutionaryLine = [new PokemonSummary(pokemon.id, pokemon.name, pokemon.types, placeholderImg)];
+      else if (!evolutions[0].stage2.id) evolutionaryLine = [evolutions[0].base, evolutions[0].stage1];
+      else evolutionaryLine = [evolutions[0].base, evolutions[0].stage1, evolutions[0].stage2];
     }
-    else return <div>Loading...</div>;
+    else return <div>Loading...second</div>;
 
     const getTypeColor = (type: string) => {
         const colors: { [key: string]: string } = {
@@ -100,10 +112,13 @@ const PokemonDetail = () => {
             Dragon: "bg-purple-600",
             Special: "bg-pink-500",
             Physical: "bg-orange-500",
-            Grass: "bg-green-500",
+            Grass: "bg-green-600",
             Electric: "bg-yellow-500",
             Ground: "bg-yellow-700",
             Ghost: "bg-purple-800",
+            Poison: "bg-purple-600",
+            Water: "bg-blue-700",
+            Psychic: "bg-pink-600",
         }
         return colors[type] || "bg-gray-500"
     }
@@ -115,17 +130,21 @@ const PokemonDetail = () => {
         return "bg-red-500"
     }
 
+    // return (<div className="bg-testcolor w-32 h-32">
+    //   Test box
+    //   </div>);
+
     return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-red-50 p-4">
       <div className="max-w-6xl mx-auto space-y-6">
         {/* Header Section */}
         <Card className="overflow-hidden">
           <CardContent className="p-0">
-            <div className="bg-gradient-to-r from-orange-400 to-red-500 p-6 text-white">
+            <div className={`bg-gradient-to-r gradient-${pokemon.types[0].toLowerCase()} p-6 text-white`}>
               <div className="flex flex-col md:flex-row items-center gap-6">
                 <div className="relative">
                   <img
-                    src="/placeholder.svg?height=200&width=200"
+                    src={placeholderImg}
                     alt={pokemon.name}
                     width={200}
                     height={200}
@@ -136,7 +155,7 @@ const PokemonDetail = () => {
                   </Badge>
                 </div>
                 <div className="flex-1 text-center md:text-left">
-                  <h1 className="text-4xl font-bold mb-2">{pokemon.name}</h1>
+                  <h1 className="text-white text-4xl font-bold mb-2">{pokemon.name}</h1>
                   <div className="flex flex-wrap gap-2 justify-center md:justify-start mb-4">
                     {pokemon.types.map((type) => (
                       <Badge key={type} className={`${getTypeColor(type)} text-white`}>
@@ -152,15 +171,14 @@ const PokemonDetail = () => {
         </Card>
 
         {/* Main Content Tabs */}
-        <Tabs defaultValue="stats" className="space-y-4">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
+        <Tabs defaultValue="stats" className="space-y-3">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="stats">Stats</TabsTrigger>
             <TabsTrigger value="evolution">Evolution</TabsTrigger>
             <TabsTrigger value="moves">Moves</TabsTrigger>
-            <TabsTrigger value="stats">Stats</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="stats" className="space-y-4">
+          <TabsContent value="stats" className="space-y-3">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -169,8 +187,8 @@ const PokemonDetail = () => {
                 </CardTitle>
                 <CardDescription>The base statistical values for this Pokémon</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid gap-4">
+              <CardContent className="space-y-3">
+                <div className="grid gap-3">
                   {Object.entries(pokemon.stats).map(([stat, value]) => (
                     <div key={stat} className="space-y-2">
                       <div className="flex justify-between items-center">
@@ -254,7 +272,7 @@ const PokemonDetail = () => {
                               className={`p-3 rounded-lg border-2 mx-auto w-fit ${evo.stage1.name === pokemon.name ? "border-orange-500 bg-orange-50" : "border-gray-200"}`}
                             >
                               <img
-                                src={evo.stage1.image || "/placeholder.svg?height=60&width=60"}
+                                src={evo.stage1.image || placeholderImg}
                                 alt={evo.stage1.name}
                                 width={60}
                                 height={60}
@@ -305,7 +323,7 @@ const PokemonDetail = () => {
                             className={`p-4 rounded-lg border-2 ${evo.name === pokemon.name ? "border-orange-500 bg-orange-50" : "border-gray-200"}`}
                           >
                             <img
-                              src={evo.image || "/placeholder.svg?height=80&width=80"}
+                              src={evo.image || placeholderImg}
                               alt={evo.name}
                               width={80}
                               height={80}
@@ -351,13 +369,11 @@ const PokemonDetail = () => {
                         </div>
                         <div className="flex gap-4 text-sm text-muted-foreground">
                           <span>Power: {move.stats.power}</span>
-                          <span>Accuracy: {move.stats.acuracy}%</span>
+                          <span>Accuracy: {move.stats.accuracy}%</span>
                           <span>PP: {move.stats.pp}</span>
                         </div>
                       </div>
-                      {/* <div className="mt-2 sm:mt-0">
-                        <Badge variant="secondary">{move.level === 1 ? "TM/TR" : `Level ${move.level}`}</Badge>
-                      </div> */}
+                      <p>{move.effect}</p>
                     </div>
                   ))}
                 </div>

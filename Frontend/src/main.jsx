@@ -1,8 +1,9 @@
 import { StrictMode, useState } from 'react'
 import { createRoot } from 'react-dom/client'
-import { BrowserRouter } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import Navbar from './components/navbar.js'
 import PokemonInterface from './pokedex.js'
+import PokemonDetail from './pokemonDetail.js'
 import Profile from './profile.js'
 
 function MainApp() {
@@ -12,8 +13,15 @@ function MainApp() {
     <div>
       <Navbar currentPage={currentPage} setCurrentPage={setCurrentPage} />
       <main>
-        {currentPage === "pokedex" && <PokemonInterface />}
+        {/* {currentPage === "pokedex" && <PokemonInterface />}
         {currentPage === "profile" && <Profile />}
+        {currentPage === "pokedex/:id" && <PokemonDetail />} */}
+        <Routes>
+          <Route path="/" element={<Navigate to= "/pokedex" />} />
+          <Route path="/pokedex" element={<PokemonInterface />} />
+          <Route path="/pokedex/:id" element={<PokemonDetail />} />
+          <Route path="/profile" element={<Profile />} />
+        </Routes>
       </main>
     </div>
   )
