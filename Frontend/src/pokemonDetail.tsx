@@ -1,4 +1,4 @@
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 
 import { Badge } from "./components/ui/badge"
@@ -144,7 +144,7 @@ const PokemonDetail = () => {
               <div className="flex flex-col md:flex-row items-center gap-6">
                 <div className="relative">
                   <img
-                    src={placeholderImg}
+                    src={`/pokemonPics/${pokemon.id.toString().padStart(3, "0")}.png`}
                     alt={pokemon.name}
                     width={200}
                     height={200}
@@ -249,7 +249,7 @@ const PokemonDetail = () => {
                           className={`p-4 rounded-lg border-2 ${(evolutions as any)[0].base.name === pokemon.name ? "border-orange-500 bg-orange-50" : "border-gray-200"}`}
                         >
                           <img
-                            src={(evolutions as any)[0].base.image}
+                            src={`/pokemonPics/${evolutions[0].base.id.toString().padStart(3, "0")}.png`}
                             alt={(evolutions as any)[0].base.name}
                             width={80}
                             height={80}
@@ -261,34 +261,39 @@ const PokemonDetail = () => {
                     </div>
 
                     {/* Evolution Paths */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-3 gap-4">
                       {(evolutions as any).map((evo: any) => (
                         <div key={evo.stage1.id} className="relative">
                           {/* Connection Line */}
                           <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 w-px h-4 bg-gray-300 hidden sm:block"></div>
 
                           <div className="text-center p-3 border rounded-lg hover:shadow-md transition-shadow">
-                            <div
-                              className={`p-3 rounded-lg border-2 mx-auto w-fit ${evo.stage1.name === pokemon.name ? "border-orange-500 bg-orange-50" : "border-gray-200"}`}
-                            >
-                              <img
-                                src={evo.stage1.image || placeholderImg}
-                                alt={evo.stage1.name}
-                                width={60}
-                                height={60}
-                                className="mx-auto"
-                              />
-                            </div>
-                            <h4 className="font-semibold mt-2 text-sm">{evo.stage1.name}</h4>
-                            <div className="mt-1">
-                              <div className="pokemon-types">
-                                {evo.stage1.types.map((type) => (
-                                <span key={type} className={`type-badge type-${type.toLowerCase()}`}>
-                                    {type}
-                                </span>
-                                ))}
-                            </div>
-                            </div>
+                            <Link
+                              to={`/pokedex/${evo.stage1.id}`}
+                              key={evo.stage1.id}
+                              style={{ textDecoration:"none", color: "inherit" }}>
+                              <div
+                                className={`p-3 rounded-lg border-2 mx-auto w-fit ${evo.stage1.name === pokemon.name ? "border-orange-500 bg-orange-50" : "border-gray-200"}`}
+                              >
+                                <img
+                                  src={`/pokemonPics/${evo.stage1.id.toString().padStart(3, "0")}.png` || placeholderImg}
+                                  alt={evo.stage1.name}
+                                  width={60}
+                                  height={60}
+                                  className="mx-auto"
+                                />
+                              </div>
+                              <h4 className="font-semibold mt-2 text-sm">{evo.stage1.name}</h4>
+                              <div className="mt-1">
+                                <div className="pokemon-types">
+                                  {evo.stage1.types.map((type) => (
+                                  <span key={type} className={`type-badge type-${type.toLowerCase()}`}>
+                                      {type}
+                                  </span>
+                                  ))}
+                              </div>
+                              </div>
+                            </Link>
                           </div>
                         </div>
                       ))}
@@ -319,11 +324,15 @@ const PokemonDetail = () => {
                     {(evolutionaryLine as any).map((evo, index) => (
                       <div key={evo.id} className="flex items-center gap-4">
                         <div className="text-center">
+                          <Link
+                              to={`/pokedex/${evo.id}`}
+                              key={evo.id}
+                              style={{ textDecoration:"none", color: "inherit" }}>
                           <div
                             className={`p-4 rounded-lg border-2 ${evo.name === pokemon.name ? "border-orange-500 bg-orange-50" : "border-gray-200"}`}
                           >
                             <img
-                              src={evo.image || placeholderImg}
+                              src={`/pokemonPics/${evo.id.toString().padStart(3, "0")}.png` || placeholderImg}
                               alt={evo.name}
                               width={80}
                               height={80}
@@ -331,6 +340,7 @@ const PokemonDetail = () => {
                             />
                           </div>
                           <h3 className="font-semibold mt-2">{evo.name}</h3>
+                          </Link>
                         </div>
                         {index < (evolutionaryLine as any[]).length - 1 && (
                           <ArrowRight className="h-6 w-6 text-muted-foreground hidden md:block" />
