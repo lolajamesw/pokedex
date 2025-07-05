@@ -74,12 +74,13 @@
 }
 
 .nav-button-active {
-  background: #2563eb;
+  background: #161616;
   color: white;
 }
 
 .nav-button-active:hover {
-  background: #1d4ed8;
+  background: #000000;
+  color: white;
 }
 
 .nav-icon {

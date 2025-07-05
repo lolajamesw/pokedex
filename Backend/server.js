@@ -1,17 +1,19 @@
 require('dotenv').config();
 const express = require('express');
 const mysql = require('mysql2');
+const mysqlPromise = require('mysql2/promise');
 const cors = require('cors');
 
 const app = express()
 app.use(cors())
+app.use(express.json());
 
 const db = mysql.createConnection({
-    host: process.env.DB_HOST,
-    port: process.env.DB_PORT,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME
+    host: 'localhost',
+    port: 3306,
+    user: 'root',
+    password: 'fluffyP23',
+    database: 'pokedex'
 })
 
 app.get('/', (re, res)=> {
@@ -178,6 +180,97 @@ app.get(`/pokemon/evolutions/:id`, (req, res) => {
         }))
         return res.json(formatted);
     });
+});
+
+app.get('/userPokemon', (req, res) => {
+  const uID = 5; // Replace with actual user ID from session or authentication
+
+  const sql = `
+    SELECT
+      mp.instanceID AS id,
+      p.pID AS number,
+      p.name,
+      p.type1,
+      p.type2,
+      p.hp,
+      p.atk,
+      p.def,
+      p.spAtk,
+      p.spDef,
+      p.speed,
+      mp.nickname
+    FROM MyPokemon mp
+    JOIN Pokedex p ON mp.pID = p.pID
+    WHERE mp.uID = ${uID}
+  `;
+
+  db.query(sql, (err, results) => {
+    if (err) {
+      console.error("Error fetching user's Pokémon data:", err);
+      return res.status(500).json({ error: "Database error" });
+    }
+
+    const formatted = results.map((row) => ({
+      id: row.id,
+      number: row.number,
+      name: row.name,
+      types: row.type2 ? [row.type1, row.type2] : [row.type1],
+      stats: {
+        hp: row.hp,
+        attack: row.atk,
+        defense: row.def,
+        spAttack: row.spAtk,
+        spDefense: row.spDef,
+        speed: row.speed,
+      },
+      nickname: row.nickname
+    }));
+
+    return res.json(formatted);
+  });
+});
+
+app.post("/addPokemon", async (req, res) => {
+  const { pokemonName, nickname, level, uID } = req.body;
+
+  console.log("Incoming request to /addPokemon with:", req.body);
+
+  try {
+    const dbPromise = await mysqlPromise.createConnection({
+      host: 'localhost',
+      port: 3306,
+      user: 'root',
+      password: 'fluffyP23',
+      database: 'pokedex'
+    });
+
+    const [rows] = await dbPromise.query(
+      "SELECT pID FROM Pokedex WHERE LOWER(name) = LOWER(?)",
+      [pokemonName]
+    );
+    console.log("Pokedex lookup result:", rows);
+
+    if (rows.length === 0) {
+      await dbPromise.end();
+      return res.status(400).send("Pokémon not found in Pokedex.");
+    }
+
+    const pID = rows[0].pID;
+    console.log(`Found pID: ${pID}, inserting into MyPokemon...`);
+
+    await dbPromise.query(
+      `INSERT INTO MyPokemon (pID, uID, nickname, level, dateAdded)
+       VALUES (?, ?, ?, ?, NOW())`,
+      [pID, uID, nickname || null, level]
+    );
+
+    console.log("Insert successful.");
+    await dbPromise.end();
+    res.send("Pokémon added successfully.");
+  } catch (err) {
+    console.error("Error adding Pokémon:", err);
+    res.status(500).send("Server error adding Pokémon.");
+  }
 });
 
 app.listen(8081, ()=> {
