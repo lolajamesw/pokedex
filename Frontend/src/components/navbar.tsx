@@ -1,13 +1,14 @@
 "use client"
 
 import { useState, useRef, useEffect } from "react"
+import { useLocation, Link } from "react-router-dom"
 import { Menu, User, LogOut, BookOpen, ShoppingCart } from "lucide-react"
 import "./navbar.css"
 
 const navigationItems = [
-  { name: "Pokédex", href: "pokedex", icon: BookOpen },
-  { name: "My Pokémon", href: "my-pokemon", icon: User },
-  { name: "Market", href: "market", icon: ShoppingCart },
+  { name: "Pokédex", href: "/pokedex", icon: BookOpen },
+  { name: "My Pokémon", href: "/my-pokemon", icon: User },
+  { name: "Market", href: "/market", icon: ShoppingCart },
 ]
 
 export default function Navbar({ currentPage, setCurrentPage }) {
@@ -19,6 +20,7 @@ export default function Navbar({ currentPage, setCurrentPage }) {
       .catch((err) => console.error("Failed to fetch user:", err));
   }, [])
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  useEffect(() => {})
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
   const dropdownRef = useRef(null)
   useEffect(() => {
@@ -34,7 +36,7 @@ export default function Navbar({ currentPage, setCurrentPage }) {
   }
 }, [])
 
-
+  const location = useLocation();
   return (
     <nav className="navbar">
       <div className="navbar-container">
@@ -48,16 +50,16 @@ export default function Navbar({ currentPage, setCurrentPage }) {
           <div className="desktop-nav">
             {navigationItems.map((item) => {
               const Icon = item.icon
-              const isActive = currentPage === item.href
+              const isActive = location.pathname.startsWith(item.href)
               return (
-                <button
+                <Link
                   key={item.name}
-                  onClick={() => setCurrentPage(item.href)}
+                  to={item.href}
                   className={`nav-button ${isActive ? "nav-button-active" : ""}`}
                 >
                   <Icon className="nav-icon" />
                   <span>{item.name}</span>
-                </button>
+                </Link>
               )
             })}
           </div>
@@ -76,10 +78,10 @@ export default function Navbar({ currentPage, setCurrentPage }) {
                 <p className="profile-username">@{user.username}</p>
               </div>
               <hr className="dropdown-divider" />
-              <button onClick={() => setCurrentPage("profile")} className="dropdown-item">
+              <Link to="/profile" onClick={() => setShowProfileDropdown(false)} className="dropdown-item">
                 <User className="dropdown-icon" />
                 <span>Profile</span>
-              </button>
+              </Link>
               <button className="dropdown-item">
                 <LogOut className="dropdown-icon" />
                 <span>Log out</span>
@@ -115,35 +117,31 @@ export default function Navbar({ currentPage, setCurrentPage }) {
               <div className="mobile-nav-items">
                 {navigationItems.map((item) => {
                   const Icon = item.icon
-                  const isActive = currentPage === item.href
+                  const isActive = location.pathname.startsWith(item.href)
                   return (
-                    <button
+                    <Link
                       key={item.name}
-                      onClick={() => {
-                        setCurrentPage(item.href)
-                        setMobileMenuOpen(false)
-                      }}
+                      to={item.href}
+                      onClick={() => setMobileMenuOpen(false)}
                       className={`mobile-nav-button ${isActive ? "mobile-nav-button-active" : ""}`}
                     >
                       <Icon className="mobile-nav-icon" />
                       <span>{item.name}</span>
-                    </button>
+                    </Link>
                   )
                 })}
               </div>
 
               {/* Profile actions */}
               <div className="mobile-profile-actions">
-                <button
-                  onClick={() => {
-                    setCurrentPage("profile")
-                    setMobileMenuOpen(false)
-                  }}
+                <Link
+                  to="/profile"
+                  onClick={() => setMobileMenuOpen(false)}
                   className="mobile-action-button"
                 >
                   <User className="mobile-action-icon" />
                   <span>Profile</span>
-                </button>
+                </Link>
                 <button className="mobile-action-button">
                   <LogOut className="mobile-action-icon" />
                   <span>Log out</span>
