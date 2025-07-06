@@ -1,10 +1,12 @@
 require('dotenv').config();
 const express = require('express');
 const mysql = require('mysql2');
+const mysqlPromise = require('mysql2/promise');
 const cors = require('cors');
 
 const app = express()
 app.use(cors())
+app.use(express.json());
 
 const db = mysql.createConnection({
     host: process.env.DB_HOST,
@@ -270,7 +272,6 @@ app.post("/addPokemon", async (req, res) => {
     res.status(500).send("Server error adding Pokémon.");
   }
 });
-
 
 app.listen(8081, ()=> {
     console.log("listening on port 8081");
