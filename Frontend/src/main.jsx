@@ -5,6 +5,7 @@ import Navbar from './components/navbar.js'
 import PokemonInterface from './pokedex.js'
 import PokemonDetail from './pokemonDetail.js'
 import Profile from './profile.js'
+import MyPokedex from './my-pokemon.js'
 
 function MainApp() {
   const [currentPage, setCurrentPage] = useState("pokedex")
@@ -21,6 +22,7 @@ function MainApp() {
           <Route path="/pokedex" element={<PokemonInterface />} />
           <Route path="/pokedex/:id" element={<PokemonDetail />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/my-pokemon" element={<MyPokedex />} />
         </Routes>
       </main>
     </div>
