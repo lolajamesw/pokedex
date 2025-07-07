@@ -35,13 +35,17 @@ type AttackDetailType = {
 }
 
 type PokemonDetailType = {
-  id: number;
-  name: string;
+  id: number,
+  pID: number,
+  name: string,
+  nickname: string,
+  level: number,
   types: string[],
   stats: PokemonStatType,
   legendary: boolean,
   description: string,
-  attacks: AttackDetailType[]
+  learnableAttacks: AttackDetailType[],
+  knownAttacks: AttackDetailType[],
 };
 
 type PokemonSummary = {
@@ -61,8 +65,8 @@ type Evolution = {
     stage2: PokemonSummary
 }
 
-const PokemonDetail = () => {
-    const { id } = useParams<{ id: string}>();
+const MyPokeDetail = () => {
+    const { id, pID } = useParams<{ id: string, pID: string}>();
     const [pokemon, setPokemonDetail] = useState<PokemonDetailType | null>(null);
     const [evolutions, setEvolutions] = useState<Evolution[] | null>(null);
     const isBranchingEvolution = 133 == Number(id);
@@ -70,20 +74,26 @@ const PokemonDetail = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const overviewRes = await fetch(`http://localhost:8081/pokemon/${id}`);
+                console.log("id:", id, "pID:",pID);
+
+                const overviewRes = await fetch(`http://localhost:8081/userPokemon/${id}`);
                 const overviewData = await overviewRes.json();
 
-                const attackRes = await fetch(`http://localhost:8081/pokemon/attacks/${id}`);
+                const attackRes = await fetch(`http://localhost:8081/pokemon/attacks/${pID}`);
                 const attackData = await attackRes.json();
+
+                const knownRes = await fetch(`http://localhost:8081/pokemon/knownAttacks/${id}`)
+                const knownData = await knownRes.json();
 
                 const combined: PokemonDetailType = {
                     ...overviewData,
-                    attacks: attackData
+                    learnableAttacks: attackData,
+                    knownAttacks: knownData,
                 };
 
                 setPokemonDetail(combined);
 
-                const evolutionRes = await fetch(`http://localhost:8081/pokemon/evolutions/${id}`);
+                const evolutionRes = await fetch(`http://localhost:8081/pokemon/evolutions/${pID}`);
                 const evolutionData = await evolutionRes.json();
                 console.log("fetched evolution data");
                 setEvolutions(evolutionData);
@@ -95,10 +105,11 @@ const PokemonDetail = () => {
     }, [id])
 
     if (!pokemon) return <div>Loading...first {id}</div>;
+    console.log("learnableAttacks: ", pokemon.learnableAttacks);
     const placeholderImg = "/placeholder.png";    
     var evolutionaryLine: PokemonSummary[] = [];
     if (evolutions) {
-      if (evolutions.length == 0) evolutionaryLine = [new PokemonSummary(pokemon.id, pokemon.name, pokemon.types, placeholderImg)];
+      if (evolutions.length == 0) evolutionaryLine = [new PokemonSummary(pokemon.pID, pokemon.name, pokemon.types, placeholderImg)];
       else if (!evolutions[0].stage2.id) evolutionaryLine = [evolutions[0].base, evolutions[0].stage1];
       else evolutionaryLine = [evolutions[0].base, evolutions[0].stage1, evolutions[0].stage2];
     }
@@ -143,19 +154,26 @@ const PokemonDetail = () => {
               <div className="flex flex-col md:flex-row items-center gap-6">
                 <div className="relative">
                   <img
-                    src={`/pokemonPics/${pokemon.id.toString().padStart(3, "0")}.png`}
+                    src={`/pokemonPics/${pokemon.pID.toString().padStart(3, "0")}.png`}
                     alt={pokemon.name}
                     width={200}
                     height={200}
                     className="rounded-lg bg-white/20 p-4"
                   />
                   <Badge className="absolute -top-2 -right-2 bg-white text-black">
-                    #{pokemon.id.toString().padStart(3, "0")}
+                    #{pokemon.pID.toString().padStart(3, "0")}
                   </Badge>
                 </div>
                 <div className="flex-1 text-center md:text-left">
-                  <h1 className="text-white text-4xl font-bold mb-2">{pokemon.name}</h1>
+                <div className="flex flex-col md:flex-row md:items-baseline md:gap-3 mb-2">
+                  <h1 className="text-white text-4xl font-bold mb-2">{pokemon.nickname}</h1>
                   <div className="flex flex-wrap gap-2 justify-center md:justify-start mb-4">
+                  <div className="flex items-center gap-2 justify-center md:justify-start">
+                    <span className="text-xl font-semibold text-white/90">Lv. {pokemon.level}</span>
+                    {pokemon.nickname && <span className="text-lg text-white/75">({pokemon.name})</span>}
+                  </div>
+                </div></div>
+                <div className="flex flex-wrap gap-2 justify-center md:justify-start mb-4">
                     {pokemon.types.map((type) => (
                       <Badge key={type} className={`${getTypeColor(type)} text-white`}>
                         {type}
@@ -363,7 +381,42 @@ const PokemonDetail = () => {
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {pokemon.attacks.map((move, index) => (
+                  {pokemon.learnableAttacks.map((move, index) => (
+                    <div
+                      key={index}
+                      className="flex flex-col sm:flex-row sm:items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors"
+                    >
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <h4 className="font-medium">{move.name}</h4>
+                          <Badge className={`${getTypeColor(move.type)} text-white text-xs`}>{move.type}</Badge>
+                          <Badge variant="outline" className="text-xs">
+                            {move.category}
+                          </Badge>
+                        </div>
+                        <div className="flex gap-4 text-sm text-muted-foreground">
+                          <span>Power: {move.stats.power}</span>
+                          <span>Accuracy: {move.stats.accuracy}%</span>
+                          <span>PP: {move.stats.pp}</span>
+                        </div>
+                      </div>
+                      <p>{move.effect}</p>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Swords className="h-5 w-5" />
+                  Current Moves
+                </CardTitle>
+                <CardDescription>Moves that this Pokémon has learned through leveling up and TMs</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {pokemon.knownAttacks.map((move, index) => (
                     <div
                       key={index}
                       className="flex flex-col sm:flex-row sm:items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors"
@@ -389,53 +442,6 @@ const PokemonDetail = () => {
               </CardContent>
             </Card>
           </TabsContent>
-
-          {/* <TabsContent value="stats" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Shield className="h-5 w-5" />
-                  Base Stats
-                </CardTitle>
-                <CardDescription>The base statistical values for this Pokémon</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid gap-4">
-                  {Object.entries(pokemon.baseStats).map(([stat, value]) => (
-                    <div key={stat} className="space-y-2">
-                      <div className="flex justify-between items-center">
-                        <span className="font-medium capitalize">
-                          {stat === "hp"
-                            ? "HP"
-                            : stat === "spAttack"
-                              ? "Sp. Attack"
-                              : stat === "spDefense"
-                                ? "Sp. Defense"
-                                : stat.charAt(0).toUpperCase() + stat.slice(1)}
-                        </span>
-                        <span className="font-bold">{value}</span>
-                      </div>
-                      <div className="relative">
-                        <Progress value={(value / 150) * 100} className="h-2" />
-                        <div
-                          className={`absolute top-0 left-0 h-2 rounded-full ${getStatColor(value)}`}
-                          style={{ width: `${(value / 150) * 100}%` }}
-                        />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                <div className="pt-4 border-t">
-                  <div className="flex justify-between items-center">
-                    <span className="font-semibold">Total:</span>
-                    <span className="font-bold text-lg">
-                      {Object.values(pokemon.baseStats).reduce((sum, stat) => sum + stat, 0)}
-                    </span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent> */}
         </Tabs>
       </div>
     </div>
@@ -444,4 +450,4 @@ const PokemonDetail = () => {
 
 
 
-export default PokemonDetail;
+export default MyPokeDetail;

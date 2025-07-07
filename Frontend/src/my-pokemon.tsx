@@ -6,12 +6,32 @@ import { Link } from "react-router-dom"
 import "./pokedex.css"
 import "./my-pokemon.css"
 
+type PokemonDetailType = {
+  id: number,
+  number: number,
+  name: string,
+  types: string[],
+  stats: PokemonStatType,
+  level: number,
+  nickname: string,
+  showcase: boolean
+};
+
+type PokemonStatType = {
+    hp: number,
+    atk: number,
+    def: number,
+    spAtk: number,
+    spDef: number,
+    speed: number
+}
+
 function PokemonCard({ pokemon }) {
   return (
     <div className="pokemon-card">
       <Link
-        to={`/pokedex/${pokemon.number}`}
-        key={pokemon.number}
+        to={`/my-pokemon/${pokemon.number}/${pokemon.id}`}
+        key={pokemon.id}
         style={{ textDecoration:"none", color: "inherit" }}
       >                   
         <div className="pokemon-card-header">
@@ -70,7 +90,7 @@ export default function MyPokedex() {
   const [sortBy, setSortBy] = useState("number")
   const [sortOrder, setSortOrder] = useState("asc")
   const [filterType, setFilterType] = useState("all")
-  const [pokemonList, setPokemonList] = useState([])
+  const [pokemonList, setPokemonList] = useState<PokemonDetailType[]>([])
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newPokemonName, setNewPokemonName] = useState("");
   const [newNickname, setNewNickname] = useState("");
@@ -108,20 +128,20 @@ export default function MyPokedex() {
         bValue = b.stats.hp
         break
       case "attack":
-        aValue = a.stats.attack
-        bValue = b.stats.attack
+        aValue = a.stats.atk
+        bValue = b.stats.atk
         break
       case "defense":
-        aValue = a.stats.defense
-        bValue = b.stats.defense
+        aValue = a.stats.def
+        bValue = b.stats.def
         break
       case "spAttack":
-        aValue = a.stats.spAttack
-        bValue = b.stats.spAttack
+        aValue = a.stats.spAtk
+        bValue = b.stats.spAtk
         break
       case "spDefense":
-        aValue = a.stats.spDefense
-        bValue = b.stats.spDefense
+        aValue = a.stats.spDef
+        bValue = b.stats.spDef
         break
       case "speed":
         aValue = a.stats.speed

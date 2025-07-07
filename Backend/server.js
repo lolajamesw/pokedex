@@ -84,7 +84,41 @@ app.get(`/pokemon/:id`, (req, res) => {
                 spDef: row.spDef, 
                 speed: row.speed
             },
-            legendary: row.legendary.buffer[0] === 1, 
+            legendary: row.legendary[0] === 1, 
+            description: row.description
+        }))
+        return res.json(formatted[0]);
+    });
+});
+
+app.get(`/userPokemon/:id`, (req, res) => {
+    const id = req.params.id;
+    const sql = `
+    SELECT instanceID, mp.pID, name, nickname, level, type1, type2, hp, atk, def, spAtk, spDef, speed, legendary, description
+    FROM Pokedex p, MyPokemon mp WHERE instanceID=${id} AND p.pID=mp.pID;
+    `
+    db.query(sql, (err, results) => {
+        if (err) {
+            console.error("Error fetching pokemon's data", err);
+            return res.status(500).json({error: "Database error"});
+        }
+
+        const formatted = results.map((row) => ({
+            id: row.instanceID,
+            pID: row.pID,
+            name: row.name,
+            nickname: row.nickname,
+            level: row.level,
+            types: row.type2 ? [row.type1, row.type2] : [row.type1],
+            stats: {
+                hp: row.hp,
+                atk: row.atk, 
+                def: row.def, 
+                spAtk: row.spAtk, 
+                spDef: row.spDef, 
+                speed: row.speed
+            },
+            legendary: row.legendary[0] === 1, 
             description: row.description
         }))
         return res.json(formatted[0]);
@@ -97,6 +131,35 @@ app.get(`/pokemon/attacks/:id`, (req, res) => {
     SELECT a.aID, a.attack_name, type, category, power, accuracy, PP, effect
     FROM Attacks a, LearnableAttacks l 
     WHERE pID=${pID} AND a.aID=l.aID;
+    `
+    db.query(sql, (err, results) => {
+        if (err) {
+            console.error("Error fetching pokemon's data", err);
+            return res.status(500).json({error: "Database error"});
+        }
+
+        const formatted = results.map((row) => ({
+            id: row.aID,
+            name: row.attack_name,
+            type: row.type,
+            category: row.category,
+            stats: {
+                power: row.power,
+                accuracy: row.accuracy, 
+                pp: row.PP
+            },
+            effect: row.effect
+        }))
+        return res.json(formatted);
+    });
+});
+
+app.get(`/pokemon/knownAttacks/:id`, (req, res) => {
+    const id = req.params.id;
+    const sql = `
+    SELECT a.aID, a.attack_name, type, category, power, accuracy, PP, effect
+    FROM Attacks a, CurrentAttacks c
+    WHERE instanceID=${id} AND a.aID=c.aID;
     `
     db.query(sql, (err, results) => {
         if (err) {
@@ -177,13 +240,34 @@ app.get(`/pokemon/evolutions/:id`, (req, res) => {
                 types: row.type23 ? [row.type13, row.type23] : [row.type13],
                 image: placeholderImg
             }
-        }))
+        }));
         return res.json(formatted);
     });
 });
 
+app.get('/user/:id', (req, res) => {
+    const uID = req.params.id;
+    const sql = `
+        SELECT uID, name, tradeCount, username
+        FROM User WHERE uID=${uID};
+    `
+    db.query(sql, (err, results) => {
+        if (err) {
+            console.error("Error fetching user's data", err);
+            return res.status(500).json({error: "Database error"});
+        }
+        const formatted = results.map((row) => ({
+            id: row.uID,
+            displayName: row.name,
+            tradeCount: row.tradeCount,
+            username: row.username,
+        }));
+        return res.json(formatted[0]);
+    });
+});
+
 app.get('/userPokemon', (req, res) => {
-  const uID = 5; // Replace with actual user ID from session or authentication
+  const uID = 4; // Replace with actual user ID from session or authentication
 
   const sql = `
     SELECT
@@ -198,7 +282,9 @@ app.get('/userPokemon', (req, res) => {
       p.spAtk,
       p.spDef,
       p.speed,
-      mp.nickname
+      mp.level,
+      mp.nickname,
+      mp.showcase
     FROM MyPokemon mp
     JOIN Pokedex p ON mp.pID = p.pID
     WHERE mp.uID = ${uID}
@@ -223,7 +309,9 @@ app.get('/userPokemon', (req, res) => {
         spDefense: row.spDef,
         speed: row.speed,
       },
-      nickname: row.nickname
+      level: row.level,
+      nickname: row.nickname,
+      showcase: row.showcase[0]===1
     }));
 
     return res.json(formatted);
@@ -273,8 +361,67 @@ app.post("/addPokemon", async (req, res) => {
   }
 });
 
+app.post("/setShowcased", async(req,res) => {
+    const {instanceIDs, user} = req.body;
+    console.log("Incoming request to /setShowcased pokemon instance:", req.body);
+
+    try {
+    const dbPromise = await mysqlPromise.createConnection({
+      host: process.env.DB_HOST,
+      port: process.env.DB_PORT,
+      user: process.env.DB_USER,
+      password: process.env.DB_PASSWORD,
+      database: process.env.DB_NAME
+    });
+
+    await dbPromise.query(
+        `UPDATE MyPokemon
+         SET showcase=1
+         WHERE instanceID IN (${instanceIDs.toString()}) AND uID=${user};`
+    );
+    await dbPromise.query(
+        `UPDATE MyPokemon
+         SET showcase=0
+         WHERE instanceID NOT IN (${instanceIDs.toString()}) AND uID=${user};`
+    )
+
+    console.log("Marking successful.");
+    await dbPromise.end();
+    res.send("Pokémon updated successfully.");
+  } catch (err) {
+    console.error("Error marking Pokémon:", err);
+    res.status(500).send("Server error marking Pokémon.");
+  }
+});
+
+app.post("/updateUserDisplayName", async(req,res) => {
+    const {uID, name} = req.body;
+    console.log("Incoming request to update name to:", name);
+
+    try {
+        const dbPromise = await mysqlPromise.createConnection({
+        host: process.env.DB_HOST,
+        port: process.env.DB_PORT,
+        user: process.env.DB_USER,
+        password: process.env.DB_PASSWORD,
+        database: process.env.DB_NAME
+        });
+
+        await dbPromise.query(
+            `UPDATE User
+            SET name='${name}'
+            WHERE uID=${uID};`
+        )
+        console.log("Update successful");
+        await dbPromise.end();
+        res.send("User's name updated successfully.");
+    } catch (err) {
+    console.error("Error marking Pokémon:", err);
+    res.status(500).send("Server error marking Pokémon.");
+  }
+})
+
 app.listen(8081, ()=> {
     console.log("listening on port 8081");
     console.log("View output at http://localhost:8081");
-    console.log("read table at http://localhost:8081/group_members")
 })

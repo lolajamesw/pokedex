@@ -1,42 +1,35 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Edit2, Save, X, Plus } from "lucide-react"
 import "./profile.css"
 
-// Mock user data based on User table query
-const mockUser = {
-  username: "trainer_red",
-  Name: "Trainer Red", // Display name from database
-  tradeCount: 47,
+
+type PokemonSummaryType = {
+  nickname: string,
+  level: number,
+  name: string
 }
 
-// Mock showcased Pokemon data based on showcase query
-const mockShowcasedPokemon = [
-  { nickname: "Bulby", level: 45, Species: "Bulbasaur" },
-  { nickname: "Flame", level: 52, Species: "Charizard" },
-  { nickname: "Sparky", level: 38, Species: "Pikachu" },
-  { nickname: "Ivy", level: 48, Species: "Venusaur" },
-  { nickname: "Splash", level: 41, Species: "Blastoise" },
-  { nickname: "Freeze", level: 55, Species: "Articuno" },
-]
+type PokemonDetailType = {
+  id: number,
+  number: number,
+  name: string,
+  types: string[],
+  stats: PokemonStatType,
+  level: number,
+  nickname: string,
+  showcase: boolean
+};
 
-// Mock user's Pokemon collection for selection (would come from another query)
-const mockUserPokemon = [
-  { id: 1, nickname: "Bulby", level: 45, Species: "Bulbasaur" },
-  { id: 2, nickname: "Ivy Jr", level: 32, Species: "Ivysaur" },
-  { id: 3, nickname: "Ivy", level: 48, Species: "Venusaur" },
-  { id: 4, nickname: "Ember", level: 28, Species: "Charmander" },
-  { id: 5, nickname: "Blaze", level: 35, Species: "Charmeleon" },
-  { id: 6, nickname: "Flame", level: 52, Species: "Charizard" },
-  { id: 7, nickname: "Squirt", level: 25, Species: "Squirtle" },
-  { id: 8, nickname: "Turtle", level: 38, Species: "Wartortle" },
-  { id: 9, nickname: "Splash", level: 41, Species: "Blastoise" },
-  { id: 10, nickname: "Sparky", level: 38, Species: "Pikachu" },
-  { id: 11, nickname: "Freeze", level: 55, Species: "Articuno" },
-  { id: 12, nickname: "Thunder", level: 58, Species: "Zapdos" },
-  { id: 13, nickname: "Inferno", level: 60, Species: "Moltres" },
-]
+type PokemonStatType = {
+    hp: number,
+    atk: number,
+    def: number,
+    spAtk: number,
+    spDef: number,
+    speed: number
+}
 
 function PokemonCard({ pokemon, isSelected, onSelect, showSelectButton }) {
   return (
@@ -54,7 +47,7 @@ function PokemonCard({ pokemon, isSelected, onSelect, showSelectButton }) {
       </div>
       <div className="showcase-card-content">
         <h3 className="showcase-nickname">{pokemon.nickname}</h3>
-        <p className="showcase-species">{pokemon.Species}</p>
+        <p className="showcase-species">{pokemon.name}</p>
       </div>
     </div>
   )
@@ -119,36 +112,93 @@ function PokemonSelectionModal({ isOpen, onClose, userPokemon, selectedPokemon, 
 }
 
 export default function Profile() {
-  const [user, setUser] = useState(mockUser)
+  const [pokemonList, setPokemonList] = useState<PokemonDetailType[]>([]);
+  const [user, setUser] = useState({id: 4, tradeCount: 0, displayName: "", username: "" })
   const [isEditingName, setIsEditingName] = useState(false)
-  const [editedDisplayName, setEditedDisplayName] = useState(user.Name)
+  const [editedDisplayName, setEditedDisplayName] = useState(user.displayName)
   const [isPokemonModalOpen, setIsPokemonModalOpen] = useState(false)
-  const [showcasedPokemon, setShowcasedPokemon] = useState(mockShowcasedPokemon)
+  const [showcasedPokemon, setShowcasedPokemon] = useState<PokemonSummaryType[]>([])
 
-  const handleSaveDisplayName = () => {
-    setUser({ ...user, Name: editedDisplayName })
+  useEffect(() => {
+    fetch("http://localhost:8081/user/4")
+      .then((res) => res.json())
+      .then((data) => setUser(data))
+      .catch((err) => console.error("Failed to fetch user: ", err));
+  }, [])
+
+  useEffect(() => {
+      fetch("http://localhost:8081/userPokemon")
+        .then((res) => res.json())
+        .then((data) => setPokemonList(data))
+        .catch((err) => console.error("Failed to fetch Pokémon:", err));
+    }, [])
+
+    useEffect(() => {
+      const showcased = pokemonList.filter(
+        (p) => p.showcase===true,
+      );
+      const formatted = showcased.map((pokemon) => ({
+        nickname: pokemon.nickname,
+        level: pokemon.level,
+        name: pokemon.name
+      }));
+      setShowcasedPokemon(formatted);
+      console.log("list: ", pokemonList);
+      console.log("Showcased: ", showcasedPokemon);
+      console.log("Initial Showcase list: ", showcased);
+    }, [pokemonList])
+  
+
+  const handleSaveDisplayName = async () => {
+    try {
+      console.log("Updating user's name");
+      const response = await fetch("http://localhost:8081/updateUserDisplayName", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({uID: 4, name: editedDisplayName})
+      })
+    } catch (err) {
+      console.error("Error showcasing Pokémon: ", err);
+      alert("Something went wrong adding the Pokémon.")
+    }
+    setUser({ ...user, displayName: editedDisplayName }) // Update database
     setIsEditingName(false)
-  }
+  } 
 
   const handleCancelEdit = () => {
-    setEditedDisplayName(user.Name)
+    setEditedDisplayName(user.displayName)
     setIsEditingName(false)
   }
 
-  const handleShowcaseChange = (selectedPokemon) => {
-    // Convert UserPokemon to ShowcasedPokemon format
-    const newShowcase = selectedPokemon.map((pokemon) => ({
-      nickname: pokemon.nickname,
-      level: pokemon.level,
-      Species: pokemon.Species,
-    }))
-    setShowcasedPokemon(newShowcase)
+  const handleShowcaseChange = async (selectedPokemon) => {
+    // Call setShowcased to selected pokemon
+    try {
+      console.log("Marking Pokemon: ", selectedPokemon.map((p)=>(p.nickname)));
+      const response = await fetch("http://localhost:8081/setShowcased", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({instanceIDs: selectedPokemon.map((p)=>(p.id)), user: 4}),
+      });
+      // Convert UserPokemon to ShowcasedPokemon format
+      const newShowcase = selectedPokemon.map((pokemon) => ({
+        nickname: pokemon.nickname,
+        level: pokemon.level,
+        name: pokemon.name,
+      }))
+      setShowcasedPokemon(newShowcase)
+
+    } catch (err) {
+      console.error("Error showcasing Pokémon: ", err);
+      alert("Something went wrong adding the Pokémon.")
+    }
+
+    
   }
 
   // Convert showcased Pokemon to UserPokemon format for selection
   const selectedForModal = showcasedPokemon.map((pokemon, index) => {
-    const userPokemon = mockUserPokemon.find(
-      (p) => p.nickname === pokemon.nickname && p.level === pokemon.level && p.Species === pokemon.Species,
+    const userPokemon = pokemonList.find(
+      (p) => p.nickname === pokemon.nickname && p.level === pokemon.level && p.name === pokemon.name,
     )
     return userPokemon || { id: index, ...pokemon }
   })
@@ -161,7 +211,7 @@ export default function Profile() {
           <div className="profile-info">
             {/* Profile Picture */}
             <div className="profile-avatar">
-              <div className="avatar-fallback">{user.Name.charAt(0)}</div>
+              <div className="avatar-fallback">{user.displayName.charAt(0)}</div>
             </div>
 
             {/* Profile Info */}
@@ -184,7 +234,7 @@ export default function Profile() {
                   </div>
                 ) : (
                   <div className="name-display">
-                    <h1 className="profile-name">{user.Name}</h1>
+                    <h1 className="profile-name">{user.displayName}</h1>
                     <button className="edit-button edit-button-ghost" onClick={() => setIsEditingName(true)}>
                       <Edit2 className="edit-icon" />
                     </button>
@@ -200,7 +250,7 @@ export default function Profile() {
                   <div className="stat-label">Trades</div>
                 </div>
                 <div className="stat-item">
-                  <div className="stat-number">{mockUserPokemon.length}</div>
+                  <div className="stat-number">{pokemonList.length}</div>
                   <div className="stat-label">Pokémon Caught</div>
                 </div>
               </div>
@@ -248,7 +298,7 @@ export default function Profile() {
       <PokemonSelectionModal
         isOpen={isPokemonModalOpen}
         onClose={() => setIsPokemonModalOpen(false)}
-        userPokemon={mockUserPokemon}
+        userPokemon={pokemonList}
         selectedPokemon={selectedForModal}
         onSelectionChange={handleShowcaseChange}
       />
