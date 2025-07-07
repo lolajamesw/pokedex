@@ -286,7 +286,8 @@ app.get('/userPokemon', (req, res) => {
       p.speed,
       mp.level,
       mp.nickname,
-      mp.showcase
+      mp.showcase,
+      mp.onteam
     FROM MyPokemon mp
     JOIN Pokedex p ON mp.pID = p.pID
     WHERE mp.uID = ${uID}
@@ -313,7 +314,8 @@ app.get('/userPokemon', (req, res) => {
       },
       level: row.level,
       nickname: row.nickname,
-      showcase: row.showcase[0]===1
+      showcase: row.showcase[0]===1,
+      onTeam: row.onteam[0]===1
     }));
 
     return res.json(formatted);
@@ -424,9 +426,9 @@ app.post("/setFavourite", async(req,res) => {
   }
 });
 
-app.post("/setOnTeam", async(req,res) => {
-    const {instanceID, user, value} = req.body;
-    console.log("Incoming request to /setOnTeam pokemon instance:", req.body);
+app.post("/setTeam", async(req,res) => {
+    const {instanceIDs, user} = req.body;
+    console.log("Incoming request to /setTeam pokemon instance:", req.body);
 
     try {
     const dbPromise = await mysqlPromise.createConnection({
@@ -439,9 +441,14 @@ app.post("/setOnTeam", async(req,res) => {
 
     await dbPromise.query(
         `UPDATE MyPokemon
-         SET onteam=${value}
-         WHERE instanceID = ${instanceID} AND uID=${user};`
+         SET onteam=1
+         WHERE instanceID IN (${instanceIDs.toString()}) AND uID=${user};`
     );
+    await dbPromise.query(
+        `UPDATE MyPokemon
+         SET onteam=0
+         WHERE instanceID NOT IN (${instanceIDs.toString()}) AND uID=${user};`
+    )
 
     console.log("Marking successful.");
     await dbPromise.end();

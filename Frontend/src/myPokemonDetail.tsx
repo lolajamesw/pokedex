@@ -165,26 +165,6 @@ const MyPokeDetail = () => {
     
   }
 
-  const toggleTeamStatus = async () => {
-    try {
-      console.log("Marking Pokemon: ", pokemon.nickname);
-      const response = await fetch("http://localhost:8081/setOnTeam", {
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({instanceID: pokemon.id, user: 4, value: Number(!pokemon.onTeam)}),
-      });
-      // Convert UserPokemon to ShowcasedPokemon format
-      setPokemonDetail((prev) => {
-      if (!prev) return prev;  
-      return {...prev, onTeam: !prev.onTeam,};});
-
-    } catch (err) {
-      console.error("Error adding Pokémon to team: ", err);
-      alert("Something went wrong adding the Pokémon.")
-    }
-    
-  }
-
     return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-red-50 p-4">
       <div className="max-w-6xl mx-auto space-y-6">
@@ -205,19 +185,6 @@ const MyPokeDetail = () => {
                   title={pokemon.favourite ? "Remove from favorites" : "Add to favorites"}
                 >
                   {pokemon.favourite ? <Heart className="h-6 w-6 fill-current" /> : <Heart className="h-6 w-6" />}
-                </button>
-
-                {/* Team Status Button */}
-                <button
-                  onClick={toggleTeamStatus}
-                  className={`p-2 rounded-full transition-all duration-200 hover:scale-110 ${
-                    pokemon.onTeam
-                      ? "bg-white/20 text-green-300 hover:bg-white/30"
-                      : "bg-white/10 text-white/60 hover:bg-white/20 hover:text-white"
-                  }`}
-                  title={pokemon.onTeam ? "Remove from team" : "Add to team"}
-                >
-                  {pokemon.onTeam ? <Star className="h-6 w-6 fill-current" /> : <Users className="h-6 w-6" />}
                 </button>
 
                 {/* Pokemon ID Badge */}
