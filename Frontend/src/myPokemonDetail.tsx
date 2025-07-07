@@ -375,13 +375,13 @@ const MyPokeDetail = () => {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Swords className="h-5 w-5" />
-                  Learnable Moves
+                  Current Moves
                 </CardTitle>
-                <CardDescription>Moves that this Pokémon can learn through leveling up and TMs</CardDescription>
+                <CardDescription>Moves that this Pokémon has learned through leveling up and TMs</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {pokemon.learnableAttacks.map((move, index) => (
+                  {pokemon.knownAttacks.map((move, index) => (
                     <div
                       key={index}
                       className="flex flex-col sm:flex-row sm:items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors"
@@ -410,13 +410,13 @@ const MyPokeDetail = () => {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Swords className="h-5 w-5" />
-                  Current Moves
+                  Learnable Moves
                 </CardTitle>
-                <CardDescription>Moves that this Pokémon has learned through leveling up and TMs</CardDescription>
+                <CardDescription>Moves that this Pokémon can learn through leveling up and TMs</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {pokemon.knownAttacks.map((move, index) => (
+                  {pokemon.learnableAttacks.map((move, index) => (
                     <div
                       key={index}
                       className="flex flex-col sm:flex-row sm:items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors"

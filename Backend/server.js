@@ -194,7 +194,7 @@ app.get(`/pokemon/evolutions/:id`, (req, res) => {
         , type2 as type23
         FROM Pokedex p, Evolutions e 
         WHERE p.pID=e.stage2 AND (
-        e.base = ${pID} OR e.stage1 = ${pID} OR e.stage2 = ${pID}
+        e.basic = ${pID} OR e.stage1 = ${pID} OR e.stage2 = ${pID}
       )),
     base as (
 	    SELECT 
@@ -208,8 +208,8 @@ app.get(`/pokemon/evolutions/:id`, (req, res) => {
         , p2.type2 as type22
       
         FROM Evolutions e, Pokedex p1, Pokedex p2
-        WHERE p1.pID = e.base AND p2.pID = e.stage1 AND (
-            e.base = ${pID} OR e.stage1 = ${pID} OR e.stage2 = ${pID}
+        WHERE p1.pID = e.basic AND p2.pID = e.stage1 AND (
+            e.basic = ${pID} OR e.stage1 = ${pID} OR e.stage2 = ${pID}
     ))
 	SELECT * FROM base LEFT JOIN p3 ON true;
     `;
