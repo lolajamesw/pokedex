@@ -94,7 +94,7 @@ app.get(`/pokemon/:id`, (req, res) => {
 app.get(`/userPokemon/:id`, (req, res) => {
     const id = req.params.id;
     const sql = `
-    SELECT instanceID, mp.pID, name, nickname, level, type1, type2, hp, atk, def, spAtk, spDef, speed, legendary, description
+    SELECT instanceID, mp.pID, name, nickname, level, favourite, onteam, type1, type2, hp, atk, def, spAtk, spDef, speed, legendary, description
     FROM Pokedex p, MyPokemon mp WHERE instanceID=${id} AND p.pID=mp.pID;
     `
     db.query(sql, (err, results) => {
@@ -109,6 +109,8 @@ app.get(`/userPokemon/:id`, (req, res) => {
             name: row.name,
             nickname: row.nickname,
             level: row.level,
+            favourite: row.favourite[0]===1,
+            onTeam: row.onteam[0]===1,
             types: row.type2 ? [row.type1, row.type2] : [row.type1],
             stats: {
                 hp: row.hp,
@@ -384,6 +386,62 @@ app.post("/setShowcased", async(req,res) => {
          SET showcase=0
          WHERE instanceID NOT IN (${instanceIDs.toString()}) AND uID=${user};`
     )
+
+    console.log("Marking successful.");
+    await dbPromise.end();
+    res.send("Pokémon updated successfully.");
+  } catch (err) {
+    console.error("Error marking Pokémon:", err);
+    res.status(500).send("Server error marking Pokémon.");
+  }
+});
+
+app.post("/setFavourite", async(req,res) => {
+    const {instanceID, user, value} = req.body;
+    console.log("Incoming request to /setFavourite pokemon instance:", req.body);
+
+    try {
+    const dbPromise = await mysqlPromise.createConnection({
+      host: process.env.DB_HOST,
+      port: process.env.DB_PORT,
+      user: process.env.DB_USER,
+      password: process.env.DB_PASSWORD,
+      database: process.env.DB_NAME
+    });
+
+    await dbPromise.query(
+        `UPDATE MyPokemon
+         SET favourite=${value}
+         WHERE instanceID = ${instanceID} AND uID=${user};`
+    );
+
+    console.log("Marking successful.");
+    await dbPromise.end();
+    res.send("Pokémon updated successfully.");
+  } catch (err) {
+    console.error("Error marking Pokémon:", err);
+    res.status(500).send("Server error marking Pokémon.");
+  }
+});
+
+app.post("/setOnTeam", async(req,res) => {
+    const {instanceID, user, value} = req.body;
+    console.log("Incoming request to /setOnTeam pokemon instance:", req.body);
+
+    try {
+    const dbPromise = await mysqlPromise.createConnection({
+      host: process.env.DB_HOST,
+      port: process.env.DB_PORT,
+      user: process.env.DB_USER,
+      password: process.env.DB_PASSWORD,
+      database: process.env.DB_NAME
+    });
+
+    await dbPromise.query(
+        `UPDATE MyPokemon
+         SET onteam=${value}
+         WHERE instanceID = ${instanceID} AND uID=${user};`
+    );
 
     console.log("Marking successful.");
     await dbPromise.end();
