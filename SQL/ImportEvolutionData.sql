@@ -20,12 +20,22 @@ IGNORE 1 ROWS;
 INSERT INTO evolutions (base, stage1, stage2)
 WITH tripleEvo AS (
 	SELECT e1.efrom AS baseName, e1.eto AS stage1Name, e2.eto AS stage2Name
-    FROM tempEvolutions e1, tempEvolutions e2
-    WHERE e1.eto = e2.efrom
+    FROM tempEvolutions e1 JOIN tempEvolutions e2
+    ON e1.eto = e2.efrom
+),
+doubleEvo AS (
+	SELECT efrom AS baseName, eto AS stage1Name, NULL AS stage2Name
+    FROM tempEvolutions WHERE NOT EXISTS (SELECT * FROM tripleEvo WHERE efrom = tripleEvo.baseName OR efrom = tripleEvo.stage1Name)
 )
-SELECT p0.pid AS base, p1.pid AS stage1, p2.pid AS stage2
-FROM tripleEvo, pokedex p0, pokedex p1, pokedex p2
-WHERE p0.name = tripleEvo.baseName AND p1.name = tripleEvo.stage1Name AND p2.name = tripleEvo.stage2Name;
+SELECT DISTINCT
+	p0.pid AS base, 
+    p1.pid AS stage1, 
+    CASE
+		WHEN evos.stage2Name = p2.name THEN p2.pid
+        ELSE NULL
+	END AS stage2
+FROM (SELECT * FROM tripleEvo UNION SELECT * FROM doubleEvo) evos, pokedex p0, pokedex p1, pokedex p2
+WHERE p0.name = evos.baseName AND p1.name = evos.stage1Name AND (p2.name = evos.stage2Name OR evos.stage2Name IS NULL);
 
 -- delete temporary table
 DROP TABLE tempEvolutions;
