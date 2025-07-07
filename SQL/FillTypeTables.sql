@@ -1,10 +1,10 @@
-INSERT INTO pokedexbackup.`Types`(`type`) VALUES 
+INSERT INTO `Types`(`type`) VALUES 
 ('Normal'), ('Fire'), ('Water'), ('Electric'), ('Grass'),
 ('Ice'), ('Fighting'), ('Poison'), ('Ground'), ('Flying'),
 ('Psychic'), ('Bug'), ('Rock'), ('Ghost'), ('Dragon')
 ;
 
-INSERT INTO pokedexbackup.`TypeFX`(type1, type2, double_strength, half_strength, no_impact) VALUES 
+INSERT INTO `TypeFX`(type1, type2, double_strength, half_strength, no_impact) VALUES 
 ('Normal', 'Rock', 0, 1, 0), ('Normal', 'Ghost', 0, 0, 1), 
 
 ('Fire', 'Fire', 0, 1, 0), ('Fire', 'Water', 0, 1, 0), ('Fire', 'Grass', 1, 0, 0),
