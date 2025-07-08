@@ -143,7 +143,8 @@ const PokemonDetail = () => {
               <div className="flex flex-col md:flex-row items-center gap-6">
                 <div className="relative">
                   <img
-                    src={`/pokemonPics/${pokemon.id.toString().padStart(3, "0")}.png`}
+                    // src={`/pokemonPics/${pokemon.id.toString().padStart(3, "0")}.png`}
+                    src={`https://www.pokemon.com/static-assets/content-assets/cms2/img/pokedex/detail/${pokemon.id.toString().padStart(3, "0")}.png`}
                     alt={pokemon.name}
                     width={200}
                     height={200}
@@ -248,7 +249,7 @@ const PokemonDetail = () => {
                           className={`p-4 rounded-lg border-2 ${(evolutions as any)[0].base.name === pokemon.name ? "border-orange-500 bg-orange-50" : "border-gray-200"}`}
                         >
                           <img
-                            src={`/pokemonPics/${evolutions[0].base.id.toString().padStart(3, "0")}.png`}
+                            src={`https://www.pokemon.com/static-assets/content-assets/cms2/img/pokedex/detail/${pokemon.id.toString().padStart(3, "0")}.png`}
                             alt={(evolutions as any)[0].base.name}
                             width={80}
                             height={80}
@@ -275,7 +276,7 @@ const PokemonDetail = () => {
                                 className={`p-3 rounded-lg border-2 mx-auto w-fit ${evo.stage1.name === pokemon.name ? "border-orange-500 bg-orange-50" : "border-gray-200"}`}
                               >
                                 <img
-                                  src={`/pokemonPics/${evo.stage1.id.toString().padStart(3, "0")}.png` || placeholderImg}
+                                  src={`https://www.pokemon.com/static-assets/content-assets/cms2/img/pokedex/detail/${evo.stage1.id.toString().padStart(3, "0")}.png`}
                                   alt={evo.stage1.name}
                                   width={60}
                                   height={60}
@@ -331,7 +332,7 @@ const PokemonDetail = () => {
                             className={`p-4 rounded-lg border-2 ${evo.name === pokemon.name ? "border-orange-500 bg-orange-50" : "border-gray-200"}`}
                           >
                             <img
-                              src={`/pokemonPics/${evo.id.toString().padStart(3, "0")}.png` || placeholderImg}
+                              src={`https://www.pokemon.com/static-assets/content-assets/cms2/img/pokedex/detail/${evo.id.toString().padStart(3, "0")}.png`}
                               alt={evo.name}
                               width={80}
                               height={80}
