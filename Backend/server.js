@@ -123,32 +123,24 @@ app.get(`/pokemon/attacks/:id`, (req, res) => {
 app.get(`/pokemon/evolutions/:id`, (req, res) => {
     const pID = req.params.id;
     const sql = `
-    WITH p3 as (
+    WITH tripleEvo AS (
         SELECT 
-          pID as pID3
-        , name as name3
-        , type1 as type13
-        , type2 as type23
-        FROM Pokedex p, Evolutions e 
-        WHERE p.pID=e.stage2 AND (
-        e.base = ${pID} OR e.stage1 = ${pID} OR e.stage2 = ${pID}
-      )),
-    base as (
-	    SELECT 
-          p1.pID as pID1
-        , p1.name as name1
-        , p1.type1 as type11
-        , p1.type2 as type21
-        , p2.pID as pID2
-        , p2.name as name2
-        , p2.type1 as type12
-        , p2.type2 as type22
-      
-        FROM Evolutions e, Pokedex p1, Pokedex p2
-        WHERE p1.pID = e.base AND p2.pID = e.stage1 AND (
-            e.base = ${pID} OR e.stage1 = ${pID} OR e.stage2 = ${pID}
-    ))
-	SELECT * FROM base LEFT JOIN p3 ON true;
+            e1.evolvesFrom AS base,
+            e1.evolvesInto AS stage1,
+            e2.evolvesInto AS stage2
+        FROM evolutions e1, evolutions e2
+        WHERE e1.evolvesInto = e2.evolvesFrom
+    ),
+    doubleEvo AS (
+        SELECT 
+            evolvesFrom AS base,
+            evolvesInto AS stage1,
+            NULL AS stage2
+        FROM evolutions
+        WHERE NOT EXISTS (SELECT * FROM tripleEvo WHERE evolvesFrom = base AND evolvesInto = stage1)
+    )
+    SELECT * FROM (SELECT * FROM tripleEvo UNION SELECT * FROM doubleEvo) as evo
+    WHERE base = ${pID};
     `;
 
     const placeholderImg = "/placeholder.png";
@@ -158,27 +150,7 @@ app.get(`/pokemon/evolutions/:id`, (req, res) => {
             return res.status(500).json({error: "Database error"});
         }
 
-        const formatted = results.map((row) => ({
-            base: {
-                id: row.pID1,
-                name: row.name1,
-                types: row.type21 ? [row.type11, row.type21] : [row.type11],
-                image: placeholderImg
-            },
-            stage1: {
-                id: row.pID2,
-                name: row.name2,
-                types: row.type22 ? [row.type12, row.type22] : [row.type12],
-                image: placeholderImg
-            },
-            stage2: {
-                id: row.pID3,
-                name: row.name3,
-                types: row.type23 ? [row.type13, row.type23] : [row.type13],
-                image: placeholderImg
-            }
-        }))
-        return res.json(formatted);
+        return res.json(results);
     });
 });
 
