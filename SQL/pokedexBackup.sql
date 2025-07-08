@@ -81,10 +81,10 @@ DROP TABLE IF EXISTS `evolutions`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `evolutions` (
-  `basic` int NOT NULL,
+  `base` int NOT NULL,
   `stage1` int NOT NULL,
   `stage2` int DEFAULT NULL,
-  PRIMARY KEY (`basic`,`stage1`)
+  PRIMARY KEY (`base`,`stage1`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
