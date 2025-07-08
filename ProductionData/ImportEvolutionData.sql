@@ -18,7 +18,7 @@ IGNORE 1 ROWS;
 
 -- get the data from the csv file into our desired format 
 INSERT INTO evolutions (evolvesFrom, evolvesInto)
-SELECT 
+SELECT DISTINCT
 	p0.pid AS evolvesFrom, 
     p1.pid AS evolvesInto 
 FROM tempEvolutions, pokedex p0, pokedex p1
