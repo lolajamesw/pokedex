@@ -72,30 +72,6 @@ LOCK TABLES `currentattacks` WRITE;
 INSERT INTO `currentattacks` VALUES (1,7),(1,24),(1,53);
 /*!40000 ALTER TABLE `currentattacks` ENABLE KEYS */;
 UNLOCK TABLES;
-/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
-/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
-/*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = utf8mb4 */ ;
-/*!50003 SET character_set_results = utf8mb4 */ ;
-/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
-/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
-DELIMITER ;;
-/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `limit_attacks` BEFORE INSERT ON `currentattacks` FOR EACH ROW BEGIN
-	DECLARE atkCount INT;
-    SELECT COUNT(DISTINCT(instanceID)) INTO atkCount
-    FROM CurrentAttacks;
-    
-    IF atkCount >= 4 THEN 
-		SIGNAL SQLSTATE '45000'
-		SET MESSAGE_TEXT = 'Pokemon cannot learn more than 4 moves';
-    END IF;
-END */;;
-DELIMITER ;
-/*!50003 SET sql_mode              = @saved_sql_mode */ ;
-/*!50003 SET character_set_client  = @saved_cs_client */ ;
-/*!50003 SET character_set_results = @saved_cs_results */ ;
-/*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
 -- Table structure for table `evolutions`
@@ -118,7 +94,7 @@ CREATE TABLE `evolutions` (
 
 LOCK TABLES `evolutions` WRITE;
 /*!40000 ALTER TABLE `evolutions` DISABLE KEYS */;
-INSERT INTO `evolutions` VALUES (1,2,3),(4,5,6),(7,8,9),(10,11,12),(13,14,15),(16,17,18),(19,20,NULL),(21,22,NULL),(23,24,NULL),(27,28,NULL),(41,42,NULL),(43,44,NULL),(46,47,NULL),(48,49,NULL),(50,51,NULL),(52,53,NULL),(54,55,NULL),(56,57,NULL),(60,61,NULL),(63,64,NULL),(66,67,NULL),(69,70,NULL),(72,73,NULL),(74,75,NULL),(77,78,NULL),(79,80,NULL),(81,82,NULL),(84,85,NULL),(86,87,NULL),(88,89,NULL),(92,93,NULL),(96,97,NULL),(98,99,NULL),(100,101,NULL),(104,105,NULL),(109,110,NULL),(111,112,NULL),(116,117,NULL),(118,119,NULL),(129,130,NULL),(138,139,NULL),(140,141,NULL),(147,148,149),(154,155,156),(157,158,159),(160,161,NULL),(162,163,NULL),(164,165,NULL),(166,167,NULL),(169,170,NULL),(176,177,NULL),(178,179,180),(182,183,NULL),(186,187,188),(193,194,NULL),(203,204,NULL),(208,209,NULL),(215,216,NULL),(217,218,NULL),(219,220,NULL),(222,223,NULL),(227,228,NULL),(230,231,NULL),(235,106,NULL),(235,107,NULL),(235,236,NULL),(237,124,NULL),(238,125,NULL),(239,126,NULL),(245,246,247),(251,252,253),(254,255,256),(257,258,259),(260,261,NULL),(264,265,266),(264,267,268),(269,270,NULL),(272,273,NULL),(275,276,NULL),(277,278,NULL),(279,280,281),(282,283,NULL),(284,285,NULL),(286,287,288),(289,290,NULL),(289,291,NULL),(292,293,294),(295,296,NULL),(303,304,305),(306,307,NULL),(308,309,NULL),(315,316,NULL),(317,318,NULL),(319,320,NULL),(321,322,NULL),(324,325,NULL),(327,328,329),(330,331,NULL),(332,333,NULL),(338,339,NULL),(340,341,NULL),(342,343,NULL),(344,345,NULL),(346,347,NULL),(352,353,NULL),(354,355,NULL),(359,201,NULL),(360,361,NULL),(362,363,364),(370,371,372),(373,374,375),(391,392,393),(394,395,396),(397,398,399),(400,401,402),(403,404,NULL),(405,406,NULL),(407,408,409),(412,413,NULL),(414,415,NULL),(416,420,NULL),(421,422,NULL),(424,425,NULL),(426,427,NULL),(428,429,NULL),(431,432,NULL),(437,438,NULL),(440,441,NULL),(442,443,NULL),(449,450,451),(455,456,NULL),(457,458,NULL),(459,460,NULL),(462,463,NULL),(465,466,NULL),(507,508,509),(510,511,512),(513,514,515),(516,517,NULL),(518,519,520),(521,522,NULL),(531,532,533),(534,535,NULL),(536,537,NULL),(541,542,NULL),(544,545,NULL),(547,548,549),(552,553,NULL),(555,556,557),(563,564,565),(570,571,NULL),(572,573,NULL),(575,576,NULL),(577,578,NULL),(579,580,NULL),(581,582,NULL),(583,584,NULL),(587,588,589),(590,591,592),(593,594,NULL),(595,596,597),(598,599,NULL),(603,604,NULL),(605,606,NULL),(608,609,NULL),(610,611,NULL),(612,613,614),(615,616,NULL),(618,619,NULL),(620,621,NULL),(623,624,625),(626,627,NULL),(632,633,NULL),(635,636,NULL),(637,638,NULL),(640,641,NULL),(642,643,NULL),(646,647,648),(649,650,NULL),(670,671,672),(673,674,675),(676,677,678),(679,680,NULL),(681,682,683),(684,685,686),(687,688,NULL),(689,690,NULL),(692,693,NULL),(694,695,NULL),(700,701,NULL),(708,709,NULL),(710,711,NULL),(712,713,NULL),(714,715,NULL),(718,719,NULL),(720,721,NULL),(726,727,728),(740,741,NULL),(742,743,NULL);
+INSERT INTO `evolutions` VALUES (1,2,3),(4,5,6),(7,8,9),(10,11,12),(13,14,15),(16,17,18),(19,20,NULL),(21,22,NULL),(23,24,NULL),(27,28,NULL),(29,30,31),(32,33,34),(37,38,NULL),(39,40,173),(41,42,NULL),(43,44,45),(46,47,NULL),(48,49,NULL),(50,51,NULL),(52,53,NULL),(54,55,NULL),(56,57,NULL),(58,59,NULL),(60,61,62),(63,64,65),(66,67,68),(69,70,71),(72,73,NULL),(74,75,76),(77,78,NULL),(79,80,NULL),(81,82,NULL),(84,85,NULL),(86,87,NULL),(88,89,NULL),(90,91,NULL),(92,93,94),(96,97,NULL),(98,99,NULL),(100,101,NULL),(102,103,NULL),(104,105,NULL),(109,110,NULL),(111,112,NULL),(116,117,NULL),(118,119,NULL),(120,121,NULL),(129,130,NULL),(133,134,NULL),(133,135,NULL),(133,136,NULL),(138,139,NULL),(140,141,NULL),(147,148,149),(151,150,NULL),(154,155,156),(157,158,159),(160,161,NULL),(162,163,NULL),(164,165,NULL),(166,167,NULL),(169,170,NULL),(171,25,26),(172,35,36),(174,175,NULL),(176,177,NULL),(178,179,180),(182,183,NULL),(186,187,188),(193,194,NULL),(203,204,NULL),(208,209,NULL),(215,216,NULL),(217,218,NULL),(219,220,NULL),(222,223,NULL),(227,228,NULL),(230,231,NULL),(235,106,107),(237,124,NULL),(238,125,NULL),(239,126,NULL),(245,246,247),(251,252,253),(254,255,256),(257,258,259),(260,261,NULL),(264,265,266),(264,267,268),(269,270,NULL),(272,273,NULL),(275,276,NULL),(277,278,NULL),(279,280,281),(282,283,NULL),(284,285,NULL),(286,287,288),(289,290,NULL),(289,291,NULL),(292,293,294),(295,296,NULL),(303,304,305),(306,307,NULL),(308,309,NULL),(315,316,NULL),(317,318,NULL),(319,320,NULL),(321,322,NULL),(324,325,NULL),(327,328,329),(330,331,NULL),(332,333,NULL),(338,339,NULL),(340,341,NULL),(342,343,NULL),(344,345,NULL),(346,347,NULL),(352,353,NULL),(354,355,NULL),(359,201,NULL),(360,361,NULL),(362,363,364),(370,371,372),(373,374,375),(391,392,393),(394,395,396),(397,398,399),(400,401,402),(403,404,NULL),(405,406,NULL),(407,408,409),(412,413,NULL),(414,415,NULL),(416,420,NULL),(421,422,NULL),(424,425,NULL),(426,427,NULL),(428,429,NULL),(431,432,NULL),(437,438,NULL),(440,441,NULL),(442,443,NULL),(449,450,451),(455,456,NULL),(457,458,NULL),(459,460,NULL),(462,463,NULL),(465,466,NULL),(507,508,509),(510,511,512),(513,514,515),(516,517,NULL),(518,519,520),(521,522,NULL),(531,532,533),(534,535,NULL),(536,537,NULL),(541,542,NULL),(544,545,NULL),(547,548,549),(552,553,NULL),(555,556,557),(563,564,565),(570,571,NULL),(572,573,NULL),(575,576,NULL),(577,578,NULL),(579,580,NULL),(581,582,NULL),(583,584,NULL),(587,588,589),(590,591,592),(593,594,NULL),(595,596,597),(598,599,NULL),(603,604,NULL),(605,606,NULL),(608,609,NULL),(610,611,NULL),(612,613,614),(615,616,NULL),(618,619,NULL),(620,621,NULL),(623,624,625),(626,627,NULL),(632,633,NULL),(635,636,NULL),(637,638,NULL),(640,641,NULL),(642,643,NULL),(646,647,648),(649,650,NULL),(670,671,672),(673,674,675),(676,677,678),(679,680,NULL),(681,682,683),(684,685,686),(687,688,NULL),(689,690,NULL),(692,693,NULL),(694,695,NULL),(700,701,NULL),(708,709,NULL),(710,711,NULL),(712,713,NULL),(714,715,NULL),(718,719,NULL),(720,721,NULL),(726,727,728),(740,741,NULL),(742,743,NULL);
 /*!40000 ALTER TABLE `evolutions` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -228,60 +204,6 @@ LOCK TABLES `mypokemon` WRITE;
 INSERT INTO `mypokemon` VALUES (150,4,1,'CloneGod',70,_binary '\0',_binary '',_binary '','2000-01-01 00:00:00'),(3,4,2,'Bulky',42,_binary '',_binary '',_binary '','2000-01-01 00:00:00'),(25,4,3,'Zaps',35,_binary '\0',_binary '',_binary '\0','2000-01-01 00:00:00'),(26,4,4,'Zoomer',55,_binary '\0',_binary '',_binary '','2000-01-01 00:00:00'),(1,4,5,'Leafy',14,_binary '\0',_binary '',_binary '\0','2000-01-01 00:00:00'),(2,4,6,'Evolver',25,_binary '\0',_binary '',_binary '','2000-01-01 00:00:00'),(1,4,7,'Seedling',9,_binary '\0',_binary '\0',_binary '','2000-01-01 00:00:00'),(3,4,8,'Tanky',40,_binary '\0',_binary '\0',_binary '','2000-01-01 00:00:00'),(25,5,9,'Sparkles',18,_binary '',_binary '\0',_binary '\0','2000-01-01 00:00:00'),(2,5,10,'IvyBoy',25,_binary '\0',_binary '',_binary '\0','2000-01-01 00:00:00'),(1,6,11,'Sprouter',15,_binary '\0',_binary '',_binary '\0','2000-01-01 00:00:00'),(2,6,12,'Bloomy',25,_binary '\0',_binary '\0',_binary '\0','2000-01-01 00:00:00'),(3,6,13,'VineBoss',45,_binary '\0',_binary '',_binary '','2000-01-01 00:00:00');
 /*!40000 ALTER TABLE `mypokemon` ENABLE KEYS */;
 UNLOCK TABLES;
-/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
-/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
-/*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = utf8mb4 */ ;
-/*!50003 SET character_set_results = utf8mb4 */ ;
-/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
-/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
-DELIMITER ;;
-/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `max_6_showcase` BEFORE UPDATE ON `mypokemon` FOR EACH ROW BEGIN
-	DECLARE numShowcased INT;
-	IF OLD.showcase = 0 AND NEW.showcase = 1 THEN
-		SELECT COUNT(instanceID) INTO numShowcased 
-			FROM MyPokemon 
-			WHERE uid = OLD.uid AND showcase = 1;
-
-		IF numShowcased >= 6 THEN
-			SIGNAL SQLSTATE '45000'
-			SET MESSAGE_TEXT = 'A user cannot showcase more than 6 pokemon at a time';
-		END IF;
-	END IF;
-END */;;
-DELIMITER ;
-/*!50003 SET sql_mode              = @saved_sql_mode */ ;
-/*!50003 SET character_set_client  = @saved_cs_client */ ;
-/*!50003 SET character_set_results = @saved_cs_results */ ;
-/*!50003 SET collation_connection  = @saved_col_connection */ ;
-/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
-/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
-/*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = utf8mb4 */ ;
-/*!50003 SET character_set_results = utf8mb4 */ ;
-/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
-/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
-DELIMITER ;;
-/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `max_6_onTeam` BEFORE UPDATE ON `mypokemon` FOR EACH ROW BEGIN
-	DECLARE numTeam INT;
-    IF OLD.onTeam = 0 AND NEW.onTeam = 1 THEN
-		SELECT COUNT(instanceID) INTO numTeam 
-			FROM MyPokemon 
-			WHERE uid = OLD.uid AND onTeam = 1;
-			
-		IF numTeam >= 6 AND NEW.onTeam = 1 THEN
-			SIGNAL SQLSTATE '45000'
-			SET MESSAGE_TEXT = 'The maximum team size is 6.';
-		END IF;
-	END IF;
-END */;;
-DELIMITER ;
-/*!50003 SET sql_mode              = @saved_sql_mode */ ;
-/*!50003 SET character_set_client  = @saved_cs_client */ ;
-/*!50003 SET character_set_results = @saved_cs_results */ ;
-/*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
 -- Table structure for table `pokedex`
@@ -469,4 +391,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-07-07 17:21:00
+-- Dump completed on 2025-07-07 19:46:47
