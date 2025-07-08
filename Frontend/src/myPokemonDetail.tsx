@@ -110,7 +110,8 @@ const MyPokeDetail = () => {
     const placeholderImg = "/placeholder.png";    
     var evolutionaryLine: PokemonSummary[] = [];
     if (evolutions) {
-      if (evolutions.length == 0) evolutionaryLine = [new PokemonSummary(pokemon.pID, pokemon.name, pokemon.types, placeholderImg)];
+      if (evolutions.length>1 && evolutions[0].stage1.id===evolutions[1].stage1.id) evolutionaryLine = [evolutions[0].base, evolutions[0].stage1]
+      else if (evolutions.length == 0) evolutionaryLine = [new PokemonSummary(pokemon.pID, pokemon.name, pokemon.types, placeholderImg)];
       else if (!evolutions[0].stage2.id) evolutionaryLine = [evolutions[0].base, evolutions[0].stage1];
       else evolutionaryLine = [evolutions[0].base, evolutions[0].stage1, evolutions[0].stage2];
     }

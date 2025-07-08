@@ -99,7 +99,7 @@ const PokemonDetail = () => {
     const placeholderImg = "/placeholder.png";    
     var evolutionaryLine: PokemonSummary[] = [];
     if (evolutions) {
-      if (evolutions.length>1 && evolutions[0].stage1===evolutions[1].stage1) evolutionaryLine = [evolutions[0].base, evolutions[0].stage1]
+      if (evolutions.length>1 && evolutions[0].stage1.id===evolutions[1].stage1.id) evolutionaryLine = [evolutions[0].base, evolutions[0].stage1]
       else if (evolutions.length == 0) evolutionaryLine = [new PokemonSummary(pokemon.id, pokemon.name, pokemon.types, placeholderImg)];
       else if (!evolutions[0].stage2.id) evolutionaryLine = [evolutions[0].base, evolutions[0].stage1];
       else evolutionaryLine = [evolutions[0].base, evolutions[0].stage1, evolutions[0].stage2];
@@ -113,8 +113,8 @@ const PokemonDetail = () => {
         if (myBool) return "base_branching" // Eevee
         for (let i=1; i<evolutions.length; i++)
           if (evolutions[i].stage1.id!=evolutions[i-1].stage1.id) myBool=true;
-        if (!myBool) return "middle_branching";
-        return "random_branching"
+        if (!myBool) return "middle_branching"; // Oddish
+        return "random_branching" // Wurmple
       }
     const evolutionType = getEvolutionType()
 
