@@ -5,6 +5,7 @@ import { useState, useEffect, useMemo } from "react"
 import { Search, SortAsc, SortDesc } from "lucide-react"
 import { Link } from "react-router-dom"
 import "./pokedex.css"
+import "./pokemonTypes.tsx"
 
 function PokemonCard({ pokemon }) {
   return (
@@ -77,17 +78,17 @@ export default function Pokedex() {
   }, [])
 
   const filteredAndSortedPokemon = useMemo(() => {
-  const filtered = pokemonList.filter((pokemon) => {
+  const filtered = pokemonList.filter((pokemon: PokemonDetailType) => {
     const matchesSearch =
       pokemon.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      pokemon.number.toString().includes(searchTerm)
+      pokemon.id.toString().includes(searchTerm)
     const matchesType = filterType === "all" || pokemon.types.includes(filterType)
-    const matchesCaught = !showCaughtOnly || pokemon.caught
+    const matchesCaught = !showCaughtOnly || pokemon.caught_count > 0
 
     return matchesSearch && matchesType && matchesCaught
   })
 
-  filtered.sort((a, b) => {
+  filtered.sort((a: PokemonDetailType, b: PokemonDetailType) => {
     let aValue, bValue
     switch (sortBy) {
       case "name":
@@ -95,36 +96,36 @@ export default function Pokedex() {
         bValue = b.name
         break
       case "number":
-        aValue = a.number
-        bValue = b.number
+        aValue = a.id
+        bValue = b.id
         break
       case "hp":
         aValue = a.stats.hp
         bValue = b.stats.hp
         break
       case "attack":
-        aValue = a.stats.attack
-        bValue = b.stats.attack
+        aValue = a.stats.atk
+        bValue = b.stats.atk
         break
       case "defense":
-        aValue = a.stats.defense
-        bValue = b.stats.defense
+        aValue = a.stats.def
+        bValue = b.stats.def
         break
       case "spAttack":
-        aValue = a.stats.spAttack
-        bValue = b.stats.spAttack
+        aValue = a.stats.spAtk
+        bValue = b.stats.spAtk
         break
       case "spDefense":
-        aValue = a.stats.spDefense
-        bValue = b.stats.spDefense
+        aValue = a.stats.spDef
+        bValue = b.stats.spDef
         break
       case "speed":
         aValue = a.stats.speed
         bValue = b.stats.speed
         break
       default:
-        aValue = a.number
-        bValue = b.number
+        aValue = a.id
+        bValue = b.id
     }
 
     if (typeof aValue === "string" && typeof bValue === "string") {
@@ -137,7 +138,7 @@ export default function Pokedex() {
   return filtered
 }, [searchTerm, sortBy, sortOrder, filterType, showCaughtOnly, pokemonList])
 
-  const allTypes = Array.from(new Set(pokemonList.flatMap((p) => p.types))).sort()
+  const allTypes = Array.from(new Set(pokemonList.flatMap((p: PokemonDetailType) => p.types))).sort()
 
   return (
     <div className="pokedex-container">
@@ -162,7 +163,7 @@ export default function Pokedex() {
                 className="search-input"
               />
             </div>
-            <select value={filterType} onChange={(e) => setFilterType(e.target.value)} className="type-select">
+            <select title="title2" value={filterType} onChange={(e) => setFilterType(e.target.value)} className="type-select">
               <option value="all">All Types</option>
               {allTypes.map((type) => (
                 <option key={type} value={type}>
@@ -174,7 +175,7 @@ export default function Pokedex() {
 
           <div className="controls-row">
             <div className="sort-controls">
-              <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} className="sort-select">
+              <select title="title1" value={sortBy} onChange={(e) => setSortBy(e.target.value)} className="sort-select">
                 <option value="number">Number</option>
                 <option value="name">Name</option>
                 <option value="hp">HP</option>
@@ -212,7 +213,7 @@ export default function Pokedex() {
 
       {/* Pokemon Grid */}
       <div className="pokemon-grid">
-        {filteredAndSortedPokemon.map((pokemon) => (
+        {filteredAndSortedPokemon.map((pokemon: PokemonDetailType) => (
           <PokemonCard key={pokemon.id} pokemon={pokemon} />
         ))}
       </div>
