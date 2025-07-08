@@ -189,7 +189,7 @@ const MyPokeDetail = () => {
 
                 {/* Pokemon ID Badge */}
                 <span className="badge badge-default bg-white text-black px-3 py-1">
-                  #{pokemon.id.toString().padStart(3, "0")}
+                  #{pokemon.pID.toString().padStart(3, "0")}
                 </span>
               </div>
 
