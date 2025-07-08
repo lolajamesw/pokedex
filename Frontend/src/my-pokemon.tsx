@@ -179,7 +179,7 @@ export default function MyPokedex() {
           pokemonName: newPokemonName,
           nickname: newNickname,
           level: parseInt(newLevel),
-          uID: 5, // Replace 4 with actual logged-in user ID
+          uID: 4, // Replace 4 with actual logged-in user ID
         }),
       });
 

@@ -67,6 +67,7 @@ const PokemonDetail = () => {
     const [evolutions, setEvolutions] = useState<Evolution[] | null>(null);
     const isBranchingEvolution = 133 == Number(id);
     
+    
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -98,11 +99,24 @@ const PokemonDetail = () => {
     const placeholderImg = "/placeholder.png";    
     var evolutionaryLine: PokemonSummary[] = [];
     if (evolutions) {
-      if (evolutions.length == 0) evolutionaryLine = [new PokemonSummary(pokemon.id, pokemon.name, pokemon.types, placeholderImg)];
+      if (evolutions.length>1 && evolutions[0].stage1===evolutions[1].stage1) evolutionaryLine = [evolutions[0].base, evolutions[0].stage1]
+      else if (evolutions.length == 0) evolutionaryLine = [new PokemonSummary(pokemon.id, pokemon.name, pokemon.types, placeholderImg)];
       else if (!evolutions[0].stage2.id) evolutionaryLine = [evolutions[0].base, evolutions[0].stage1];
       else evolutionaryLine = [evolutions[0].base, evolutions[0].stage1, evolutions[0].stage2];
     }
     else return <div>Loading...second</div>;
+    const getEvolutionType = () => {
+        if (evolutions.length<2) return "linear"; // Charizard
+        let myBool=true;
+        for (let i=0; i<evolutions.length; i++)
+          if (evolutions[i].stage2.id!=null) myBool=false
+        if (myBool) return "base_branching" // Eevee
+        for (let i=1; i<evolutions.length; i++)
+          if (evolutions[i].stage1.id!=evolutions[i-1].stage1.id) myBool=true;
+        if (!myBool) return "middle_branching";
+        return "random_branching"
+      }
+    const evolutionType = getEvolutionType()
 
     const getTypeColor = (type: string) => {
         const colors: { [key: string]: string } = {
@@ -143,7 +157,6 @@ const PokemonDetail = () => {
               <div className="flex flex-col md:flex-row items-center gap-6">
                 <div className="relative">
                   <img
-                    // src={`/pokemonPics/${pokemon.id.toString().padStart(3, "0")}.png`}
                     src={`https://www.pokemon.com/static-assets/content-assets/cms2/img/pokedex/detail/${pokemon.id.toString().padStart(3, "0")}.png`}
                     alt={pokemon.name}
                     width={200}
@@ -226,54 +239,98 @@ const PokemonDetail = () => {
           </TabsContent>
 
           <TabsContent value="evolution" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+            <div className="card">
+              <div className="card-header">
+                <h3 className="card-title flex items-center gap-2">
                   <Footprints className="h-5 w-5" />
                   Evolution Line
-                </CardTitle>
-                <CardDescription>
-                  {isBranchingEvolution
-                    ? "All possible evolution paths for this Pokémon"
-                    : "The complete evolutionary chain for this Pokémon"}
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                {isBranchingEvolution ? (
-                  // Branching Evolution Layout
+                </h3>
+                <p className="card-description">
+                  {evolutionType === "linear"
+                    ? "The complete evolutionary chain for this Pokémon"
+                    : evolutionType === "base_branching"
+                      ? "All possible evolution paths from the base form"
+                      : evolutionType === "random_branching"
+                        ? "Random evolution paths - determined by personality value"
+                        : "Evolution chain with branching paths"}
+                </p>
+              </div>
+              <div className="card-content">
+                {evolutionType === "linear" && (
+                  // Linear Evolution Layout
+                  <div className="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-8">
+                    {evolutionaryLine.map((evo: any, index: number) => (
+                      <div key={evo.id} className="flex items-center gap-4">
+                        <Link
+                              to={`/pokedex/${evo.id}`}
+                              key={evo.id}
+                              style={{ textDecoration:"none", color: "inherit" }}>
+                          <div className="text-center">
+                            <div
+                              className={`p-4 rounded-lg border-2 transition-all duration-200 pokemon-card-hover ${
+                                evo.name === pokemon.name
+                                  ? "border-green-500 bg-green-50"
+                                  : "border-border hover:border-muted-foreground"
+                              }`}
+                            >
+                              <img
+                                src={`https://www.pokemon.com/static-assets/content-assets/cms2/img/pokedex/detail/${evo.id.toString().padStart(3, "0")}.png`}
+                                alt={evo.name}
+                                width={80}
+                                height={80}
+                                className="mx-auto"
+                              />
+                            </div>
+                            <h3 className="font-semibold mt-2 text-foreground">{evo.name}</h3>
+                          </div>
+                          {index < evolutionaryLine.length - 1 && (
+                            <ArrowRight className="h-6 w-6 text-muted-foreground hidden md:block" />
+                          )}
+                        </Link>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {evolutionType === "base_branching" && (
+                  // Base Branching Evolution Layout (Eevee-style)
                   <div className="space-y-8">
                     {/* Base Pokemon */}
                     <div className="flex justify-center">
                       <div className="text-center">
                         <div
-                          className={`p-4 rounded-lg border-2 ${(evolutions as any)[0].base.name === pokemon.name ? "border-orange-500 bg-orange-50" : "border-gray-200"}`}
+                          className={`p-4 rounded-lg border-2 transition-all duration-200 border-green-500 bg-green-50`}
                         >
                           <img
-                            src={`https://www.pokemon.com/static-assets/content-assets/cms2/img/pokedex/detail/${pokemon.id.toString().padStart(3, "0")}.png`}
-                            alt={(evolutions as any)[0].base.name}
+                            src={`https://www.pokemon.com/static-assets/content-assets/cms2/img/pokedex/detail/${evolutions[0].base.id.toString().padStart(3, "0")}.png`}
+                            alt={evolutions[0].base.name}
                             width={80}
                             height={80}
                             className="mx-auto"
                           />
                         </div>
-                        <h3 className="font-semibold mt-2">{(evolutions as any)[0].base.name}</h3>
+                        <h3 className="font-semibold mt-2 text-foreground">{evolutions[0].base.name}</h3>
                       </div>
                     </div>
 
                     {/* Evolution Paths */}
-                    <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-3 gap-4">
-                      {(evolutions as any).map((evo: any) => (
-                        <div key={evo.stage1.id} className="relative">
-                          {/* Connection Line */}
-                          <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 w-px h-4 bg-gray-300 hidden sm:block"></div>
-
-                          <div className="text-center p-3 border rounded-lg hover:shadow-md transition-shadow">
-                            <Link
+                    <div className="evolution-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                      {evolutions.map((evo: any) => (
+                        <div key={evo.id} className="relative">
+                          <Link
                               to={`/pokedex/${evo.stage1.id}`}
                               key={evo.stage1.id}
                               style={{ textDecoration:"none", color: "inherit" }}>
+                            {/* Connection Line */}
+                            <div className="evolution-connection-line absolute -top-4 left-1/2 transform -translate-x-1/2 w-px h-4 hidden sm:block"></div>
+
+                            <div className="text-center p-3 border rounded-lg hover:shadow-md transition-all duration-200 pokemon-card-hover">
                               <div
-                                className={`p-3 rounded-lg border-2 mx-auto w-fit ${evo.stage1.name === pokemon.name ? "border-orange-500 bg-orange-50" : "border-gray-200"}`}
+                                className={`p-3 rounded-lg border-2 mx-auto w-fit transition-all duration-200 ${
+                                  evo.stage1.name === pokemon.name
+                                    ? "border-green-500 bg-green-50"
+                                    : "border-border hover:border-muted-foreground"
+                                }`}
                               >
                                 <img
                                   src={`https://www.pokemon.com/static-assets/content-assets/cms2/img/pokedex/detail/${evo.stage1.id.toString().padStart(3, "0")}.png`}
@@ -283,74 +340,224 @@ const PokemonDetail = () => {
                                   className="mx-auto"
                                 />
                               </div>
-                              <h4 className="font-semibold mt-2 text-sm">{evo.stage1.name}</h4>
-                              <div className="mt-1">
-                                <div className="pokemon-types">
-                                  {evo.stage1.types.map((type) => (
-                                  <span key={type} className={`type-badge type-${type.toLowerCase()}`}>
-                                      {type}
-                                  </span>
-                                  ))}
+                              <h4 className="font-semibold mt-2 text-sm text-foreground">{evo.stage1.name}</h4>
+                              <div className="pokemon-types">
+                                    {evo.stage1.types.map((type) => (
+                                    <span key={type} className={`type-badge type-${type.toLowerCase()}`}>
+                                        {type}
+                                    </span>
+                                    ))}
+                                  </div>
+                            </div>
+                          </Link>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {evolutionType === "random_branching" && (
+                  // Random Branching Evolution Layout (Wurmple-style)
+                  <div className="space-y-8">
+                    {/* Base Pokemon */}
+                    <div className="flex justify-center">
+                      <div className="text-center">
+                        <div
+                          className={`p-4 rounded-lg border-2 transition-all duration-200 ${
+                            evolutions[0].base.name === pokemon.name
+                              ? "border-green-500 bg-green-50"
+                              : "border-border hover:border-muted-foreground"
+                          }`}
+                        >
+                          <img
+                            src={`https://www.pokemon.com/static-assets/content-assets/cms2/img/pokedex/detail/${evolutions[0].base.id.toString().padStart(3, "0")}.png`}
+                            alt={evolutions[0].base.name}
+                            width={80}
+                            height={80}
+                            className="mx-auto"
+                          />
+                        </div>
+                        <h3 className="font-semibold mt-2 text-foreground">{evolutions[0].base.name}</h3>
+                      </div>
+                    </div>
+
+                    {/* Random Evolution Branches */}
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                      {evolutions.map((branch: any, branchIndex: number) => (
+                        <div key={branchIndex} className="space-y-4">
+                          {/* Branch Header */}
+                          <div className="text-center">
+                            <span className="badge bg-yellow-100 text-yellow-800 border border-yellow-300">
+                              Path {branchIndex + 1}
+                            </span>
+                          </div>
+
+                          {/* Stage 1 Evolution */}
+                          <div className="text-center">
+                            <Link
+                              to={`/pokedex/${branch.stage1.id}`}
+                              key={branch.stage1.id}
+                              style={{ textDecoration:"none", color: "inherit" }}>
+                              <div
+                                className={`p-3 rounded-lg border-2 mx-auto w-fit transition-all duration-200 pokemon-card-hover ${
+                                  branch.stage1.name === pokemon.name
+                                    ? "border-green-500 bg-green-50"
+                                    : "border-border hover:border-muted-foreground"
+                                }`}
+                              >
+                                <img
+                                  src={`https://www.pokemon.com/static-assets/content-assets/cms2/img/pokedex/detail/${branch.stage1.id.toString().padStart(3, "0")}.png`}
+                                  alt={branch.stage1.name}
+                                  width={70}
+                                  height={70}
+                                  className="mx-auto"
+                                />
                               </div>
+                              <h4 className="font-semibold mt-2 text-foreground">{branch.stage1.name}</h4>
+                            </Link>
+                          </div>
+
+                          {/* Arrow Down */}
+                          <div className="flex justify-center">
+                            <ArrowRight className="h-5 w-5 text-muted-foreground rotate-90" />
+                          </div>
+
+                          {/* Stage 2 Evolution */}
+                          <div className="text-center">
+                            <Link
+                              to={`/pokedex/${branch.stage2.id}`}
+                              key={branch.stage2.id}
+                              style={{ textDecoration:"none", color: "inherit" }}>
+                              <div
+                                className={`p-3 rounded-lg border-2 mx-auto w-fit transition-all duration-200 pokemon-card-hover ${
+                                  branch.stage2.name === pokemon.name
+                                    ? "border-green-500 bg-green-50"
+                                    : "border-border hover:border-muted-foreground"
+                                }`}
+                              >
+                                <img
+                                  src={`https://www.pokemon.com/static-assets/content-assets/cms2/img/pokedex/detail/${branch.stage2.id.toString().padStart(3, "0")}.png`}
+                                  alt={branch.stage2.name}
+                                  width={70}
+                                  height={70}
+                                  className="mx-auto"
+                                />
                               </div>
+                              <h4 className="font-semibold mt-2 text-foreground">{branch.stage2.name}</h4>
                             </Link>
                           </div>
                         </div>
                       ))}
                     </div>
-
-                    {/* Evolution Methods Legend */}
-                    <div className="mt-6 p-4 bg-muted/50 rounded-lg">
-                      <h4 className="font-semibold mb-2 text-sm">Evolution Methods:</h4>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-muted-foreground">
-                        <div>
-                          • <strong>Stones:</strong> Use evolution stones
-                        </div>
-                        <div>
-                          • <strong>Friendship:</strong> High friendship level
-                        </div>
-                        <div>
-                          • <strong>Day/Night:</strong> Time-specific evolution
-                        </div>
-                        <div>
-                          • <strong>Stats:</strong> Based on stat comparisons
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ) : (
-                  // Linear Evolution Layout
-                  <div className="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-8">
-                    {(evolutionaryLine as any).map((evo, index) => (
-                      <div key={evo.id} className="flex items-center gap-4">
-                        <div className="text-center">
-                          <Link
-                              to={`/pokedex/${evo.id}`}
-                              key={evo.id}
-                              style={{ textDecoration:"none", color: "inherit" }}>
-                          <div
-                            className={`p-4 rounded-lg border-2 ${evo.name === pokemon.name ? "border-orange-500 bg-orange-50" : "border-gray-200"}`}
-                          >
-                            <img
-                              src={`https://www.pokemon.com/static-assets/content-assets/cms2/img/pokedex/detail/${evo.id.toString().padStart(3, "0")}.png`}
-                              alt={evo.name}
-                              width={80}
-                              height={80}
-                              className="mx-auto"
-                            />
-                          </div>
-                          <h3 className="font-semibold mt-2">{evo.name}</h3>
-                          </Link>
-                        </div>
-                        {index < (evolutionaryLine as any[]).length - 1 && (
-                          <ArrowRight className="h-6 w-6 text-muted-foreground hidden md:block" />
-                        )}
-                      </div>
-                    ))}
                   </div>
                 )}
-              </CardContent>
-            </Card>
+
+                {evolutionType === "middle_branching" && (
+                  // Middle Branching Evolution Layout (Gloom-style)
+                  <div className="space-y-6">
+                    <div className="flex flex-col items-center gap-6">
+                      {evolutionaryLine.map((stage: any, stageIndex: number) => (
+                        <div key={stage.id} className="flex flex-col items-center">
+                          <Link
+                              to={`/pokedex/${stage.id}`}
+                              key={stage.id}
+                              style={{ textDecoration:"none", color: "inherit" }}>
+                            {/* Current Stage Pokemon */}
+                            <div className="text-center mb-4">
+                              <div
+                                className={`p-4 rounded-lg border-2 transition-all duration-200 pokemon-card-hover ${
+                                  stage.name === pokemon.name
+                                    ? "border-green-500 bg-green-50"
+                                    : "border-border hover:border-muted-foreground"
+                                }`}
+                              >
+                                <img
+                                  src={`https://www.pokemon.com/static-assets/content-assets/cms2/img/pokedex/detail/${stage.id.toString().padStart(3, "0")}.png`}
+                                  alt={stage.name}
+                                  width={80}
+                                  height={80}
+                                  className="mx-auto"
+                                />
+                              </div>
+                              <h3 className="font-semibold mt-2 text-foreground">{stage.name}</h3>
+                            </div>
+
+                            {/* Arrow to next stage (if not last and no branching) */}
+                            {stageIndex < evolutionaryLine.length - 1 && (
+                              <div className="mt-4">
+                                <ArrowRight className="h-6 w-6 text-muted-foreground rotate-90" />
+                              </div>
+                            )}
+                          </Link>
+                        </div>
+                      ))}
+                      {/* Branching Evolutions (if any) */}
+                        {true && (
+                          <div className="space-y-4">
+                            {/* Connection indicator */}
+                            <div className="flex justify-center">
+                              <div className="w-px h-8 bg-border"></div>
+                            </div>
+
+                            {/* Evolution options */}
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                              {evolutions.map((evo: any) => (
+                                <div key={evo.stage2.id} className="relative">
+                                  <Link
+                                    to={`/pokedex/${evo.id}`}
+                                    key={evo.id}
+                                    style={{ textDecoration:"none", color: "inherit" }}>
+                                    {/* Connection Line to center */}
+                                    <div className="evolution-connection-line absolute -top-4 left-1/2 transform -translate-x-1/2 w-px h-4 hidden sm:block"></div>
+
+                                    <div className="text-center p-3 border rounded-lg hover:shadow-md transition-all duration-200 pokemon-card-hover">
+                                      <div
+                                        className={`p-3 rounded-lg border-2 mx-auto w-fit transition-all duration-200 ${
+                                          evo.stage2.name === pokemon.name
+                                            ? "border-green-500 bg-green-50"
+                                            : "border-border hover:border-muted-foreground"
+                                        }`}
+                                      >
+                                        <img
+                                          src={`https://www.pokemon.com/static-assets/content-assets/cms2/img/pokedex/detail/${evo.stage2.id.toString().padStart(3, "0")}.png`}
+                                          alt={evo.stage2.name}
+                                          width={60}
+                                          height={60}
+                                          className="mx-auto"
+                                        />
+                                      </div>
+                                      <h4 className="font-semibold mt-2 text-sm text-foreground">{evo.stage2.name}</h4>
+                                    </div>
+                                  </Link>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Evolution Methods Legend */}
+                <div className="mt-6 p-4 bg-muted/50 rounded-lg">
+                  <h4 className="font-semibold mb-2 text-sm text-foreground">Evolution Methods:</h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-muted-foreground">
+                    <div>
+                      • <strong>Level Up:</strong> Reach required level
+                    </div>
+                    <div>
+                      • <strong>Random:</strong> Based on personality value
+                    </div>
+                    <div>
+                      • <strong>Stones:</strong> Use evolution stones
+                    </div>
+                    <div>
+                      • <strong>Trade:</strong> Trade with specific items
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </TabsContent>
 
           <TabsContent value="moves" className="space-y-4">

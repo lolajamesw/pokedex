@@ -188,32 +188,48 @@ app.get(`/pokemon/knownAttacks/:id`, (req, res) => {
 app.get(`/pokemon/evolutions/:id`, (req, res) => {
     const pID = req.params.id;
     const sql = `
-    WITH p3 as (
+    WITH tripleEvo AS (
         SELECT 
-          pID as pID3
-        , name as name3
-        , type1 as type13
-        , type2 as type23
-        FROM Pokedex p, Evolutions e 
-        WHERE p.pID=e.stage2 AND (
-        e.base = ${pID} OR e.stage1 = ${pID} OR e.stage2 = ${pID}
-      )),
-    base as (
-	    SELECT 
-          p1.pID as pID1
-        , p1.name as name1
-        , p1.type1 as type11
-        , p1.type2 as type21
-        , p2.pID as pID2
-        , p2.name as name2
-        , p2.type1 as type12
-        , p2.type2 as type22
-      
-        FROM Evolutions e, Pokedex p1, Pokedex p2
-        WHERE p1.pID = e.base AND p2.pID = e.stage1 AND (
-            e.base = ${pID} OR e.stage1 = ${pID} OR e.stage2 = ${pID}
-    ))
-	SELECT * FROM base LEFT JOIN p3 ON true;
+	      p1.pID as pID1
+		, p1.name as name1
+		, p1.type1 as type11
+		, p1.type2 as type21
+		, p2.pID as pID2
+		, p2.name as name2
+		, p2.type1 as type12
+		, p2.type2 as type22
+		, p3.pID as pID3
+		, p3.name as name3
+		, p3.type1 as type13
+		, p3.type2 as type23
+        FROM evolutions e1, evolutions e2, Pokedex p1, Pokedex p2, Pokedex p3
+        WHERE e1.evolvesInto = e2.evolvesFrom AND p1.pID=e1.evolvesFrom 
+        AND p2.pID=e1.evolvesInto AND p3.pID=e2.evolvesInto
+    ),
+    doubleEvo AS (
+        SELECT 
+		  p1.pID as pID1
+		, p1.name as name1
+		, p1.type1 as type11
+		, p1.type2 as type21
+		, p2.pID as pID2
+		, p2.name as name2
+		, p2.type1 as type12
+		, p2.type2 as type22
+		, NULL as pID3
+		, NULL as name3
+		, NULL as type13
+		, NULL as type23
+        FROM evolutions, Pokedex p1, Pokedex p2
+        WHERE p1.pID=evolvesFrom AND p2.pID=evolvesInto AND NOT EXISTS (
+            SELECT * FROM tripleEvo 
+            WHERE (evolvesFrom = pID1 AND evolvesInto = pID2) 
+                OR (evolvesFrom = pID2 AND evolvesInto = pID3)
+        )
+    )
+    SELECT *
+    FROM (SELECT * FROM tripleEvo UNION SELECT * FROM doubleEvo) as evo
+    WHERE (pID1 = ${pID} OR pID2 = ${pID} OR pID3 = ${pID});
     `;
 
     const placeholderImg = "/placeholder.png";
