@@ -585,8 +585,8 @@ const MyPokeDetail = () => {
                               {evolutions.map((evo: any) => (
                                 <div key={evo.stage2.id} className="relative">
                                   <Link
-                                    to={`/pokedex/${evo.id}`}
-                                    key={evo.id}
+                                    to={`/pokedex/${evo.stage2.id}`}
+                                    key={evo.stage2.id}
                                     style={{ textDecoration:"none", color: "inherit" }}>
                                     {/* Connection Line to center */}
                                     <div className="evolution-connection-line absolute -top-4 left-1/2 transform -translate-x-1/2 w-px h-4 hidden sm:block"></div>
