@@ -54,10 +54,9 @@ CREATE TABLE Pokedex (
 );
     
 CREATE TABLE Evolutions (
-	base INT REFERENCES Pokedex(pID),
-    stage1 INT REFERENCES Pokedex(pID),
-    stage2 INT REFERENCES Pokedex(pID),
-    PRIMARY KEY(base, stage1)
+	evolvesFrom INT REFERENCES Pokedex(pID),
+    evolvesInto INT REFERENCES Pokedex(pID),
+    PRIMARY KEY(evolvesFrom, evolvesInto)
 );
 CREATE TABLE MyPokemon(
 	pID INT NOT NULL REFERENCES Pokedex(pID),
