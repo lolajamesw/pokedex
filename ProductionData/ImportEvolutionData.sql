@@ -4,8 +4,8 @@ DROP TABLE IF EXISTS tempEvolutions;
 
 -- create a temporary table to hold the exact data from the csv file
 CREATE TABLE tempEvolutions (
-	efrom CHAR(25),
-    eto CHAR(25)
+	efrom VARCHAR(100),
+    eto VARCHAR(100)
 );
 
 -- populate the temporary table with the data from the csv file
@@ -35,7 +35,10 @@ SELECT DISTINCT
         ELSE NULL
 	END AS stage2
 FROM (SELECT * FROM tripleEvo UNION SELECT * FROM doubleEvo) evos, pokedex p0, pokedex p1, pokedex p2
-WHERE p0.name = evos.baseName AND p1.name = evos.stage1Name AND (p2.name = evos.stage2Name OR evos.stage2Name IS NULL);
+WHERE p0.name = evos.baseName AND p1.name = evos.stage1Name AND (p2.name = evos.stage2Name OR evos.stage2Name IS NULL)
+    AND p0.pid != 43
+    AND p0.pid != 60
+    AND p0.pid != 279; -- temporarily ommitting evolution information for these species because they follow an irregular evolutionary tree. Need to restructure to handle this
 
 -- delete temporary table
 DROP TABLE tempEvolutions;
