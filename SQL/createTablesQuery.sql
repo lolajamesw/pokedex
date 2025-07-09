@@ -125,7 +125,7 @@ BEFORE INSERT ON CurrentAttacks
 FOR EACH ROW
 BEGIN
 	DECLARE atkCount INT;
-    SELECT COUNT(DISTINCT(pID, instanceID, uID)) INTO atkCount
+    SELECT COUNT(DISTINCT(instanceID)) INTO atkCount
     FROM CurrentAttacks;
     
     IF atkCount >= 4 THEN 

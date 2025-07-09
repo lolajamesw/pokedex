@@ -5,8 +5,7 @@ import { Badge } from "./components/ui/badge"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./components/ui/card"
 import { Progress } from "./components/ui/progress"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./components/ui/tabs.tsx"
-import { ArrowRight, Shield, Zap, Swords, Eye, Footprints } from "lucide-react"
-import { cn } from "./lib/utils.ts"
+import { ArrowRight, Shield, Swords, Footprints, Heart, Users, Star } from "lucide-react"
 import "./pokedex.css"
 import "./details.css"
 
@@ -35,13 +34,19 @@ type AttackDetailType = {
 }
 
 type PokemonDetailType = {
-  id: number;
-  name: string;
+  id: number,
+  pID: number,
+  name: string,
+  nickname: string,
+  level: number,
+  onTeam: boolean,
+  favourite: boolean,
   types: string[],
   stats: PokemonStatType,
   legendary: boolean,
   description: string,
-  attacks: AttackDetailType[]
+  learnableAttacks: AttackDetailType[],
+  knownAttacks: AttackDetailType[],
 };
 
 type PokemonSummary = {
@@ -61,30 +66,35 @@ type Evolution = {
     stage2: PokemonSummary
 }
 
-const PokemonDetail = () => {
-    const { id } = useParams<{ id: string}>();
+const MyPokeDetail = () => {
+    const { id, pID } = useParams<{ id: string, pID: string}>();
     const [pokemon, setPokemonDetail] = useState<PokemonDetailType | null>(null);
     const [evolutions, setEvolutions] = useState<Evolution[] | null>(null);
     const isBranchingEvolution = 133 == Number(id);
     
-    
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const overviewRes = await fetch(`http://localhost:8081/pokemon/${id}`);
+                console.log("id:", id, "pID:",pID);
+
+                const overviewRes = await fetch(`http://localhost:8081/userPokemon/${id}`);
                 const overviewData = await overviewRes.json();
 
-                const attackRes = await fetch(`http://localhost:8081/pokemon/attacks/${id}`);
+                const attackRes = await fetch(`http://localhost:8081/pokemon/attacks/${pID}`);
                 const attackData = await attackRes.json();
+
+                const knownRes = await fetch(`http://localhost:8081/pokemon/knownAttacks/${id}`)
+                const knownData = await knownRes.json();
 
                 const combined: PokemonDetailType = {
                     ...overviewData,
-                    attacks: attackData
+                    learnableAttacks: attackData,
+                    knownAttacks: knownData,
                 };
 
                 setPokemonDetail(combined);
 
-                const evolutionRes = await fetch(`http://localhost:8081/pokemon/evolutions/${id}`);
+                const evolutionRes = await fetch(`http://localhost:8081/pokemon/evolutions/${pID}`);
                 const evolutionData = await evolutionRes.json();
                 console.log("fetched evolution data");
                 setEvolutions(evolutionData);
@@ -96,11 +106,12 @@ const PokemonDetail = () => {
     }, [id])
 
     if (!pokemon) return <div>Loading...first {id}</div>;
+    console.log("learnableAttacks: ", pokemon.learnableAttacks);
     const placeholderImg = "/placeholder.png";    
     var evolutionaryLine: PokemonSummary[] = [];
     if (evolutions) {
       if (evolutions.length>1 && evolutions[0].stage1.id===evolutions[1].stage1.id) evolutionaryLine = [evolutions[0].base, evolutions[0].stage1]
-      else if (evolutions.length == 0) evolutionaryLine = [new PokemonSummary(pokemon.id, pokemon.name, pokemon.types, placeholderImg)];
+      else if (evolutions.length == 0) evolutionaryLine = [new PokemonSummary(pokemon.pID, pokemon.name, pokemon.types, placeholderImg)];
       else if (!evolutions[0].stage2.id) evolutionaryLine = [evolutions[0].base, evolutions[0].stage1];
       else evolutionaryLine = [evolutions[0].base, evolutions[0].stage1, evolutions[0].stage2];
     }
@@ -113,8 +124,8 @@ const PokemonDetail = () => {
         if (myBool) return "base_branching" // Eevee
         for (let i=1; i<evolutions.length; i++)
           if (evolutions[i].stage1.id!=evolutions[i-1].stage1.id) myBool=true;
-        if (!myBool) return "middle_branching"; // Oddish
-        return "random_branching" // Wurmple
+        if (!myBool) return "middle_branching";
+        return "random_branching"
       }
     const evolutionType = getEvolutionType()
 
@@ -147,41 +158,111 @@ const PokemonDetail = () => {
     //   Test box
     //   </div>);
 
+  const toggleFavorite = async () => {
+    try {
+      console.log("Marking Pokemon: ", pokemon.nickname);
+      const response = await fetch("http://localhost:8081/setFavourite", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({instanceID: pokemon.id, user: 4, value:Number(!pokemon.favourite)}),
+      });
+      // Convert UserPokemon to ShowcasedPokemon format
+      setPokemonDetail((prev) => {
+      if (!prev) return prev;  
+      return {...prev, favourite: !prev.favourite,};});
+
+    } catch (err) {
+      console.error("Error favouriting Pokémon: ", err);
+      alert("Something went wrong favouriting the Pokémon.")
+    }
+    
+  }
+
     return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-red-50 p-4">
       <div className="max-w-6xl mx-auto space-y-6">
         {/* Header Section */}
-        <Card className="overflow-hidden">
-          <CardContent className="p-0">
-            <div className={`bg-gradient-to-r gradient-${pokemon.types[0].toLowerCase()} p-6 text-white`}>
-              <div className="flex flex-col md:flex-row items-center gap-6">
+        <div className="card overflow-hidden">
+          <div className="p-0">
+            <div className={`gradient-${pokemon.types[0].toLowerCase()} p-6 text-white relative`}>
+              {/* Top Right Controls */}
+              <div className="absolute top-4 right-4 flex items-center gap-3">
+                {/* Favorite Button */}
+                <button
+                  onClick={toggleFavorite}
+                  className={`p-2 rounded-full transition-all duration-200 hover:scale-110 ${
+                    pokemon.favourite
+                      ? "bg-white/20 text-yellow-300 hover:bg-white/30"
+                      : "bg-white/10 text-white/60 hover:bg-white/20 hover:text-white"
+                  }`}
+                  title={pokemon.favourite ? "Remove from favorites" : "Add to favorites"}
+                >
+                  {pokemon.favourite ? <Heart className="h-6 w-6 fill-current" /> : <Heart className="h-6 w-6" />}
+                </button>
+
+                {/* Pokemon ID Badge */}
+                <span className="badge badge-default bg-white text-black px-3 py-1">
+                  #{pokemon.pID.toString().padStart(3, "0")}
+                </span>
+              </div>
+
+              <div className="flex flex-col md:flex-row items-center gap-6 mt-8 md:mt-0">
                 <div className="relative">
                   <img
-                    src={`https://www.pokemon.com/static-assets/content-assets/cms2/img/pokedex/detail/${pokemon.id.toString().padStart(3, "0")}.png`}
+                    src={`https://www.pokemon.com/static-assets/content-assets/cms2/img/pokedex/detail/${pokemon.pID.toString().padStart(3, "0")}.png`}
                     alt={pokemon.name}
                     width={200}
                     height={200}
                     className="rounded-lg bg-white/20 p-4"
                   />
-                  <Badge className="absolute -top-2 -right-2 bg-white text-black">
-                    #{pokemon.id.toString().padStart(3, "0")}
-                  </Badge>
+                  {/* Status Indicators on Pokemon Image */}
+                  <div className="absolute -bottom-2 -right-2 flex gap-1">
+                    {pokemon.favourite && (
+                      <div className="bg-yellow-400 rounded-full p-1.5 shadow-lg">
+                        <Heart className="h-3 w-3 text-yellow-800 fill-current" />
+                      </div>
+                    )}
+                    {pokemon.onTeam && (
+                      <div className="bg-green-400 rounded-full p-1.5 shadow-lg">
+                        <Star className="h-3 w-3 text-green-800 fill-current" />
+                      </div>
+                    )}
+                  </div>
                 </div>
                 <div className="flex-1 text-center md:text-left">
-                  <h1 className="text-white text-4xl font-bold mb-2">{pokemon.name}</h1>
-                  <div className="flex flex-wrap gap-2 justify-center md:justify-start mb-4">
+                  <div className="flex flex-col md:flex-row md:items-baseline md:gap-3 mb-2">
+                    <h1 className="text-4xl font-bold text-white">{pokemon.nickname || pokemon.name}</h1>
+                    <div className="flex items-center gap-2 justify-center md:justify-start">
+                      <span className="text-xl font-semibold text-white/90">Lv. {pokemon.level}</span>
+                      {pokemon.nickname && <span className="text-lg text-white/75">({pokemon.name})</span>}
+                    </div>
+                  </div>
+
+                  {/* Status Text Indicators */}
+                  <div className="flex flex-wrap gap-2 justify-center md:justify-start mb-3">
                     {pokemon.types.map((type) => (
                       <Badge key={type} className={`${getTypeColor(type)} text-white`}>
                         {type}
                       </Badge>
                     ))}
+                    {pokemon.favourite && (
+                      <span className="badge bg-yellow-400/20 text-yellow-100 border border-yellow-300/30">
+                        ⭐ Favorite
+                      </span>
+                    )}
+                    {pokemon.onTeam && (
+                      <span className="badge bg-green-400/20 text-green-100 border border-green-300/30">
+                        🌟 Team Member
+                      </span>
+                    )}
                   </div>
+
                   <p className="text-white/90 max-w-2xl">{pokemon.description}</p>
                 </div>
               </div>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
         {/* Main Content Tabs */}
         <Tabs defaultValue="stats" className="space-y-3">
@@ -565,13 +646,48 @@ const PokemonDetail = () => {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Swords className="h-5 w-5" />
+                  Current Moves
+                </CardTitle>
+                <CardDescription>Moves that this Pokémon has learned through leveling up and TMs</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {pokemon.knownAttacks.map((move, index) => (
+                    <div
+                      key={index}
+                      className="flex flex-col sm:flex-row sm:items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors"
+                    >
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <h4 className="font-medium">{move.name}</h4>
+                          <Badge className={`${getTypeColor(move.type)} text-white text-xs`}>{move.type}</Badge>
+                          <Badge variant="outline" className="text-xs">
+                            {move.category}
+                          </Badge>
+                        </div>
+                        <div className="flex gap-4 text-sm text-muted-foreground">
+                          <span>Power: {move.stats.power}</span>
+                          <span>Accuracy: {move.stats.accuracy}%</span>
+                          <span>PP: {move.stats.pp}</span>
+                        </div>
+                      </div>
+                      <p>{move.effect}</p>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Swords className="h-5 w-5" />
                   Learnable Moves
                 </CardTitle>
                 <CardDescription>Moves that this Pokémon can learn through leveling up and TMs</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {pokemon.attacks.map((move, index) => (
+                  {pokemon.learnableAttacks.map((move, index) => (
                     <div
                       key={index}
                       className="flex flex-col sm:flex-row sm:items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors"
@@ -597,53 +713,6 @@ const PokemonDetail = () => {
               </CardContent>
             </Card>
           </TabsContent>
-
-          {/* <TabsContent value="stats" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Shield className="h-5 w-5" />
-                  Base Stats
-                </CardTitle>
-                <CardDescription>The base statistical values for this Pokémon</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid gap-4">
-                  {Object.entries(pokemon.baseStats).map(([stat, value]) => (
-                    <div key={stat} className="space-y-2">
-                      <div className="flex justify-between items-center">
-                        <span className="font-medium capitalize">
-                          {stat === "hp"
-                            ? "HP"
-                            : stat === "spAttack"
-                              ? "Sp. Attack"
-                              : stat === "spDefense"
-                                ? "Sp. Defense"
-                                : stat.charAt(0).toUpperCase() + stat.slice(1)}
-                        </span>
-                        <span className="font-bold">{value}</span>
-                      </div>
-                      <div className="relative">
-                        <Progress value={(value / 150) * 100} className="h-2" />
-                        <div
-                          className={`absolute top-0 left-0 h-2 rounded-full ${getStatColor(value)}`}
-                          style={{ width: `${(value / 150) * 100}%` }}
-                        />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                <div className="pt-4 border-t">
-                  <div className="flex justify-between items-center">
-                    <span className="font-semibold">Total:</span>
-                    <span className="font-bold text-lg">
-                      {Object.values(pokemon.baseStats).reduce((sum, stat) => sum + stat, 0)}
-                    </span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent> */}
         </Tabs>
       </div>
     </div>
@@ -652,4 +721,4 @@ const PokemonDetail = () => {
 
 
 
-export default PokemonDetail;
+export default MyPokeDetail;

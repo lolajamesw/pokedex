@@ -1,8 +1,10 @@
--- MySQL dump 10.13  Distrib 8.0.40, for Win64 (x86_64)
+CREATE DATABASE  IF NOT EXISTS `pokedexbackup` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci */ /*!80016 DEFAULT ENCRYPTION='N' */;
+USE `pokedexbackup`;
+-- MySQL dump 10.13  Distrib 8.0.42, for Win64 (x86_64)
 --
--- Host: localhost    Database: pokedex
+-- Host: 127.0.0.1    Database: pokedexbackup
 -- ------------------------------------------------------
--- Server version	8.0.40
+-- Server version	9.3.0
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -67,6 +69,7 @@ CREATE TABLE `currentattacks` (
 
 LOCK TABLES `currentattacks` WRITE;
 /*!40000 ALTER TABLE `currentattacks` DISABLE KEYS */;
+INSERT INTO `currentattacks` VALUES (1,7),(1,24),(1,53);
 /*!40000 ALTER TABLE `currentattacks` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -189,7 +192,7 @@ CREATE TABLE `mypokemon` (
   `dateAdded` datetime DEFAULT '2000-01-01 00:00:00',
   PRIMARY KEY (`instanceID`),
   CONSTRAINT `mypokemon_chk_1` CHECK ((`level` > 0))
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -198,6 +201,7 @@ CREATE TABLE `mypokemon` (
 
 LOCK TABLES `mypokemon` WRITE;
 /*!40000 ALTER TABLE `mypokemon` DISABLE KEYS */;
+INSERT INTO `mypokemon` VALUES (150,4,1,'CloneGod',70,_binary '\0',_binary '',_binary '','2000-01-01 00:00:00'),(3,4,2,'Bulky',42,_binary '',_binary '',_binary '','2000-01-01 00:00:00'),(25,4,3,'Zaps',35,_binary '\0',_binary '',_binary '\0','2000-01-01 00:00:00'),(26,4,4,'Zoomer',55,_binary '\0',_binary '',_binary '','2000-01-01 00:00:00'),(1,4,5,'Leafy',14,_binary '\0',_binary '',_binary '\0','2000-01-01 00:00:00'),(2,4,6,'Evolver',25,_binary '\0',_binary '',_binary '','2000-01-01 00:00:00'),(1,4,7,'Seedling',9,_binary '\0',_binary '\0',_binary '','2000-01-01 00:00:00'),(3,4,8,'Tanky',40,_binary '\0',_binary '\0',_binary '','2000-01-01 00:00:00'),(25,5,9,'Sparkles',18,_binary '',_binary '\0',_binary '\0','2000-01-01 00:00:00'),(2,5,10,'IvyBoy',25,_binary '\0',_binary '',_binary '\0','2000-01-01 00:00:00'),(1,6,11,'Sprouter',15,_binary '\0',_binary '',_binary '\0','2000-01-01 00:00:00'),(2,6,12,'Bloomy',25,_binary '\0',_binary '\0',_binary '\0','2000-01-01 00:00:00'),(3,6,13,'VineBoss',45,_binary '\0',_binary '',_binary '','2000-01-01 00:00:00');
 /*!40000 ALTER TABLE `mypokemon` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -313,6 +317,7 @@ CREATE TABLE `typefx` (
 
 LOCK TABLES `typefx` WRITE;
 /*!40000 ALTER TABLE `typefx` DISABLE KEYS */;
+INSERT INTO `typefx` VALUES ('Bug','Fighting',_binary '\0',_binary '',_binary '\0'),('Bug','Fire',_binary '\0',_binary '',_binary '\0'),('Bug','Flying',_binary '\0',_binary '',_binary '\0'),('Bug','Ghost',_binary '\0',_binary '',_binary '\0'),('Bug','Grass',_binary '',_binary '\0',_binary '\0'),('Bug','Poison',_binary '',_binary '\0',_binary '\0'),('Bug','Psychic',_binary '',_binary '\0',_binary '\0'),('Dragon','Dragon',_binary '',_binary '\0',_binary '\0'),('Electric','Dragon',_binary '\0',_binary '',_binary '\0'),('Electric','Electric',_binary '\0',_binary '',_binary '\0'),('Electric','Flying',_binary '',_binary '\0',_binary '\0'),('Electric','Grass',_binary '\0',_binary '',_binary '\0'),('Electric','Ground',_binary '\0',_binary '\0',_binary ''),('Electric','Water',_binary '',_binary '\0',_binary '\0'),('Fighting','Bug',_binary '\0',_binary '',_binary '\0'),('Fighting','Flying',_binary '\0',_binary '',_binary '\0'),('Fighting','Ghost',_binary '\0',_binary '\0',_binary ''),('Fighting','Ice',_binary '',_binary '\0',_binary '\0'),('Fighting','Normal',_binary '',_binary '\0',_binary '\0'),('Fighting','Poison',_binary '\0',_binary '',_binary '\0'),('Fighting','Psychic',_binary '\0',_binary '',_binary '\0'),('Fighting','Rock',_binary '',_binary '\0',_binary '\0'),('Fire','Bug',_binary '',_binary '\0',_binary '\0'),('Fire','Dragon',_binary '\0',_binary '',_binary '\0'),('Fire','Fire',_binary '\0',_binary '',_binary '\0'),('Fire','Grass',_binary '',_binary '\0',_binary '\0'),('Fire','Ice',_binary '',_binary '\0',_binary '\0'),('Fire','Rock',_binary '\0',_binary '',_binary '\0'),('Fire','Water',_binary '\0',_binary '',_binary '\0'),('Flying','Bug',_binary '',_binary '\0',_binary '\0'),('Flying','Electric',_binary '\0',_binary '',_binary '\0'),('Flying','Fighting',_binary '',_binary '\0',_binary '\0'),('Flying','Grass',_binary '',_binary '\0',_binary '\0'),('Flying','Rock',_binary '\0',_binary '',_binary '\0'),('Ghost','Ghost',_binary '',_binary '\0',_binary '\0'),('Ghost','Normal',_binary '\0',_binary '\0',_binary ''),('Ghost','Psychic',_binary '\0',_binary '\0',_binary ''),('Grass','Bug',_binary '\0',_binary '',_binary '\0'),('Grass','Dragon',_binary '\0',_binary '',_binary '\0'),('Grass','Fire',_binary '\0',_binary '',_binary '\0'),('Grass','Flying',_binary '\0',_binary '',_binary '\0'),('Grass','Grass',_binary '\0',_binary '',_binary '\0'),('Grass','Ground',_binary '',_binary '\0',_binary '\0'),('Grass','Poison',_binary '\0',_binary '',_binary '\0'),('Grass','Rock',_binary '',_binary '\0',_binary '\0'),('Grass','Water',_binary '',_binary '\0',_binary '\0'),('Ground','Bug',_binary '\0',_binary '',_binary '\0'),('Ground','Electric',_binary '',_binary '\0',_binary '\0'),('Ground','Fire',_binary '',_binary '\0',_binary '\0'),('Ground','Flying',_binary '\0',_binary '\0',_binary ''),('Ground','Grass',_binary '\0',_binary '',_binary '\0'),('Ground','Poison',_binary '',_binary '\0',_binary '\0'),('Ground','Rock',_binary '',_binary '\0',_binary '\0'),('Ice','Dragon',_binary '',_binary '\0',_binary '\0'),('Ice','Flying',_binary '',_binary '\0',_binary '\0'),('Ice','Grass',_binary '',_binary '\0',_binary '\0'),('Ice','Ground',_binary '',_binary '\0',_binary '\0'),('Ice','Ice',_binary '\0',_binary '',_binary '\0'),('Ice','Water',_binary '\0',_binary '',_binary '\0'),('Normal','Ghost',_binary '\0',_binary '\0',_binary ''),('Normal','Rock',_binary '\0',_binary '',_binary '\0'),('Poison','Bug',_binary '',_binary '\0',_binary '\0'),('Poison','Ghost',_binary '\0',_binary '',_binary '\0'),('Poison','Grass',_binary '',_binary '\0',_binary '\0'),('Poison','Ground',_binary '\0',_binary '',_binary '\0'),('Poison','Poison',_binary '\0',_binary '',_binary '\0'),('Poison','Rock',_binary '\0',_binary '',_binary '\0'),('Psychic','Fighting',_binary '',_binary '\0',_binary '\0'),('Psychic','Poison',_binary '',_binary '\0',_binary '\0'),('Psychic','Psychic',_binary '\0',_binary '',_binary '\0'),('Rock','Bug',_binary '',_binary '\0',_binary '\0'),('Rock','Fighting',_binary '\0',_binary '',_binary '\0'),('Rock','Fire',_binary '',_binary '\0',_binary '\0'),('Rock','Flying',_binary '',_binary '\0',_binary '\0'),('Rock','Ground',_binary '\0',_binary '',_binary '\0'),('Rock','Ice',_binary '',_binary '\0',_binary '\0'),('Water','Dragon',_binary '\0',_binary '',_binary '\0'),('Water','Fire',_binary '',_binary '\0',_binary '\0'),('Water','Grass',_binary '\0',_binary '',_binary '\0'),('Water','Ground',_binary '',_binary '\0',_binary '\0'),('Water','Rock',_binary '',_binary '\0',_binary '\0'),('Water','Water',_binary '\0',_binary '',_binary '\0');
 /*!40000 ALTER TABLE `typefx` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -335,6 +340,7 @@ CREATE TABLE `types` (
 
 LOCK TABLES `types` WRITE;
 /*!40000 ALTER TABLE `types` DISABLE KEYS */;
+INSERT INTO `types` VALUES ('Bug'),('Dragon'),('Electric'),('Fighting'),('Fire'),('Flying'),('Ghost'),('Grass'),('Ground'),('Ice'),('Normal'),('Poison'),('Psychic'),('Rock'),('Water');
 /*!40000 ALTER TABLE `types` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -355,7 +361,7 @@ CREATE TABLE `user` (
   UNIQUE KEY `username` (`username`),
   UNIQUE KEY `password` (`password`),
   CONSTRAINT `user_chk_1` CHECK (((length(`password`) > 7) and regexp_like(`password`,_utf8mb4'[0-9]') and regexp_like(`password`,_utf8mb4'[a-z]') and regexp_like(`password`,_utf8mb4'[A-Z]') and regexp_like(`password`,_utf8mb4'[^a-zA-Z0-9]')))
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -364,8 +370,17 @@ CREATE TABLE `user` (
 
 LOCK TABLES `user` WRITE;
 /*!40000 ALTER TABLE `user` DISABLE KEYS */;
+INSERT INTO `user` VALUES (4,'Cynthia',5,'championcyn','Garchomp142*'),(5,'Gary Oak',2,'rivalgary','Eeveelutions21*'),(6,'Erika',1,'flowerqueen','Bellsprout13*');
 /*!40000 ALTER TABLE `user` ENABLE KEYS */;
 UNLOCK TABLES;
+
+--
+-- Dumping events for database 'pokedexbackup'
+--
+
+--
+-- Dumping routines for database 'pokedexbackup'
+--
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
