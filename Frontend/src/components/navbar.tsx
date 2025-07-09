@@ -12,7 +12,7 @@ const navigationItems = [
 ]
 
 export default function Navbar({ currentPage, setCurrentPage }) {
-  const [user, setUser] = useState({ displayName: "", username: "" })
+  const [user, setUser] = useState({id: 4, tradeCount: 0, displayName: "", username: "" })
   useEffect(() => {
     fetch("http://localhost:8081/user/4")
       .then((res) => res.json())

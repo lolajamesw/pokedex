@@ -40,6 +40,8 @@ INSERT INTO MyPokemon (pid, uid, nickname, favourite, onteam, level, showcase) V
 (1, 4, 'Seedling', 0, 0, 9, 1),   -- Not on team, but Showcased
 (3, 4, 'Tanky', 0, 0, 40, 1);     -- Not on team, but Showcased
 
+INSERT INTO CurrentAttacks (instanceID, aID) VALUES
+(1, 7), (1,24), (1,53);
 
 -- User with 2 pokemon: 1 favourite, 1 not--
 INSERT INTO User (uid, Name, tradeCount, username, password) VALUES

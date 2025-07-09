@@ -32,31 +32,48 @@ app.get('/pokemon', (req, res) => {
   const uid = 4;
 
   const sql = `
-  SELECT pID AS id, name, type1, type2, hp, atk, def, spAtk, spDef, speed 
-  FROM Pokedex
+    SELECT 
+      p.pID AS id,
+      p.name,
+      p.type1,
+      p.type2,
+      p.hp,
+      p.atk,
+      p.def,
+      p.spAtk,
+      p.spDef,
+      p.speed,
+      EXISTS (
+        SELECT 1 
+        FROM MyPokemon mp 
+        WHERE mp.pID = p.pID AND mp.uID = ${uid}
+      ) AS caught
+    FROM Pokedex p
   `;
 
-      db.query(sql, (err, results) => {
-        if (err) {
-            console.error("Error fetching Pokémon data:", err);
-            return res.status(500).json({ error: "Database error" });
-        }
+  db.query(sql, [uid], (err, results) => {
+    if (err) {
+      console.error("Error fetching Pokémon data:", err);
+      return res.status(500).json({ error: "Database error" });
+    }
 
-        const formatted = results.map((row) => ({
-            id: row.id,
-            number: row.id,
-            name: row.name,
-            types: row.type2 ? [row.type1, row.type2] : [row.type1],
-            stats: { hp: row.hp,
-            attack: row.atk,
-            defense: row.def,
-            spAttack: row.spAtk,
-            spDefense: row.spDef,
-            speed: row.speed,
-            },
-            caught: false,
-        }));
-    return res.json(formatted);
+    const formatted = results.map((row) => ({
+      id: row.id,
+      number: row.id,
+      name: row.name,
+      types: row.type2 ? [row.type1, row.type2] : [row.type1],
+      stats: {
+        hp: row.hp,
+        attack: row.atk,
+        defense: row.def,
+        spAttack: row.spAtk,
+        spDefense: row.spDef,
+        speed: row.speed
+      },
+      caught: !!row.caught
+    }));
+
+    res.json(formatted);
   });
 });
 
@@ -84,7 +101,43 @@ app.get(`/pokemon/:id`, (req, res) => {
                 spDef: row.spDef, 
                 speed: row.speed
             },
-            legendary: row.legendary.buffer[0] === 1, 
+            legendary: row.legendary[0] === 1, 
+            description: row.description
+        }))
+        return res.json(formatted[0]);
+    });
+});
+
+app.get(`/userPokemon/:id`, (req, res) => {
+    const id = req.params.id;
+    const sql = `
+    SELECT instanceID, mp.pID, name, nickname, level, favourite, onteam, type1, type2, hp, atk, def, spAtk, spDef, speed, legendary, description
+    FROM Pokedex p, MyPokemon mp WHERE instanceID=${id} AND p.pID=mp.pID;
+    `
+    db.query(sql, (err, results) => {
+        if (err) {
+            console.error("Error fetching pokemon's data", err);
+            return res.status(500).json({error: "Database error"});
+        }
+
+        const formatted = results.map((row) => ({
+            id: row.instanceID,
+            pID: row.pID,
+            name: row.name,
+            nickname: row.nickname,
+            level: row.level,
+            favourite: row.favourite[0]===1,
+            onTeam: row.onteam[0]===1,
+            types: row.type2 ? [row.type1, row.type2] : [row.type1],
+            stats: {
+                hp: row.hp,
+                atk: row.atk, 
+                def: row.def, 
+                spAtk: row.spAtk, 
+                spDef: row.spDef, 
+                speed: row.speed
+            },
+            legendary: row.legendary[0] === 1, 
             description: row.description
         }))
         return res.json(formatted[0]);
@@ -120,35 +173,80 @@ app.get(`/pokemon/attacks/:id`, (req, res) => {
     });
 });
 
+app.get(`/pokemon/knownAttacks/:id`, (req, res) => {
+    const id = req.params.id;
+    const sql = `
+    SELECT a.aID, a.attack_name, type, category, power, accuracy, PP, effect
+    FROM Attacks a, CurrentAttacks c
+    WHERE instanceID=${id} AND a.aID=c.aID;
+    `
+    db.query(sql, (err, results) => {
+        if (err) {
+            console.error("Error fetching pokemon's data", err);
+            return res.status(500).json({error: "Database error"});
+        }
+
+        const formatted = results.map((row) => ({
+            id: row.aID,
+            name: row.attack_name,
+            type: row.type,
+            category: row.category,
+            stats: {
+                power: row.power,
+                accuracy: row.accuracy, 
+                pp: row.PP
+            },
+            effect: row.effect
+        }))
+        return res.json(formatted);
+    });
+});
+
 app.get(`/pokemon/evolutions/:id`, (req, res) => {
     const pID = req.params.id;
     const sql = `
-    WITH p3 as (
+    WITH tripleEvo AS (
         SELECT 
-          pID as pID3
-        , name as name3
-        , type1 as type13
-        , type2 as type23
-        FROM Pokedex p, Evolutions e 
-        WHERE p.pID=e.stage2 AND (
-        e.base = ${pID} OR e.stage1 = ${pID} OR e.stage2 = ${pID}
-      )),
-    base as (
-	    SELECT 
-          p1.pID as pID1
-        , p1.name as name1
-        , p1.type1 as type11
-        , p1.type2 as type21
-        , p2.pID as pID2
-        , p2.name as name2
-        , p2.type1 as type12
-        , p2.type2 as type22
-      
-        FROM Evolutions e, Pokedex p1, Pokedex p2
-        WHERE p1.pID = e.base AND p2.pID = e.stage1 AND (
-            e.base = ${pID} OR e.stage1 = ${pID} OR e.stage2 = ${pID}
-    ))
-	SELECT * FROM base LEFT JOIN p3 ON true;
+	      p1.pID as pID1
+		, p1.name as name1
+		, p1.type1 as type11
+		, p1.type2 as type21
+		, p2.pID as pID2
+		, p2.name as name2
+		, p2.type1 as type12
+		, p2.type2 as type22
+		, p3.pID as pID3
+		, p3.name as name3
+		, p3.type1 as type13
+		, p3.type2 as type23
+        FROM evolutions e1, evolutions e2, Pokedex p1, Pokedex p2, Pokedex p3
+        WHERE e1.evolvesInto = e2.evolvesFrom AND p1.pID=e1.evolvesFrom 
+        AND p2.pID=e1.evolvesInto AND p3.pID=e2.evolvesInto
+    ),
+    doubleEvo AS (
+        SELECT 
+		  p1.pID as pID1
+		, p1.name as name1
+		, p1.type1 as type11
+		, p1.type2 as type21
+		, p2.pID as pID2
+		, p2.name as name2
+		, p2.type1 as type12
+		, p2.type2 as type22
+		, NULL as pID3
+		, NULL as name3
+		, NULL as type13
+		, NULL as type23
+        FROM evolutions, Pokedex p1, Pokedex p2
+        WHERE p1.pID=evolvesFrom AND p2.pID=evolvesInto AND NOT EXISTS (
+            SELECT * FROM tripleEvo 
+            WHERE (evolvesFrom = pID1 AND evolvesInto = pID2) 
+                OR (evolvesFrom = pID2 AND evolvesInto = pID3)
+        )
+    )
+    SELECT *
+    FROM (SELECT * FROM tripleEvo UNION SELECT * FROM doubleEvo) as evo
+    WHERE (pID1 = ${pID} OR pID2 = ${pID} OR pID3 = ${pID});
     `;
 
     const placeholderImg = "/placeholder.png";
@@ -177,13 +275,34 @@ app.get(`/pokemon/evolutions/:id`, (req, res) => {
                 types: row.type23 ? [row.type13, row.type23] : [row.type13],
                 image: placeholderImg
             }
-        }))
+        }));
         return res.json(formatted);
     });
 });
 
+app.get('/user/:id', (req, res) => {
+    const uID = req.params.id;
+    const sql = `
+        SELECT uID, name, tradeCount, username
+        FROM User WHERE uID=${uID};
+    `
+    db.query(sql, (err, results) => {
+        if (err) {
+            console.error("Error fetching user's data", err);
+            return res.status(500).json({error: "Database error"});
+        }
+        const formatted = results.map((row) => ({
+            id: row.uID,
+            displayName: row.name,
+            tradeCount: row.tradeCount,
+            username: row.username,
+        }));
+        return res.json(formatted[0]);
+    });
+});
+
 app.get('/userPokemon', (req, res) => {
-  const uID = 5; // Replace with actual user ID from session or authentication
+  const uID = 4; // Replace with actual user ID from session or authentication
 
   const sql = `
     SELECT
@@ -198,7 +317,10 @@ app.get('/userPokemon', (req, res) => {
       p.spAtk,
       p.spDef,
       p.speed,
-      mp.nickname
+      mp.level,
+      mp.nickname,
+      mp.showcase,
+      mp.onteam
     FROM MyPokemon mp
     JOIN Pokedex p ON mp.pID = p.pID
     WHERE mp.uID = ${uID}
@@ -223,7 +345,10 @@ app.get('/userPokemon', (req, res) => {
         spDefense: row.spDef,
         speed: row.speed,
       },
-      nickname: row.nickname
+      level: row.level,
+      nickname: row.nickname,
+      showcase: row.showcase[0]===1,
+      onTeam: row.onteam[0]===1
     }));
 
     return res.json(formatted);
@@ -273,8 +398,128 @@ app.post("/addPokemon", async (req, res) => {
   }
 });
 
+app.post("/setShowcased", async(req,res) => {
+    const {instanceIDs, user} = req.body;
+    console.log("Incoming request to /setShowcased pokemon instance:", req.body);
+
+    try {
+    const dbPromise = await mysqlPromise.createConnection({
+      host: process.env.DB_HOST,
+      port: process.env.DB_PORT,
+      user: process.env.DB_USER,
+      password: process.env.DB_PASSWORD,
+      database: process.env.DB_NAME
+    });
+
+    await dbPromise.query(
+        `UPDATE MyPokemon
+         SET showcase=1
+         WHERE instanceID IN (${instanceIDs.toString()}) AND uID=${user};`
+    );
+    await dbPromise.query(
+        `UPDATE MyPokemon
+         SET showcase=0
+         WHERE instanceID NOT IN (${instanceIDs.toString()}) AND uID=${user};`
+    )
+
+    console.log("Marking successful.");
+    await dbPromise.end();
+    res.send("Pokémon updated successfully.");
+  } catch (err) {
+    console.error("Error marking Pokémon:", err);
+    res.status(500).send("Server error marking Pokémon.");
+  }
+});
+
+app.post("/setFavourite", async(req,res) => {
+    const {instanceID, user, value} = req.body;
+    console.log("Incoming request to /setFavourite pokemon instance:", req.body);
+
+    try {
+    const dbPromise = await mysqlPromise.createConnection({
+      host: process.env.DB_HOST,
+      port: process.env.DB_PORT,
+      user: process.env.DB_USER,
+      password: process.env.DB_PASSWORD,
+      database: process.env.DB_NAME
+    });
+
+    await dbPromise.query(
+        `UPDATE MyPokemon
+         SET favourite=${value}
+         WHERE instanceID = ${instanceID} AND uID=${user};`
+    );
+
+    console.log("Marking successful.");
+    await dbPromise.end();
+    res.send("Pokémon updated successfully.");
+  } catch (err) {
+    console.error("Error marking Pokémon:", err);
+    res.status(500).send("Server error marking Pokémon.");
+  }
+});
+
+app.post("/setTeam", async(req,res) => {
+    const {instanceIDs, user} = req.body;
+    console.log("Incoming request to /setTeam pokemon instance:", req.body);
+
+    try {
+    const dbPromise = await mysqlPromise.createConnection({
+      host: process.env.DB_HOST,
+      port: process.env.DB_PORT,
+      user: process.env.DB_USER,
+      password: process.env.DB_PASSWORD,
+      database: process.env.DB_NAME
+    });
+
+    await dbPromise.query(
+        `UPDATE MyPokemon
+         SET onteam=1
+         WHERE instanceID IN (${instanceIDs.toString()}) AND uID=${user};`
+    );
+    await dbPromise.query(
+        `UPDATE MyPokemon
+         SET onteam=0
+         WHERE instanceID NOT IN (${instanceIDs.toString()}) AND uID=${user};`
+    )
+
+    console.log("Marking successful.");
+    await dbPromise.end();
+    res.send("Pokémon updated successfully.");
+  } catch (err) {
+    console.error("Error marking Pokémon:", err);
+    res.status(500).send("Server error marking Pokémon.");
+  }
+});
+
+app.post("/updateUserDisplayName", async(req,res) => {
+    const {uID, name} = req.body;
+    console.log("Incoming request to update name to:", name);
+
+    try {
+        const dbPromise = await mysqlPromise.createConnection({
+        host: process.env.DB_HOST,
+        port: process.env.DB_PORT,
+        user: process.env.DB_USER,
+        password: process.env.DB_PASSWORD,
+        database: process.env.DB_NAME
+        });
+
+        await dbPromise.query(
+            `UPDATE User
+            SET name='${name}'
+            WHERE uID=${uID};`
+        )
+        console.log("Update successful");
+        await dbPromise.end();
+        res.send("User's name updated successfully.");
+    } catch (err) {
+    console.error("Error marking Pokémon:", err);
+    res.status(500).send("Server error marking Pokémon.");
+  }
+})
+
 app.listen(8081, ()=> {
     console.log("listening on port 8081");
     console.log("View output at http://localhost:8081");
-    console.log("read table at http://localhost:8081/group_members")
 })
