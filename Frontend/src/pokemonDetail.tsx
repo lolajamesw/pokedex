@@ -132,6 +132,7 @@ const PokemonDetail = () => {
             Poison: "bg-purple-600",
             Water: "bg-blue-700",
             Psychic: "bg-pink-600",
+            Fairy: "bg-pink-300",
         }
         return colors[type] || "bg-gray-500"
     }
