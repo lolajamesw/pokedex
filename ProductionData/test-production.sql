@@ -157,8 +157,8 @@ SELECT
       p.speed,
       mp.level,
       mp.nickname,
-      mp.showcase,
-      mp.onteam
+      CAST(mp.showcase AS UNSIGNED) AS showcase,
+      CAST(mp.onteam AS UNSIGNED) AS onTeam
     FROM MyPokemon mp
     JOIN Pokedex p ON mp.pID = p.pID
     WHERE mp.uID = 50;
