@@ -125,8 +125,11 @@ BEFORE INSERT ON CurrentAttacks
 FOR EACH ROW
 BEGIN
 	DECLARE atkCount INT;
-    SELECT COUNT(DISTINCT(instanceID)) INTO atkCount
-    FROM CurrentAttacks;
+    SELECT COUNT(aid) INTO atkCount
+    FROM CurrentAttacks
+	WHERE instanceID = NEW.instanceID
+    GROUP BY instanceID;
+
     
     IF atkCount >= 4 THEN 
 		SIGNAL SQLSTATE '45000'

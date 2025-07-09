@@ -32,8 +32,27 @@ app.get('/pokemon', (req, res) => {
   const uid = 4;
 
   const sql = `
-  SELECT pID AS id, name, type1, type2, hp, atk, def, spAtk, spDef, speed 
-  FROM Pokedex
+  WITH user_pokedex AS (
+  SELECT 
+    P.pid,
+    P.name,
+    P.type1,
+    P.type2,
+    P.hp,
+    P.def,
+    P.spAtk,
+    P.spDef,
+    P.speed,
+    COUNT(MP.instanceId) AS caught_count
+FROM 
+    Pokedex P LEFT OUTER JOIN MyPokemon MP 
+ON P.pid = MP.pid AND MP.uid = ${uid}
+GROUP BY 
+    P.pid, P.Name, P.type1, P.type2, P.HP, P.Def,
+    P.SpAtk, P.SpDef, P.Speed
+ORDER BY 
+    P.pid)
+    SELECT * FROM user_pokedex
   `;
 
       db.query(sql, (err, results) => {
@@ -43,8 +62,8 @@ app.get('/pokemon', (req, res) => {
         }
 
         const formatted = results.map((row) => ({
-            id: row.id,
-            number: row.id,
+            id: row.pid,
+            number: row.pid,
             name: row.name,
             types: row.type2 ? [row.type1, row.type2] : [row.type1],
             stats: { hp: row.hp,
@@ -54,7 +73,7 @@ app.get('/pokemon', (req, res) => {
             spDefense: row.spDef,
             speed: row.speed,
             },
-            caught: false,
+            caught_count: row.caught_count
         }));
     return res.json(formatted);
   });
