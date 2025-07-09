@@ -32,31 +32,48 @@ app.get('/pokemon', (req, res) => {
   const uid = 4;
 
   const sql = `
-  SELECT pID AS id, name, type1, type2, hp, atk, def, spAtk, spDef, speed 
-  FROM Pokedex
+    SELECT 
+      p.pID AS id,
+      p.name,
+      p.type1,
+      p.type2,
+      p.hp,
+      p.atk,
+      p.def,
+      p.spAtk,
+      p.spDef,
+      p.speed,
+      EXISTS (
+        SELECT 1 
+        FROM MyPokemon mp 
+        WHERE mp.pID = p.pID AND mp.uID = ${uid}
+      ) AS caught
+    FROM Pokedex p
   `;
 
-      db.query(sql, (err, results) => {
-        if (err) {
-            console.error("Error fetching Pokémon data:", err);
-            return res.status(500).json({ error: "Database error" });
-        }
+  db.query(sql, [uid], (err, results) => {
+    if (err) {
+      console.error("Error fetching Pokémon data:", err);
+      return res.status(500).json({ error: "Database error" });
+    }
 
-        const formatted = results.map((row) => ({
-            id: row.id,
-            number: row.id,
-            name: row.name,
-            types: row.type2 ? [row.type1, row.type2] : [row.type1],
-            stats: { hp: row.hp,
-            attack: row.atk,
-            defense: row.def,
-            spAttack: row.spAtk,
-            spDefense: row.spDef,
-            speed: row.speed,
-            },
-            caught: false,
-        }));
-    return res.json(formatted);
+    const formatted = results.map((row) => ({
+      id: row.id,
+      number: row.id,
+      name: row.name,
+      types: row.type2 ? [row.type1, row.type2] : [row.type1],
+      stats: {
+        hp: row.hp,
+        attack: row.atk,
+        defense: row.def,
+        spAttack: row.spAtk,
+        spDefense: row.spDef,
+        speed: row.speed
+      },
+      caught: !!row.caught
+    }));
+
+    res.json(formatted);
   });
 });
 
