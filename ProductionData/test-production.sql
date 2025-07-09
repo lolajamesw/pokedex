@@ -84,6 +84,8 @@ SELECT
     SELECT uID, name, tradeCount, username
         FROM User WHERE uID=5;
         
+	SELECT username, uID, name, tradeCount FROM User WHERE username LIKE '%User5%';
+        
 	-- Get MyPokemon details
     SELECT
       mp.instanceID AS id,
