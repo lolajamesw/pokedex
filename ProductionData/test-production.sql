@@ -13,7 +13,7 @@ SELECT
       EXISTS (
         SELECT 1 
         FROM MyPokemon mp 
-        WHERE mp.pID = p.pID AND mp.uID = 4
+        WHERE mp.pID = p.pID AND mp.uID = 50
       ) AS caught
     FROM Pokedex p
     LIMIT 10;
