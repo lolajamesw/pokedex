@@ -44,6 +44,15 @@ function PokemonCard({ pokemon }) {
             </h3>
             <div className="pokemon-badges">{pokemon.caught && <span className="badge badge-caught">Caught</span>}</div>
           </div>
+          <div className="pokemon-image">
+            <img
+              src={`https://www.pokemon.com/static-assets/content-assets/cms2/img/pokedex/detail/${pokemon.number.toString().padStart(3, "0")}.png`}
+              alt={pokemon.name}
+              width={200}
+              height={200}
+              className="rounded-lg bg-white/20 p-4"
+            />
+          </div>
           <div className="pokemon-types">
             {pokemon.types.map((type) => (
               <span key={type} className={`type-badge type-${type.toLowerCase()}`}>

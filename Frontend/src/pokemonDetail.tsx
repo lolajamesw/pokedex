@@ -172,9 +172,9 @@ const PokemonDetail = () => {
                   <h1 className="text-white text-4xl font-bold mb-2">{pokemon.name}</h1>
                   <div className="flex flex-wrap gap-2 justify-center md:justify-start mb-4">
                     {pokemon.types.map((type) => (
-                      <Badge key={type} className={`${getTypeColor(type)} text-white`}>
-                        {type}
-                      </Badge>
+                      <span key={type} className={`badge badge-type type-${type.toLowerCase()}`}>
+                          {type}
+                      </span>
                     ))}
                   </div>
                   <p className="text-white/90 max-w-2xl">{pokemon.description}</p>
@@ -259,7 +259,7 @@ const PokemonDetail = () => {
               <div className="card-content">
                 {evolutionType === "linear" && (
                   // Linear Evolution Layout
-                  <div className="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-8">
+                  <div className="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-6">
                     {evolutionaryLine.map((evo: any, index: number) => (
                       <div key={evo.id} className="flex items-center gap-4">
                         <Link
@@ -284,10 +284,10 @@ const PokemonDetail = () => {
                             </div>
                             <h3 className="font-semibold mt-2 text-foreground">{evo.name}</h3>
                           </div>
-                          {index < evolutionaryLine.length - 1 && (
+                        </Link>
+                        {index < evolutionaryLine.length - 1 && (
                             <ArrowRight className="h-6 w-6 text-muted-foreground hidden md:block" />
                           )}
-                        </Link>
                       </div>
                     ))}
                   </div>
@@ -456,7 +456,7 @@ const PokemonDetail = () => {
                 {evolutionType === "middle_branching" && (
                   // Middle Branching Evolution Layout (Gloom-style)
                   <div className="space-y-6">
-                    <div className="flex flex-col items-center gap-6">
+                    <div className="flex flex-col items-center gap-3">
                       {evolutionaryLine.map((stage: any, stageIndex: number) => (
                         <div key={stage.id} className="flex flex-col items-center">
                           <Link
@@ -482,14 +482,13 @@ const PokemonDetail = () => {
                               </div>
                               <h3 className="font-semibold mt-2 text-foreground">{stage.name}</h3>
                             </div>
-
-                            {/* Arrow to next stage (if not last and no branching) */}
-                            {stageIndex < evolutionaryLine.length - 1 && (
+                          </Link>
+                          {/* Arrow to next stage (if not last and no branching) */}
+                            {stageIndex < evolutionaryLine.length && (
                               <div className="mt-4">
                                 <ArrowRight className="h-6 w-6 text-muted-foreground rotate-90" />
                               </div>
                             )}
-                          </Link>
                         </div>
                       ))}
                       {/* Branching Evolutions (if any) */}
@@ -562,41 +561,43 @@ const PokemonDetail = () => {
           </TabsContent>
 
           <TabsContent value="moves" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+            <div className="card">
+              <div className="card-header">
+                <h3 className="card-title flex items-center gap-2">
                   <Swords className="h-5 w-5" />
                   Learnable Moves
-                </CardTitle>
-                <CardDescription>Moves that this Pokémon can learn through leveling up and TMs</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
+                </h3>
+                <p className="card-description">Moves that this Pokémon can learn through leveling up and TMs</p>
+              </div>
+              <div className="card-content">
+                <div className="moves-container space-y-3 max-h-96 overflow-y-auto">
                   {pokemon.attacks.map((move, index) => (
                     <div
                       key={index}
-                      className="flex flex-col sm:flex-row sm:items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors"
+                      className="flex flex-col sm:flex-row sm:items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors pokemon-card-hover"
                     >
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-1">
-                          <h4 className="font-medium">{move.name}</h4>
-                          <Badge className={`${getTypeColor(move.type)} text-white text-xs`}>{move.type}</Badge>
-                          <Badge variant="outline" className="text-xs">
-                            {move.category}
-                          </Badge>
+                          <h4 className="font-medium text-foreground">{move.name}</h4>
+                          <span className={`badge type-${move.type.toLowerCase()} text-white text-xs`}>{move.type}</span>
+                          <span className="badge badge-outline text-xs">{move.category}</span>
                         </div>
                         <div className="flex gap-4 text-sm text-muted-foreground">
-                          <span>Power: {move.stats.power}</span>
+                          <span>Power: {move.stats.power || "—"}</span>
                           <span>Accuracy: {move.stats.accuracy}%</span>
                           <span>PP: {move.stats.pp}</span>
                         </div>
                       </div>
-                      <p>{move.effect}</p>
+                      <div className="mt-2 sm:mt-0">
+                        <span className="badge badge-outline">
+                          {move.effect}
+                        </span>
+                      </div>
                     </div>
                   ))}
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           </TabsContent>
 
           {/* <TabsContent value="stats" className="space-y-4">

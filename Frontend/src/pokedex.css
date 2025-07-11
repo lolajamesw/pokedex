@@ -310,6 +310,14 @@
   padding-bottom: 0.75rem;
 }
 
+.pokemon-image {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  padding: 0;
+  align-items: center;
+}
+
 .pokemon-title-row {
   display: flex;
   align-items: center;

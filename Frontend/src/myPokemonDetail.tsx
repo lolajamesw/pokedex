@@ -5,7 +5,7 @@ import { Badge } from "./components/ui/badge"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./components/ui/card"
 import { Progress } from "./components/ui/progress"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./components/ui/tabs.tsx"
-import { ArrowRight, Shield, Swords, Footprints, Heart, Users, Star } from "lucide-react"
+import { ArrowRight, Shield, Swords, Footprints, Heart, X, Plus, Star } from "lucide-react"
 import "./pokedex.css"
 import "./details.css"
 
@@ -129,23 +129,89 @@ const MyPokeDetail = () => {
       }
     const evolutionType = getEvolutionType()
 
-    const getTypeColor = (type: string) => {
-        const colors: { [key: string]: string } = {
-            Fire: "bg-red-500",
-            Flying: "bg-blue-400",
-            Dragon: "bg-purple-600",
-            Special: "bg-pink-500",
-            Physical: "bg-orange-500",
-            Grass: "bg-green-600",
-            Electric: "bg-yellow-500",
-            Ground: "bg-yellow-700",
-            Ghost: "bg-purple-800",
-            Poison: "bg-purple-600",
-            Water: "bg-blue-700",
-            Psychic: "bg-pink-600",
-            Fairy: "bg-pink-300",
+    const learnMove = async (moveToLearn: AttackDetailType) => {
+      try {
+        const response = await fetch("http://localhost:8081/learnMove", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            instanceID: id,
+            aID: moveToLearn.id,
+          }),
+        });
+
+        if (response.ok) {
+          const overviewRes = await fetch(`http://localhost:8081/userPokemon/${id}`);
+          const overviewData = await overviewRes.json();
+
+          const attackRes = await fetch(`http://localhost:8081/pokemon/attacks/${pID}`);
+          const attackData = await attackRes.json();
+
+          const knownRes = await fetch(`http://localhost:8081/pokemon/knownAttacks/${id}`)
+          const knownData = await knownRes.json();
+
+          const combined: PokemonDetailType = {
+              ...overviewData,
+              learnableAttacks: attackData,
+              knownAttacks: knownData,
+          };
+
+          setPokemonDetail(combined);
+        } else {
+          const errMsg = await response.text();
+          console.error("Failed to update Pokémon moveset:", errMsg);
+
+          alert("Failed to update Pokémon moveset. See console for details.");
         }
-        return colors[type] || "bg-gray-500"
+      } catch (err) {
+        console.error("Error updating Pokémon moveset:", err);
+        alert("Something went wrong updating Pokémon moveset.");
+      }
+
+    }
+
+    const forgetMove = async (moveToForget: AttackDetailType) => {
+      try {
+        const response = await fetch("http://localhost:8081/unlearnMove", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            instanceID: id,
+            aID: moveToForget.id,
+          }),
+        });
+
+        if (response.ok) {
+          const overviewRes = await fetch(`http://localhost:8081/userPokemon/${id}`);
+          const overviewData = await overviewRes.json();
+
+          const attackRes = await fetch(`http://localhost:8081/pokemon/attacks/${pID}`);
+          const attackData = await attackRes.json();
+
+          const knownRes = await fetch(`http://localhost:8081/pokemon/knownAttacks/${id}`)
+          const knownData = await knownRes.json();
+
+          const combined: PokemonDetailType = {
+              ...overviewData,
+              learnableAttacks: attackData,
+              knownAttacks: knownData,
+          };
+
+          setPokemonDetail(combined);
+        } else {
+          const errMsg = await response.text();
+          console.error("Failed to update Pokémon moveset:", errMsg);
+
+          alert("Failed to update Pokémon moveset. See console for details.");
+        }
+      } catch (err) {
+        console.error("Error updating Pokémon moveset:", err);
+        alert("Something went wrong updating Pokémon moveset.");
+      }
+    }
+
+    const isMoveKnown = (move: AttackDetailType) => {
+      return pokemon.knownAttacks.some((knownMove) => knownMove.id === move.id)
     }
 
     const getStatColor = (stat: number) => {
@@ -242,17 +308,17 @@ const MyPokeDetail = () => {
                   {/* Status Text Indicators */}
                   <div className="flex flex-wrap gap-2 justify-center md:justify-start mb-3">
                     {pokemon.types.map((type) => (
-                      <Badge key={type} className={`${getTypeColor(type)} text-white`}>
-                        {type}
-                      </Badge>
+                      <span key={type} className={`badge badge-type type-${type.toLowerCase()}`}>
+                          {type}
+                      </span>
                     ))}
                     {pokemon.favourite && (
-                      <span className="badge bg-yellow-400/20 text-yellow-100 border border-yellow-300/30">
+                      <span className="badge badge-type bg-yellow-400/20 text-yellow-100 border border-yellow-300/30">
                         ⭐ Favorite
                       </span>
                     )}
                     {pokemon.onTeam && (
-                      <span className="badge bg-green-400/20 text-green-100 border border-green-300/30">
+                      <span className="badge badge-type bg-green-400/20 text-green-100 border border-green-300/30">
                         🌟 Team Member
                       </span>
                     )}
@@ -340,7 +406,7 @@ const MyPokeDetail = () => {
               <div className="card-content">
                 {evolutionType === "linear" && (
                   // Linear Evolution Layout
-                  <div className="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-8">
+                  <div className="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-6">
                     {evolutionaryLine.map((evo: any, index: number) => (
                       <div key={evo.id} className="flex items-center gap-4">
                         <Link
@@ -365,10 +431,10 @@ const MyPokeDetail = () => {
                             </div>
                             <h3 className="font-semibold mt-2 text-foreground">{evo.name}</h3>
                           </div>
-                          {index < evolutionaryLine.length - 1 && (
+                        </Link>
+                        {index < evolutionaryLine.length - 1 && (
                             <ArrowRight className="h-6 w-6 text-muted-foreground hidden md:block" />
                           )}
-                        </Link>
                       </div>
                     ))}
                   </div>
@@ -563,14 +629,13 @@ const MyPokeDetail = () => {
                               </div>
                               <h3 className="font-semibold mt-2 text-foreground">{stage.name}</h3>
                             </div>
-
-                            {/* Arrow to next stage (if not last and no branching) */}
+                          </Link>
+                          {/* Arrow to next stage (if not last and no branching) */}
                             {stageIndex < evolutionaryLine.length - 1 && (
                               <div className="mt-4">
                                 <ArrowRight className="h-6 w-6 text-muted-foreground rotate-90" />
                               </div>
                             )}
-                          </Link>
                         </div>
                       ))}
                       {/* Branching Evolutions (if any) */}
@@ -643,28 +708,32 @@ const MyPokeDetail = () => {
           </TabsContent>
 
           <TabsContent value="moves" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+            <div className="card">
+              <div className="card-header">
+                <CardTitle className="card-title flex items-center gap-2">
                   <Swords className="h-5 w-5" />
                   Current Moves
+                  <span className="text-sm font-normal text-muted-foreground">({pokemon.knownAttacks.length}/4)</span>
                 </CardTitle>
-                <CardDescription>Moves that this Pokémon has learned through leveling up and TMs</CardDescription>
-              </CardHeader>
-              <CardContent>
+                <p className="card-description">Moves that this Pokémon has learned through leveling up and TMs</p>
+              </div>
+              <div className="card-content">
+                {pokemon.knownAttacks.length === 0 ? (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <p>No moves learned yet. Learn moves from the section below.</p>
+                  </div>
+                ) : (
                 <div className="space-y-3">
                   {pokemon.knownAttacks.map((move, index) => (
                     <div
                       key={index}
-                      className="flex flex-col sm:flex-row sm:items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors"
+                      className="flex flex-col sm:flex-row sm:items-center justify-between p-3 border rounded-lg bg-green-50/50 border-green-200 hover:bg-muted/50"
                     >
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-1">
-                          <h4 className="font-medium">{move.name}</h4>
-                          <Badge className={`${getTypeColor(move.type)} text-white text-xs`}>{move.type}</Badge>
-                          <Badge variant="outline" className="text-xs">
-                            {move.category}
-                          </Badge>
+                          <h4 className="font-medium text-foreground">{move.name}</h4>
+                          <span className={`badge type-${move.type.toLowerCase()} text-white text-xs`}>{move.type}</span>
+                          <span className="badge badge-outline text-xs">{move.category}</span>
                         </div>
                         <div className="flex gap-4 text-sm text-muted-foreground">
                           <span>Power: {move.stats.power}</span>
@@ -672,12 +741,26 @@ const MyPokeDetail = () => {
                           <span>PP: {move.stats.pp}</span>
                         </div>
                       </div>
-                      <p>{move.effect}</p>
+                      <div className="mt-2 sm:mt-0 flex items-center gap-2">
+                        {move.effect !== "" ? 
+                          <span className="badge badge-outline">
+                              {move.effect}
+                            </span> : <span></span>
+                        }
+                        <button
+                          onClick={() => forgetMove(move)}
+                          className="p-1 rounded-full bg-red-100 text-red-600 hover:bg-red-200 transition-colors"
+                          title="Forget this move"
+                        >
+                          <X className="h-4 w-4" />
+                        </button>
+                      </div>
                     </div>
                   ))}
                 </div>
-              </CardContent>
-            </Card>
+                )}
+              </div>
+            </div>
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -691,15 +774,15 @@ const MyPokeDetail = () => {
                   {pokemon.learnableAttacks.map((move, index) => (
                     <div
                       key={index}
-                      className="flex flex-col sm:flex-row sm:items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors"
+                      className={`flex flex-col sm:flex-row sm:items-center justify-between p-3 border rounded-lg
+                      hover:bg-muted/50 transition-colors pokemon-card-hover ${isMoveKnown(move) ? "bg-green-50/50 border-green-200" : "hover:bg-muted/50 border-border"}`}
                     >
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-1">
-                          <h4 className="font-medium">{move.name}</h4>
-                          <Badge className={`${getTypeColor(move.type)} text-white text-xs`}>{move.type}</Badge>
-                          <Badge variant="outline" className="text-xs">
-                            {move.category}
-                          </Badge>
+                          <h4 className="font-medium text-foreground">{move.name}</h4>
+                          <span className={`badge type-${move.type.toLowerCase()} text-white text-xs`}>{move.type}</span>
+                          <span className="badge badge-outline text-xs">{move.category}</span>
+                          {isMoveKnown(move) && <span className="badge bg-green-100 text-green-800 text-xs">Known</span>}
                         </div>
                         <div className="flex gap-4 text-sm text-muted-foreground">
                           <span>Power: {move.stats.power}</span>
@@ -707,7 +790,41 @@ const MyPokeDetail = () => {
                           <span>PP: {move.stats.pp}</span>
                         </div>
                       </div>
-                      <p>{move.effect}</p>
+                      <div className="mt-2 sm:mt-0 flex items-center gap-2">
+                        {move.effect !== "" ? 
+                          <span className="badge badge-outline">
+                              {move.effect}
+                            </span> : <span></span>
+                        }
+                        {isMoveKnown(move) ? (
+                          <button
+                            onClick={() => forgetMove(move)}
+                            className="p-1 rounded-full bg-red-100 text-red-600 hover:bg-red-200 transition-colors"
+                            title="Forget this move"
+                          >
+                            <X className="h-4 w-4" />
+                          </button>
+                        ) : (
+                          <button
+                            onClick={() => learnMove(move)}
+                            disabled={pokemon.knownAttacks.length>=4}
+                            className={`p-1 rounded-full transition-colors ${
+                              pokemon.knownAttacks.length<4
+                                ? "bg-green-100 text-green-600 hover:bg-green-200"
+                                : "bg-gray-100 text-gray-400 cursor-not-allowed"
+                            }`}
+                            title={
+                              pokemon.knownAttacks.length < 4
+                                ? "Learn this move"
+                                : pokemon.knownAttacks.length >= 4
+                                  ? "Cannot learn more moves (4/4 slots full)"
+                                  : "Move already known"
+                            }
+                          >
+                            <Plus className="h-4 w-4" />
+                          </button>
+                        )}
+                      </div>
                     </div>
                   ))}
                 </div>

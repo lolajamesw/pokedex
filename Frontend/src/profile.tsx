@@ -409,6 +409,8 @@ export default function Profile() {
         )}
       </div>
 
+      
+
       {/* Pokemon Showcase Selection Modal */}
       <PokemonSelectionModal
         isOpen={isShowcaseModalOpen}
