@@ -5,6 +5,7 @@
 }
 
 .pokedex-container {
+  background-color: 253 247 240;
   margin: 0 1rem;
   padding: 1.5rem 0;
   display: flex;

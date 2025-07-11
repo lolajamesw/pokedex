@@ -149,88 +149,90 @@ export default function Pokedex() {
   const allTypes = Array.from(new Set(pokemonList.flatMap((p) => p.types))).sort()
 
   return (
-    <div className="pokedex-container">
-      <div className="pokedex-header">
-        <h1 className="pokedex-title">Pokédex</h1>
-        <p className="pokedex-subtitle">Browse and manage your Pokémon collection</p>
-      </div>
-
-      {/* Filters and Search */}
-      <div className="filters-card">
-        <div className="filters-header">
-          <h3 className="filters-title">Filters & Search</h3>
+    <div className=" bg-gradient-to-br from-orange-50 to-red-50">
+      <div className="pokedex-container ">
+        <div className="pokedex-header">
+          <h1 className="pokedex-title">Pokédex</h1>
+          <p className="pokedex-subtitle">Browse and manage your Pokémon collection</p>
         </div>
-        <div className="filters-content">
-          <div className="search-row">
-            <div className="search-input-container">
-              <Search className="search-icon" />
-              <input
-                placeholder="Search by name or number..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="search-input"
-              />
-            </div>
-            <select value={filterType} onChange={(e) => setFilterType(e.target.value)} className="type-select">
-              <option value="all">All Types</option>
-              {allTypes.map((type) => (
-                <option key={type} value={type}>
-                  {type}
-                </option>
-              ))}
-            </select>
-          </div>
 
-          <div className="controls-row">
-            <div className="sort-controls">
-              <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} className="sort-select">
-                <option value="number">Number</option>
-                <option value="name">Name</option>
-                <option value="hp">HP</option>
-                <option value="attack">Attack</option>
-                <option value="defense">Defense</option>
-                <option value="spAttack">Sp. Attack</option>
-                <option value="spDefense">Sp. Defense</option>
-                <option value="speed">Speed</option>
+        {/* Filters and Search */}
+        <div className="filters-card">
+          <div className="filters-header">
+            <h3 className="filters-title">Filters & Search</h3>
+          </div>
+          <div className="filters-content">
+            <div className="search-row">
+              <div className="search-input-container">
+                <Search className="search-icon" />
+                <input
+                  placeholder="Search by name or number..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="search-input"
+                />
+              </div>
+              <select value={filterType} onChange={(e) => setFilterType(e.target.value)} className="type-select">
+                <option value="all">All Types</option>
+                {allTypes.map((type) => (
+                  <option key={type} value={type}>
+                    {type}
+                  </option>
+                ))}
               </select>
-              <button onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")} className="sort-button">
-                {sortOrder === "asc" ? <SortAsc className="sort-icon" /> : <SortDesc className="sort-icon" />}
-              </button>
             </div>
 
-            <div className="checkbox-container">
-              <input
-                type="checkbox"
-                id="caught-only"
-                checked={showCaughtOnly}
-                onChange={(e) => setShowCaughtOnly(e.target.checked)}
-                className="checkbox"
-              />
-              <label htmlFor="caught-only" className="checkbox-label">
-                Show caught only
-              </label>
+            <div className="controls-row">
+              <div className="sort-controls">
+                <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} className="sort-select">
+                  <option value="number">Number</option>
+                  <option value="name">Name</option>
+                  <option value="hp">HP</option>
+                  <option value="attack">Attack</option>
+                  <option value="defense">Defense</option>
+                  <option value="spAttack">Sp. Attack</option>
+                  <option value="spDefense">Sp. Defense</option>
+                  <option value="speed">Speed</option>
+                </select>
+                <button onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")} className="sort-button">
+                  {sortOrder === "asc" ? <SortAsc className="sort-icon" /> : <SortDesc className="sort-icon" />}
+                </button>
+              </div>
+
+              <div className="checkbox-container">
+                <input
+                  type="checkbox"
+                  id="caught-only"
+                  checked={showCaughtOnly}
+                  onChange={(e) => setShowCaughtOnly(e.target.checked)}
+                  className="checkbox"
+                />
+                <label htmlFor="caught-only" className="checkbox-label">
+                  Show caught only
+                </label>
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Results Count */}
-      <div className="results-count">
-        Showing {filteredAndSortedPokemon.length} of {pokemonList.length} Pokémon
-      </div>
-
-      {/* Pokemon Grid */}
-      <div className="pokemon-grid">
-        {filteredAndSortedPokemon.map((pokemon) => (
-          <PokemonCard key={pokemon.id} pokemon={pokemon} />
-        ))}
-      </div>
-
-      {filteredAndSortedPokemon.length === 0 && (
-        <div className="no-results">
-          <p>No Pokémon found matching your criteria.</p>
+        {/* Results Count */}
+        <div className="results-count">
+          Showing {filteredAndSortedPokemon.length} of {pokemonList.length} Pokémon
         </div>
-      )}
+
+        {/* Pokemon Grid */}
+        <div className="pokemon-grid">
+          {filteredAndSortedPokemon.map((pokemon) => (
+            <PokemonCard key={pokemon.id} pokemon={pokemon} />
+          ))}
+        </div>
+
+        {filteredAndSortedPokemon.length === 0 && (
+          <div className="no-results">
+            <p>No Pokémon found matching your criteria.</p>
+          </div>
+        )}
+      </div>
     </div>
   )
 }

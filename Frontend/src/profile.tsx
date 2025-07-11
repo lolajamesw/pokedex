@@ -52,6 +52,13 @@ function PokemonLink({ pokemon, isSelected, onSelect, showSelectButton }) {
       >
         <div className="showcase-card-header">
           <div className="showcase-level">Lv. {pokemon.level}</div>
+          <div className="flex flex-wrap gap-1 justify-center md:justify-start mb-3">
+            {pokemon.types.map((type) => (
+              <span key={type} className={`badge badge-type type-${type.toLowerCase()}  text-white`}>
+                  {type}
+              </span>
+            ))}
+          </div>
           {showSelectButton && "id" in pokemon && (
             <button
               className={`select-button ${isSelected ? "select-button-selected" : ""}`}
@@ -87,6 +94,13 @@ function PokemonCard({ pokemon, isSelected, onSelect, showSelectButton }) {
       <div className="showcase-card-content">
         <h3 className="showcase-nickname">{pokemon.nickname}</h3>
         <p className="showcase-species">{pokemon.name}</p>
+        <div className="flex flex-wrap gap-1 justify-center">
+            {pokemon.types.map((type) => (
+              <span key={type} className={`badge badge-type type-${type.toLowerCase()}  text-white`}>
+                  {type}
+              </span>
+            ))}
+          </div>
       </div>      
     </div>
   )
@@ -101,7 +115,7 @@ const getEffectivenessColor = (value) => {
 }
 
 const getEffectivenessLabel = (value) => {
-  if (value >= 1.5) return "Excellent"
+  if (value >= 1.8) return "Excellent"
   if (value >= 1.2) return "Good"
   if (value <= 0.5) return "Poor"
   if (value <= 0.8) return "Weak"
@@ -263,14 +277,8 @@ export default function Profile() {
         body: JSON.stringify({instanceIDs: selectedPokemon.map((p)=>(p.id)), user: 4}),
       });
       // Convert UserPokemon to ShowcasedPokemon format
-      const newShowcase = selectedPokemon.map((pokemon) => ({
-        id: pokemon.id,
-        number: pokemon.number,
-        nickname: pokemon.nickname,
-        level: pokemon.level,
-        name: pokemon.name,
-      }))
-      setShowcasedPokemon(newShowcase)
+
+      setShowcasedPokemon(selectedPokemon);
 
     } catch (err) {
       console.error("Error showcasing Pokémon: ", err);
@@ -289,15 +297,9 @@ export default function Profile() {
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify({instanceIDs: selectedPokemon.map((p)=>(p.id)), user: 4}),
       });
-      // Convert UserPokemon to ShowcasedPokemon format
-      const newTeam = selectedPokemon.map((pokemon) => ({
-        id: pokemon.id,
-        number: pokemon.number,
-        nickname: pokemon.nickname,
-        level: pokemon.level,
-        name: pokemon.name,
-      }))
-      setMyTeam(newTeam)
+
+      setMyTeam(selectedPokemon);
+
       const teamSum = await fetch(`http://localhost:8081/teamSummary/4`);
       const teamSumData = await teamSum.json();
       setTeamSummary(teamSumData);
@@ -505,7 +507,7 @@ export default function Profile() {
               const getDefensiveLabel = (value) => {
                 if (value <= 0.5) return "Vulnerable"
                 if (value <= 0.8) return "Weak"
-                if (value >= 1.5) return "Excellent"
+                if (value >= 1.8) return "Excellent"
                 if (value >= 1.2) return "Good"
                 return "Average"
               }
