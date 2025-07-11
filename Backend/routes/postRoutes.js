@@ -174,16 +174,27 @@ module.exports = (app, db) => {
         database: process.env.DB_NAME
         });
 
-        await dbPromise.query(
-            `UPDATE MyPokemon
-            SET onteam=1
-            WHERE instanceID IN (${instanceIDs.toString()}) AND uID=${user};`
-        );
-        await dbPromise.query(
-            `UPDATE MyPokemon
-            SET onteam=0
-            WHERE instanceID NOT IN (${instanceIDs.toString()}) AND uID=${user};`
-        )
+        if (instanceIDs.length>0) {
+            await dbPromise.query(
+                `UPDATE MyPokemon
+                SET onteam=0
+                WHERE instanceID NOT IN (${instanceIDs.toString()}) AND uID=${user};`
+            );
+            await dbPromise.query(
+                `UPDATE MyPokemon
+                SET onteam=1
+                WHERE instanceID IN (${instanceIDs.toString()}) AND uID=${user};`
+            );
+        }
+        else {
+            await dbPromise.query(
+                `UPDATE MyPokemon
+                SET onteam=0
+                WHERE uID=${user};`
+            );
+        }
+
+        
 
         console.log("Marking successful.");
         await dbPromise.end();

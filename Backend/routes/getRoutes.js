@@ -317,7 +317,7 @@ module.exports = (app, db) => {
 
         SELECT atk.type 
         , SUM(atk.effect)/(SELECT COUNT(*) FROM MyPokemon WHERE uID=${uID} AND onteam=1) as atkSum
-        , (SELECT COUNT(*) FROM MyPokemon WHERE uID=${uID} AND onteam=1)/SUM(def.effect) as defSum FROM (
+        , SUM(def.effect)/(SELECT COUNT(*) FROM MyPokemon WHERE uID=${uID} AND onteam=1) as defSum FROM (
         SELECT type1 type, effect*(
             SELECT COUNT(*) from Pokedex p WHERE pID IN (
             SELECT pID FROM MyPokemon WHERE uID=${uID} AND onteam=1
@@ -377,8 +377,8 @@ module.exports = (app, db) => {
 
         const formatted = results.map((row) => ({
         type: row.type,
-        atkSum: row.atkSum,
-        defSum: row.defSum
+        atkAvg: parseFloat(row.atkSum),
+        defAvg: parseFloat(row.defSum)===0 ? 100 : 1/row.defSum
         }));
 
         return res.json(formatted);
