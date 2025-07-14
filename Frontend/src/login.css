@@ -1,3 +1,9 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
+:root{
+  font-family: "Poppins";
+}
+
 .auth-container {
     display: flex;
     flex-direction: column;
@@ -7,15 +13,18 @@
   border: 1px solid #ddd;
   border-radius: 8px;
   text-align: left;
-  font-family: sans-serif;
 }
 
-.auth-form {
-    margin-right: 20px;
+.auth-container h2 {
+    text-align: center;
+    margin-bottom: 24px;
+    font-weight: bold;
+    font-size: 1.5rem;
+    font-family: "Poppins", sans-serif;
 }
 
 .input-group label {
-  font-weight: bold;
+  font-weight: 400;
   margin-bottom: 4px;
   display: block;
 }
@@ -23,7 +32,7 @@
 .input-group input {
   padding: 8px;
   border: 1px solid #ccc;
-  border-radius: 4px;
+  border-radius: 8px;
   width: 100%;
   margin-bottom: 1rem;
 }
@@ -37,6 +46,7 @@ button[type="submit"] {
   border-radius: 4px;
   cursor: pointer;
   transition: all 0.2s;
+  margin-block: 10px;
 }
 
 button[type="submit"]:hover {
@@ -47,4 +57,5 @@ button[type="submit"]:hover {
 p {
   margin-top: 16px;
   text-align: center;
+  text-decoration: underline;
 }
