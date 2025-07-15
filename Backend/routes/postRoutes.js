@@ -229,6 +229,78 @@ module.exports = (app, db) => {
         } catch (err) {
         console.error("Error marking Pokémon:", err);
         res.status(500).send("Server error marking Pokémon.");
-    }})
+    }});
+
+    app.post("/userLogin", async (req, res) => {
+        const { username, password } = req.body;
+        console.log("Incoming request to /userLogin with:", req.body);
+
+        try {
+            const dbPromise = await mysqlPromise.createConnection({
+                host: process.env.DB_HOST,
+                port: process.env.DB_PORT,
+                user: process.env.DB_USER,
+                password: process.env.DB_PASSWORD,
+                database: process.env.DB_NAME
+            });
+
+            const [rows] = await dbPromise.query(
+                "SELECT * FROM User WHERE username= ? AND password= ?",
+                [username, password]
+            );
+
+            console.log("Login query result:", rows);
+
+            await dbPromise.end();
+
+            if (rows.length === 0) {
+                return res.status(401).send("Invalid username or password.");
+            }
+
+            console.log("Login successful for user:", username);
+            res.status(200).json({ message: "Login successful", user: rows[0] });
+        } catch (err) {
+            console.error("Error during user login:", err);
+            res.status(500).send("Server error during login.");
+        }
+    });
+
+    app.post("/createAccount", async (req, res) => {
+    const { name, username, password } = req.body;
+    console.log("Incoming request to /createAccount with:", req.body);
+
+    try {
+        const db = await mysqlPromise.createConnection({
+        host: process.env.DB_HOST,
+        port: process.env.DB_PORT,
+        user: process.env.DB_USER,
+        password: process.env.DB_PASSWORD,
+        database: process.env.DB_NAME
+        });
+
+        const [result] = await db.execute(
+        `INSERT INTO User (name, tradeCount, username, password)
+        VALUES (?, 0, ?, ?)`,
+        [name, username, password]
+        );
+
+        const newUser = {
+        uID: result.insertId,
+        name: name,
+        username: username,
+        };
+
+        await db.end();
+        res.status(201).json({ user: newUser });
+    } catch (err) {
+        console.error("Error creating account:", err);
+
+        if (err.code === 'ER_DUP_ENTRY') {
+        res.status(409).send("Username or password already exists.");
+        } else {
+        res.status(500).send("Server error while creating account.");
+        }
+    }
+    });
 
 }

@@ -300,7 +300,7 @@ export default function Profile() {
 
       setMyTeam(selectedPokemon);
 
-      const teamSum = await fetch(`http://localhost:8081/teamSummary/4`);
+      const teamSum = await fetch(`http://localhost:8081/teamSummary/${localStorage.getItem("uID")}`);
       const teamSumData = await teamSum.json();
       setTeamSummary(teamSumData);
 
