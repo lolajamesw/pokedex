@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useRef, useEffect } from "react"
-import { useLocation, Link } from "react-router-dom"
+import { useLocation, Link, useNavigate } from "react-router-dom"
 import { Menu, User, LogOut, BookOpen, ShoppingCart } from "lucide-react"
 import "./navbar.css"
 
@@ -12,9 +12,10 @@ const navigationItems = [
 ]
 
 export default function Navbar({ currentPage, setCurrentPage }) {
-  const [user, setUser] = useState({id: 4, tradeCount: 0, displayName: "", username: "" })
+  const [user, setUser] = useState({id: localStorage.getItem("uID"), tradeCount: 0, displayName: "", username: "" })
+  const navigate = useNavigate();
   useEffect(() => {
-    fetch("http://localhost:8081/user/4")
+    fetch("http://localhost:8081/user/" + localStorage.getItem("uID"))
       .then((res) => res.json())
       .then((data) => setUser(data))
       .catch((err) => console.error("Failed to fetch user:", err));
@@ -82,7 +83,14 @@ export default function Navbar({ currentPage, setCurrentPage }) {
                 <User className="dropdown-icon" />
                 <span>Profile</span>
               </Link>
-              <button className="dropdown-item">
+              <button 
+                className="dropdown-item" 
+                onClick={() => {
+                  localStorage.removeItem("uID");
+                  setShowProfileDropdown(false);
+                  navigate("/login");
+                }}
+              >
                 <LogOut className="dropdown-icon" />
                 <span>Log out</span>
               </button>
