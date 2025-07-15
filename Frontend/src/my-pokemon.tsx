@@ -97,7 +97,7 @@ export default function MyPokedex() {
   const [newLevel, setNewLevel] = useState("");
   const [bannerMessage, setBannerMessage] = useState("");
   useEffect(() => {
-    fetch("http://localhost:8081/userPokemon")
+    fetch(`http://localhost:8081/userPokemon?uID=${localStorage.getItem("uID")}`)
       .then((res) => res.json())
       .then((data) => setPokemonList(data))
       .catch((err) => console.error("Failed to fetch Pokémon:", err));
@@ -179,7 +179,7 @@ export default function MyPokedex() {
           pokemonName: newPokemonName,
           nickname: newNickname,
           level: parseInt(newLevel),
-          uID: 4, // Replace 4 with actual logged-in user ID
+          uID: localStorage.getItem("uID")
         }),
       });
 
@@ -195,7 +195,7 @@ export default function MyPokedex() {
         setNewNickname("");
         setNewLevel("");
 
-        const updated = await fetch("http://localhost:8081/userPokemon").then((r) => r.json());
+        const updated = await fetch(`http://localhost:8081/userPokemon?uID=${localStorage.getItem("uID")}`).then((r) => r.json());
         setPokemonList(updated);
       } else {
         const errMsg = await response.text();

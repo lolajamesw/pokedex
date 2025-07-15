@@ -158,7 +158,7 @@ function PokemonSelectionModal({ isOpen, onClose, userPokemon, selectedPokemon, 
 
 export default function Profile() {
   const [pokemonList, setPokemonList] = useState<PokemonDetailType[]>([]);
-  const [user, setUser] = useState({id: 4, tradeCount: 0, displayName: "", username: "" })
+  const [user, setUser] = useState({id: localStorage.getItem("uID"), tradeCount: 0, displayName: "", username: "" })
   const [isEditingName, setIsEditingName] = useState(false)
   const [editedDisplayName, setEditedDisplayName] = useState(user.displayName)
   const [isShowcaseModalOpen, setIsShowcaseModalOpen] = useState(false)
@@ -167,14 +167,14 @@ export default function Profile() {
   const [myTeam, setMyTeam] = useState<PokemonDetailType[]>([])
 
   useEffect(() => {
-    fetch("http://localhost:8081/user/4")
+    fetch("http://localhost:8081/user/" + localStorage.getItem("uID"))
       .then((res) => res.json())
       .then((data) => setUser(data))
       .catch((err) => console.error("Failed to fetch user: ", err));
   }, [])
 
   useEffect(() => {
-      fetch("http://localhost:8081/userPokemon")
+      fetch(`http://localhost:8081/userPokemon?uID=${localStorage.getItem("uID")}`)
         .then((res) => res.json())
         .then((data) => setPokemonList(data))
         .catch((err) => console.error("Failed to fetch Pokémon:", err));
@@ -199,7 +199,7 @@ export default function Profile() {
       const response = await fetch("http://localhost:8081/updateUserDisplayName", {
         method: "POST",
         headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({uID: 4, name: editedDisplayName})
+        body: JSON.stringify({uID: localStorage.getItem("uID"), name: editedDisplayName})
       })
     } catch (err) {
       console.error("Error updating user's name: ", err);
@@ -221,7 +221,7 @@ export default function Profile() {
       const response = await fetch("http://localhost:8081/setShowcased", {
         method: "POST",
         headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({instanceIDs: selectedPokemon.map((p)=>(p.id)), user: 4}),
+        body: JSON.stringify({instanceIDs: selectedPokemon.map((p)=>(p.id)), user: localStorage.getItem("uID")}),
       });
       // Convert UserPokemon to ShowcasedPokemon format
       const newShowcase = selectedPokemon.map((pokemon) => ({
@@ -248,7 +248,7 @@ export default function Profile() {
       const response = await fetch("http://localhost:8081/setTeam", {
         method: "POST",
         headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({instanceIDs: selectedPokemon.map((p)=>(p.id)), user: 4}),
+        body: JSON.stringify({instanceIDs: selectedPokemon.map((p)=>(p.id)), user: localStorage.getItem("uID")}),
       });
       // Convert UserPokemon to ShowcasedPokemon format
       const newTeam = selectedPokemon.map((pokemon) => ({
