@@ -44,6 +44,15 @@ function PokemonCard({ pokemon }) {
             </h3>
             <div className="pokemon-badges">{pokemon.caught && <span className="badge badge-caught">Caught</span>}</div>
           </div>
+          <div className="pokemon-image">
+            <img
+              src={`https://www.pokemon.com/static-assets/content-assets/cms2/img/pokedex/detail/${pokemon.number.toString().padStart(3, "0")}.png`}
+              alt={pokemon.name}
+              width={200}
+              height={200}
+              className="rounded-lg bg-white/20 p-4"
+            />
+          </div>
           <div className="pokemon-types">
             {pokemon.types.map((type) => (
               <span key={type} className={`type-badge type-${type.toLowerCase()}`}>
@@ -210,146 +219,148 @@ export default function MyPokedex() {
   };
 
   return (
-    <div className="pokedex-container">
-      {bannerMessage && (
-        <div className="banner">
-          <p>{bannerMessage}</p>
-        </div>
-      )}
-      <div className="pokedex-header">
-        <h1 className="pokedex-title">My Pokédex</h1>
-        <p className="pokedex-subtitle">Browse and manage your Pokémon collection</p>
-      </div>
-
-      {/* Filters and Search */}
-      <div className="filters-card">
-        <div className="filters-header">
-          <h3 className="filters-title">Filters & Search</h3>
-        </div>
-        <div className="filters-content">
-          <div className="search-row">
-            <div className="search-input-container">
-              <Search className="search-icon" />
-              <input
-                placeholder="Search by name or number..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="search-input"
-              />
-            </div>
-            <select value={filterType} onChange={(e) => setFilterType(e.target.value)} className="type-select">
-              <option value="all">All Types</option>
-              {allTypes.map((type) => (
-                <option key={type} value={type}>
-                  {type}
-                </option>
-              ))}
-            </select>
+    <div className=" bg-gradient-to-br from-orange-50 to-red-50">
+      <div className="pokedex-container">
+        {bannerMessage && (
+          <div className="banner">
+            <p>{bannerMessage}</p>
           </div>
+        )}
+        <div className="pokedex-header">
+          <h1 className="pokedex-title">My Pokédex</h1>
+          <p className="pokedex-subtitle">Browse and manage your Pokémon collection</p>
+        </div>
 
-          <div className="controls-row">
-            <div className="sort-controls">
-              <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} className="sort-select">
-                <option value="number">Number</option>
-                <option value="name">Name</option>
-                <option value="hp">HP</option>
-                <option value="attack">Attack</option>
-                <option value="defense">Defense</option>
-                <option value="spAttack">Sp. Attack</option>
-                <option value="spDefense">Sp. Defense</option>
-                <option value="speed">Speed</option>
+        {/* Filters and Search */}
+        <div className="filters-card">
+          <div className="filters-header">
+            <h3 className="filters-title">Filters & Search</h3>
+          </div>
+          <div className="filters-content">
+            <div className="search-row">
+              <div className="search-input-container">
+                <Search className="search-icon" />
+                <input
+                  placeholder="Search by name or number..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="search-input"
+                />
+              </div>
+              <select value={filterType} onChange={(e) => setFilterType(e.target.value)} className="type-select">
+                <option value="all">All Types</option>
+                {allTypes.map((type) => (
+                  <option key={type} value={type}>
+                    {type}
+                  </option>
+                ))}
               </select>
-              <button onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")} className="sort-button">
-                {sortOrder === "asc" ? <SortAsc className="sort-icon" /> : <SortDesc className="sort-icon" />}
-              </button>
             </div>
-          </div>
-        </div>
-      </div>
 
-      {/* Results Count */}
-      <div className="results-container">
-        <div className="results-count">
-          Showing {filteredAndSortedPokemon.length} of {pokemonList.length} Pokémon
-        </div>
-
-        <div>
-          <button onClick={() => setIsModalOpen(true)} className="enter-pokemon-button">
-            + Add Pokemon
-          </button>
-
-          {isModalOpen && (
-            <div className="modal-overlay">
-              <div className="modal-content large">
-                <div className="modal-header">
-                  <h2>Add New Pokémon</h2>
-                  <button className="close-button" onClick={() => setIsModalOpen(false)}>
-                    &times;
-                  </button>
-                </div>
-
-                <form className="pokemon-form" onSubmit={handleAddPokemon}>
-                  <div className="input-row">
-                    <div className="input-group">
-                      <label>Pokemon</label>
-                      <input
-                        type="text"
-                        placeholder="e.g., Pikachu"
-                        value={newPokemonName}
-                        onChange={(e) => setNewPokemonName(e.target.value)}
-                        required
-                      />
-                    </div>
-                    <div className="input-group">
-                      <label>Nickname</label>
-                      <input
-                        type="text"
-                        placeholder="e.g., Sparky"
-                        value={newNickname}
-                        onChange={(e) => setNewNickname(e.target.value)}
-                      />
-                    </div>
-                    <div className="input-group">
-                      <label>Level</label>
-                      <input
-                        type="number"
-                        placeholder="e.g., 25"
-                        min={1}
-                        max={100}
-                        value={newLevel}
-                        onChange={(e) => setNewLevel(e.target.value)}
-                        required
-                      />
-                    </div>
-                  </div>
-
-                  <div className="modal-actions">
-                    <button type="button" className="cancel-button" onClick={() => setIsModalOpen(false)}>
-                      Cancel
-                    </button>
-                    <button type="submit" className="add-button">
-                      Add Pokémon
-                    </button>
-                  </div>
-                </form>
+            <div className="controls-row">
+              <div className="sort-controls">
+                <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} className="sort-select">
+                  <option value="number">Number</option>
+                  <option value="name">Name</option>
+                  <option value="hp">HP</option>
+                  <option value="attack">Attack</option>
+                  <option value="defense">Defense</option>
+                  <option value="spAttack">Sp. Attack</option>
+                  <option value="spDefense">Sp. Defense</option>
+                  <option value="speed">Speed</option>
+                </select>
+                <button onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")} className="sort-button">
+                  {sortOrder === "asc" ? <SortAsc className="sort-icon" /> : <SortDesc className="sort-icon" />}
+                </button>
               </div>
             </div>
-          )}
+          </div>
         </div>
-      </div>
 
-      {/* Pokemon Grid */}
-      <div className="pokemon-grid">
-        {filteredAndSortedPokemon.map((pokemon) => (
-          <PokemonCard key={pokemon.id} pokemon={pokemon} />
-        ))}
-      </div>
+        {/* Results Count */}
+        <div className="results-container">
+          <div className="results-count">
+            Showing {filteredAndSortedPokemon.length} of {pokemonList.length} Pokémon
+          </div>
 
-      {filteredAndSortedPokemon.length === 0 && (
-        <div className="no-results">
-          <p>No Pokémon found matching your criteria.</p>
+          <div>
+            <button onClick={() => setIsModalOpen(true)} className="enter-pokemon-button">
+              + Add Pokemon
+            </button>
+
+            {isModalOpen && (
+              <div className="modal-overlay">
+                <div className="modal-content large">
+                  <div className="modal-header">
+                    <h2>Add New Pokémon</h2>
+                    <button className="close-button" onClick={() => setIsModalOpen(false)}>
+                      &times;
+                    </button>
+                  </div>
+
+                  <form className="pokemon-form" onSubmit={handleAddPokemon}>
+                    <div className="input-row">
+                      <div className="input-group">
+                        <label>Pokemon</label>
+                        <input
+                          type="text"
+                          placeholder="e.g., Pikachu"
+                          value={newPokemonName}
+                          onChange={(e) => setNewPokemonName(e.target.value)}
+                          required
+                        />
+                      </div>
+                      <div className="input-group">
+                        <label>Nickname</label>
+                        <input
+                          type="text"
+                          placeholder="e.g., Sparky"
+                          value={newNickname}
+                          onChange={(e) => setNewNickname(e.target.value)}
+                        />
+                      </div>
+                      <div className="input-group">
+                        <label>Level</label>
+                        <input
+                          type="number"
+                          placeholder="e.g., 25"
+                          min={1}
+                          max={100}
+                          value={newLevel}
+                          onChange={(e) => setNewLevel(e.target.value)}
+                          required
+                        />
+                      </div>
+                    </div>
+
+                    <div className="modal-actions">
+                      <button type="button" className="cancel-button" onClick={() => setIsModalOpen(false)}>
+                        Cancel
+                      </button>
+                      <button type="submit" className="add-button">
+                        Add Pokémon
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
-      )}
+
+        {/* Pokemon Grid */}
+        <div className="pokemon-grid">
+          {filteredAndSortedPokemon.map((pokemon) => (
+            <PokemonCard key={pokemon.id} pokemon={pokemon} />
+          ))}
+        </div>
+
+        {filteredAndSortedPokemon.length === 0 && (
+          <div className="no-results">
+            <p>No Pokémon found matching your criteria.</p>
+          </div>
+        )}
+      </div>
     </div>
   )
 }

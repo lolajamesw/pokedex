@@ -90,7 +90,7 @@
     --color-accent-foreground: 248 250 252;
     --color-destructive: 220 38 38;
     --color-destructive-foreground: 248 250 252;
-    --color-border: 222 222 222;
+    --color-border: 200 200 200;
     --color-input: 30 41 59;
     --color-ring: 99 102 241;
   }
@@ -208,18 +208,38 @@
   .badge-default {
     background-color: rgb(var(--color-primary));
     color: rgb(var(--color-primary-foreground));
-    border-color: transparent;
+    /* border-color: transparent; */
   }
 
   .badge-secondary {
     background-color: rgb(var(--color-secondary));
     color: rgb(var(--color-secondary-foreground));
-    border-color: transparent;
+    /* border-color: transparent; */
   }
 
   .badge-outline {
     color: rgb(var(--color-foreground));
-    border-color: rgb(var(--color-border));
+    border-color: rgb(var(--color-border)) !important;
+  }
+
+  .badge-type {
+    /* color: rgb(var(--color-foreground)); */
+    border-color: rgba(248, 250, 252, .33) !important;
+  }
+
+  .badge-tm {
+    color: rgb(var(--color-foreground));
+    /* background-color: #C0C0C0 !important; */
+    background: linear-gradient(
+      45deg,
+      #999 5%,
+      #eee 10%,
+      #ccc 30%,
+      #ddd 50%,
+      #ccc 70%,
+      #ddd 80%,
+      #999 95%
+  ) !important;
   }
 
   /* Tab components */
