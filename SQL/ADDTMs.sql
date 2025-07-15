@@ -1,4 +1,4 @@
-"Use this website to update pokemon moveset https://www.kaggle.com/datasets/csobral/pokemon-gen-vii-pokedex"
+-- Use this website to update pokemon moveset https://www.kaggle.com/datasets/csobral/pokemon-gen-vii-pokedex
 
 ALTER TABLE Attacks
 ADD tm bit;
