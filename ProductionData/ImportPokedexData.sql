@@ -24,8 +24,8 @@ CREATE TABLE tempPokedex (
 CREATE TRIGGER insertPokedex
 AFTER INSERT ON tempPokedex
 FOR EACH ROW
-	INSERT INTO Pokedex (name, type1, type2, hp, atk, def, spAtk, spDef, speed, legendary)
-    VALUES(NEW.name, NEW.type1, NEW.type2, NEW.hp, NEW.atk, NEW.def, NEW.spAtk, NEW.spDef, NEW.speed, 
+	INSERT INTO Pokedex (pID, name, type1, type2, hp, atk, def, spAtk, spDef, speed, legendary)
+    VALUES(NEW.pID, NEW.name, NEW.type1, NEW.type2, NEW.hp, NEW.atk, NEW.def, NEW.spAtk, NEW.spDef, NEW.speed, 
 		CASE
 			WHEN NEW.legendary = 'True' THEN 1
             ELSE 0
@@ -42,6 +42,31 @@ IGNORE 1 ROWS;
 -- delete the temporary table and trigger
 DROP TRIGGER insertPokedex;
 DROP TABLE tempPokedex;
+
+
+-- make sure no pIDs are skipped
+DROP TABLE IF EXISTS numbers;
+DROP PROCEDURE IF EXISTS populateNumbers;
+CREATE TABLE numbers (num INT PRIMARY KEY);
+DELIMITER $$
+CREATE PROCEDURE populateNumbers(min INT, max INT)
+BEGIN
+    DECLARE i INT;
+    SET i = min;
+    numLoop: LOOP 
+        INSERT INTO numbers(num) VALUES (i);
+        IF i = max THEN
+            LEAVE numLoop;
+        END IF;
+        SET i = i + 1;
+    END LOOP numLoop;
+END$$
+DELIMITER ;
+
+CALL populateNumbers(1, 721);
+SELECT * FROM numbers WHERE num NOT IN (SELECT pid FROM pokedex);
+
+DROP TABLE numbers;
 
 
 
