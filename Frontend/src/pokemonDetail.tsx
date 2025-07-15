@@ -31,7 +31,8 @@ type AttackDetailType = {
     type: string,
     category: string,
     stats: AttackStatType,
-    effect: string
+    effect: string,
+    TM: boolean
 }
 
 type PokemonDetailType = {
@@ -581,6 +582,7 @@ const PokemonDetail = () => {
                           <h4 className="font-medium text-foreground">{move.name}</h4>
                           <span className={`badge type-${move.type.toLowerCase()} text-white text-xs`}>{move.type}</span>
                           <span className="badge badge-outline text-xs">{move.category}</span>
+                          {move.TM ? <span className="badge badge-tm text-white text-xs">T/M</span>:""}
                         </div>
                         <div className="flex gap-4 text-sm text-muted-foreground">
                           <span>Power: {move.stats.power || "—"}</span>

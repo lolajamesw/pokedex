@@ -227,6 +227,21 @@
     border-color: rgba(248, 250, 252, .33) !important;
   }
 
+  .badge-tm {
+    color: rgb(var(--color-foreground));
+    /* background-color: #C0C0C0 !important; */
+    background: linear-gradient(
+      45deg,
+      #999 5%,
+      #eee 10%,
+      #ccc 30%,
+      #ddd 50%,
+      #ccc 70%,
+      #ddd 80%,
+      #999 95%
+  ) !important;
+  }
+
   /* Tab components */
   .tabs-list {
     @apply inline-flex h-10 items-center justify-center rounded-md p-1;

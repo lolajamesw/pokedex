@@ -132,7 +132,7 @@ module.exports = (app, db) => {
     app.get(`/pokemon/attacks/:id`, (req, res) => {
         const pID = req.params.id;
         const sql = `
-        SELECT a.aID, a.attack_name, type, category, power, accuracy, PP, effect
+        SELECT a.aID, a.attack_name, type, category, power, accuracy, PP, effect, tm
         FROM Attacks a, LearnableAttacks l 
         WHERE pID=${pID} AND a.aID=l.aID;
         `
@@ -152,7 +152,8 @@ module.exports = (app, db) => {
                     accuracy: row.accuracy, 
                     pp: row.PP
                 },
-                effect: row.effect
+                effect: row.effect,
+                TM: row.tm[0]===1
             }))
             return res.json(formatted);
         });
@@ -161,7 +162,7 @@ module.exports = (app, db) => {
     app.get(`/pokemon/knownAttacks/:id`, (req, res) => {
         const id = req.params.id;
         const sql = `
-        SELECT a.aID, a.attack_name, type, category, power, accuracy, PP, effect
+        SELECT a.aID, a.attack_name, type, category, power, accuracy, PP, effect, tm
         FROM Attacks a, CurrentAttacks c
         WHERE instanceID=${id} AND a.aID=c.aID;
         `
@@ -181,7 +182,8 @@ module.exports = (app, db) => {
                     accuracy: row.accuracy, 
                     pp: row.PP
                 },
-                effect: row.effect
+                effect: row.effect,
+                TM: row.tm[0]===1
             }))
             return res.json(formatted);
         });

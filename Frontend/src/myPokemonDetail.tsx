@@ -30,7 +30,8 @@ type AttackDetailType = {
     type: string,
     category: string,
     stats: AttackStatType,
-    effect: string
+    effect: string,
+    TM: boolean
 }
 
 type PokemonDetailType = {
@@ -734,6 +735,7 @@ const MyPokeDetail = () => {
                           <h4 className="font-medium text-foreground">{move.name}</h4>
                           <span className={`badge type-${move.type.toLowerCase()} text-white text-xs`}>{move.type}</span>
                           <span className="badge badge-outline text-xs">{move.category}</span>
+                          {move.TM ? <span className="badge badge-tm text-white text-xs">T/M</span>:""}
                         </div>
                         <div className="flex gap-4 text-sm text-muted-foreground">
                           <span>Power: {move.stats.power}</span>
@@ -782,6 +784,7 @@ const MyPokeDetail = () => {
                           <h4 className="font-medium text-foreground">{move.name}</h4>
                           <span className={`badge type-${move.type.toLowerCase()} text-white text-xs`}>{move.type}</span>
                           <span className="badge badge-outline text-xs">{move.category}</span>
+                          {move.TM ? <span className="badge badge-tm text-white text-xs">T/M</span>:""}
                           {isMoveKnown(move) && <span className="badge bg-green-100 text-green-800 text-xs">Known</span>}
                         </div>
                         <div className="flex gap-4 text-sm text-muted-foreground">
