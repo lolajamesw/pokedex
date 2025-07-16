@@ -130,14 +130,7 @@ const getStatClass = (stat: number) => {
 }
 
 function PokemonSelectionModal({ isOpen, onClose, userPokemon, selectedPokemon, onSelectionChange, title, filterFunc }) {
-  // const [pokemonList, setPokemonList] = useState<PokemonDetailType[]>(userPokemon);
   const [tempSelected, setTempSelected] = useState(selectedPokemon);
-  // useEffect(() => {
-  //     fetch("http://localhost:8081/userPokemon")
-  //       .then((res) => res.json())
-  //       .then((data) => setPokemonList(data))
-  //       .catch((err) => console.error("Failed to fetch Pokémon:", err));
-  // }, [])
   useEffect(() => {
     setTempSelected(userPokemon.filter(
       filterFunc,

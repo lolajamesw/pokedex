@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./components/ui/card"
 import { Button } from "./components/ui/button"
 import { Textarea } from "./components/ui/textarea"
@@ -37,38 +37,62 @@ const otherUsers = [
   { id: 4, name: "Gary Oak", avatar: "/placeholder.svg?height=40&width=40" },
 ]
 
+type pokemonType = {
+    id: number,
+    name: string,
+    type: string,
+    level: number,
+    image: string,
+}
+
+type ListingType = {
+    id: number,
+    userId: number,
+    userName: string,
+    pokemon: pokemonType,
+    description: string,
+    replyCount: number
+}
+
 export default function PokemonMarket() {
-  const [listings, setListings] = useState([
-    {
-      id: 1,
-      userId: 2,
-      userName: "Misty",
-      userAvatar: "/placeholder.svg?height=40&width=40",
-      pokemon: mockPokemon[1], // Blastoise
-      description: "Looking for a strong Fire-type Pokemon. Preferably level 50+",
-      createdAt: "2 hours ago",
-      replies: [
-        {
-          id: 1,
-          userId: 1,
-          userName: "Ash Ketchum",
-          userAvatar: "/placeholder.svg?height=40&width=40",
-          pokemon: mockPokemon[0], // Charizard
-          message: "Would love to trade my Charizard!",
-        },
-      ],
-    },
-    {
-      id: 2,
-      userId: 3,
-      userName: "Brock",
-      userAvatar: "/placeholder.svg?height=40&width=40",
-      pokemon: mockPokemon[4], // Gengar
-      description: "Seeking a Dragon-type or Flying-type Pokemon for my team",
-      createdAt: "5 hours ago",
-      replies: [],
-    },
-  ])
+  const [listings, setListings] = useState<ListingType[]>([])
+
+  useEffect(() => {
+    fetch(`http://localhost:8081/availableListings/${localStorage.getItem("uID")}`)
+        .then((res)=>res.json())
+        .then((data)=>setListings(data))
+        .catch((err)=>console.error("Failed to fetch available listings"))
+  }, [])
+  console.log(listings);
+    // {
+    //   id: 1,
+    //   userId: 2,
+    //   userName: "Misty",
+    //   userAvatar: "/placeholder.svg?height=40&width=40",
+    //   pokemon: mockPokemon[1], // Blastoise
+    //   description: "Looking for a strong Fire-type Pokemon. Preferably level 50+",
+    //   createdAt: "2 hours ago",
+    //   replies: [
+    //     {
+    //       id: 1,
+    //       userId: 1,
+    //       userName: "Ash Ketchum",
+    //       userAvatar: "/placeholder.svg?height=40&width=40",
+    //       pokemon: mockPokemon[0], // Charizard
+    //       message: "Would love to trade my Charizard!",
+    //     },
+    //   ],
+    // },
+    // {
+    //   id: 2,
+    //   userId: 3,
+    //   userName: "Brock",
+    //   userAvatar: "/placeholder.svg?height=40&width=40",
+    //   pokemon: mockPokemon[4], // Gengar
+    //   description: "Seeking a Dragon-type or Flying-type Pokemon for my team",
+    //   createdAt: "5 hours ago",
+    //   replies: [],
+    // },
 
   const [newListing, setNewListing] = useState({
     pokemonId: "",
@@ -104,8 +128,8 @@ export default function PokemonMarket() {
       userAvatar: currentUser.avatar,
       pokemon: selectedPokemon,
       description: newListing.description,
-      createdAt: "Just now",
-      replies: [],
+    //   createdAt: "Just now",
+      replyCount: 0,
     }
 
     setListings([listing, ...listings])
@@ -135,7 +159,7 @@ export default function PokemonMarket() {
     setReplyForm({ listingId: null, pokemonId: "", message: "" })
   }
 
-  const userListings = listings.filter((listing) => listing.userId === currentUser.id)
+//   const userListings = listings.filter((listing) => listing.userId === currentUser.id)
   const otherListings = listings.filter((listing) => listing.userId !== currentUser.id)
 
   return (
@@ -148,27 +172,27 @@ export default function PokemonMarket() {
       <Tabs defaultValue="browse" className="w-full">
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="browse">Browse Listings</TabsTrigger>
-          <TabsTrigger value="my-listings">My Listings ({userListings.length})</TabsTrigger>
+          <TabsTrigger value="my-listings">My Listings (0{/* userListings.length */})</TabsTrigger>
           <TabsTrigger value="create">Create Listing</TabsTrigger>
         </TabsList>
 
         <TabsContent value="browse" className="space-y-4">
           <div className="grid gap-4">
-            {otherListings.map((listing) => (
+            {listings.map((listing) => (
               <Card key={listing.id}>
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
                       <Avatar>
-                        <AvatarImage src={listing.userAvatar || "/placeholder.svg"} />
+                        {/* <AvatarImage src={listing.userAvatar || "/placeholder.svg"} /> */}
                         <AvatarFallback>{listing.userName[0]}</AvatarFallback>
                       </Avatar>
                       <div>
                         <CardTitle className="text-lg">{listing.userName}</CardTitle>
-                        <CardDescription>{listing.createdAt}</CardDescription>
+                        {/* <CardDescription>{listing.createdAt}</CardDescription> */}
                       </div>
                     </div>
-                    <Badge variant="secondary">{listing.replies.length} replies</Badge>
+                    <Badge variant="secondary">{listing.replyCount} replies</Badge>
                   </div>
                 </CardHeader>
                 <CardContent>
@@ -250,15 +274,15 @@ export default function PokemonMarket() {
         </TabsContent>
 
         <TabsContent value="my-listings" className="space-y-4">
-          {userListings.length === 0 ? (
+          {/* {userListings.length === 0 ? (*/}
             <Card>
               <CardContent className="text-center py-8">
                 <p className="text-muted-foreground">You haven{"'"}t created any listings yet.</p>
-                <Button className="mt-4" onClick={() => document.querySelector('[value="create"]').click()}>
+                <Button className="mt-4"> {/* onClick={() => document.querySelector('[value="create"]').click()} */}
                   Create Your First Listing
                 </Button>
               </CardContent>
-            </Card>
+            </Card>{/*
           ) : (
             <div className="grid gap-4">
               {userListings.map((listing) => (
@@ -267,7 +291,7 @@ export default function PokemonMarket() {
                     <div className="flex items-center justify-between">
                       <CardTitle className="text-lg">Your Listing</CardTitle>
                       <div className="flex items-center space-x-2">
-                        <Badge variant="secondary">{listing.replies.length} replies</Badge>
+                        <Badge variant="secondary">{listing.replyCount} replies</Badge>
                         <Dialog>
                           <DialogTrigger asChild>
                             <Button variant="outline" size="sm" onClick={() => setSelectedListing(listing)}>
@@ -340,7 +364,7 @@ export default function PokemonMarket() {
                 </Card>
               ))}
             </div>
-          )}
+          )} */}
         </TabsContent>
 
         <TabsContent value="create" className="space-y-4">
