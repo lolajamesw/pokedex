@@ -130,19 +130,19 @@ const getStatClass = (stat: number) => {
 }
 
 function PokemonSelectionModal({ isOpen, onClose, userPokemon, selectedPokemon, onSelectionChange, title, filterFunc }) {
-  const [pokemonList, setPokemonList] = useState<PokemonDetailType[]>([]);
+  // const [pokemonList, setPokemonList] = useState<PokemonDetailType[]>(userPokemon);
   const [tempSelected, setTempSelected] = useState(selectedPokemon);
+  // useEffect(() => {
+  //     fetch("http://localhost:8081/userPokemon")
+  //       .then((res) => res.json())
+  //       .then((data) => setPokemonList(data))
+  //       .catch((err) => console.error("Failed to fetch Pokémon:", err));
+  // }, [])
   useEffect(() => {
-      fetch("http://localhost:8081/userPokemon")
-        .then((res) => res.json())
-        .then((data) => setPokemonList(data))
-        .catch((err) => console.error("Failed to fetch Pokémon:", err));
-  }, [])
-  useEffect(() => {
-    setTempSelected(pokemonList.filter(
+    setTempSelected(userPokemon.filter(
       filterFunc,
     ));
-  }, [pokemonList])
+  }, [userPokemon])
 
   const handlePokemonSelect = (pokemon) => {
     const isAlreadySelected = tempSelected.some((p) => p.id === pokemon.id)

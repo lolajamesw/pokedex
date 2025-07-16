@@ -5,6 +5,7 @@ import Navbar from './components/navbar.js'
 import PokemonInterface from './pokedex.js'
 import PokemonDetail from './pokemonDetail.js'
 import MyPokeDetail from './myPokemonDetail.js'
+import PokemonMarket from './market.js'
 import Profile from './profile.js'
 import MyPokedex from './my-pokemon.js'
 import LoginPage from './login.js'
@@ -30,6 +31,7 @@ function MainApp() {
           <Route path="/pokedex/:id" element={<PokemonDetail />} />
           <Route path="/my-pokemon/:pID/:id" element={<MyPokeDetail />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/market" element={<PokemonMarket />} />
           <Route path="/my-pokemon" element={<MyPokedex />} />
         </Routes>
       </main>
