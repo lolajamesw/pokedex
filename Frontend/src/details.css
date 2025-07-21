@@ -494,6 +494,7 @@
   }
   .text-muted-foreground {
     color: rgb(var(--color-muted-foreground));
+    text-align: left !important;
   }
   .text-accent {
     color: rgb(var(--color-accent));

@@ -1,10 +1,10 @@
 INSERT INTO `Types`(`type`) VALUES 
-('Normal'), ('Fire'), ('Water'), ('Electric'), ('Grass'),
-('Ice'), ('Fighting'), ('Poison'), ('Ground'), ('Flying'),
-('Psychic'), ('Bug'), ('Rock'), ('Ghost'), ('Dragon'), 
+-- ('Normal'), ('Fire'), ('Water'), ('Electric'), ('Grass'),
+-- ('Ice'), ('Fighting'), ('Poison'), ('Ground'), ('Flying'),
+-- ('Psychic'), ('Bug'), ('Rock'), ('Ghost'), ('Dragon'), 
 ('Steel'), ('Dark'), ('Fairy')
 ;
-
+DELETE FROM TypeFX WHERE True;
 INSERT INTO `TypeFX`(type1, type2, double_strength, half_strength, no_impact) VALUES 
 ('Normal', 'Rock', 0, 1, 0), ('Normal', 'Ghost', 0, 0, 1), ('Normal', 'Steel', 0, 1, 0),
 

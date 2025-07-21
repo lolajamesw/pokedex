@@ -232,7 +232,7 @@ const MyPokeDetail = () => {
       const response = await fetch("http://localhost:8081/setFavourite", {
         method: "POST",
         headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({instanceID: pokemon.id, user: 4, value:Number(!pokemon.favourite)}),
+        body: JSON.stringify({instanceID: pokemon.id, user: localStorage.getItem("uID"), value:Number(!pokemon.favourite)}),
       });
       // Convert UserPokemon to ShowcasedPokemon format
       setPokemonDetail((prev) => {

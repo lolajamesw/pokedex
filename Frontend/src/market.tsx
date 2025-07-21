@@ -19,7 +19,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "./components/ui/avatar"
 import { MessageSquare, Plus, Eye } from "lucide-react"
 import "./market.css"
 
-
 // Mock data
 const mockPokemon = [
   { id: 1, name: "Charizard", type: "Fire/Flying", level: 55, image: "/placeholder.svg?height=80&width=80" },
@@ -59,7 +58,7 @@ export default function PokemonMarket() {
   const [listings, setListings] = useState<ListingType[]>([])
 
   useEffect(() => {
-    fetch(`http://localhost:8081/availableListings/${localStorage.getItem("uID")}`) //TODO: Make sure my own listings are not shown
+    fetch(`http://localhost:8081/availableListings/${localStorage.getItem("uID")}`)
         .then((res)=>res.json())
         .then((data)=>setListings(data))
         .catch((err)=>console.error("Failed to fetch available listings"))
@@ -110,27 +109,11 @@ export default function PokemonMarket() {
 
   // Get user's own Pokemon that aren't already listed
   const getAvailablePokemon = () => {
-    try {
-      const response = await fetch(`http://localhost:8081/availablePokemon?uID=${localStorage.getItem("uID")}`, {
-          method: "GET"
-      });
+    const listedPokemonIds = listings
+      .filter((listing) => listing.userId === currentUser.id)
+      .map((listing) => listing.pokemon.id)
 
-      if (response.ok){
-
-      } else {
-        const errMsg = await response.text();
-        console.error("Failed to get available Pokémon:", errMsg);
-
-        alert("Failed to get available Pokémon. See console for details.");
-      }
-
-
-    } catch (err) {
-      console.error("Error getting available Pokémon:", err);
-      alert("Something went wrong getting the available Pokémon.");
-    }
-
-
+    return mockPokemon.filter((pokemon) => !listedPokemonIds.includes(pokemon.id))
   }
 
   const handleCreateListing = () => {
