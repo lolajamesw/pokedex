@@ -18,6 +18,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 import { Avatar, AvatarFallback, AvatarImage } from "./components/ui/avatar"
 import { MessageSquare, Plus, Eye } from "lucide-react"
 import "./market.css"
+import { Description } from "@radix-ui/react-dialog"
 
 // Mock data
 const mockPokemon = [
@@ -64,6 +65,14 @@ export default function PokemonMarket() {
         .catch((err)=>console.error("Failed to fetch available listings"))
   }, [])
   console.log(listings);
+
+  const [availablePokemon, setAvailablePokemon] = useState<pokemonType[]>([]);
+  useEffect(() => {
+    fetch(`http://localhost:8081/availablePokemon/${localStorage.getItem("uID")}`)
+        .then((res) => res.json())
+        .then((data) => setAvailablePokemon(data))
+        .catch((error) => console.error("There was a problem getting the pokemon available for trade.", error));
+  }, [])
     // {
     //   id: 1,
     //   userId: 2,
@@ -100,67 +109,68 @@ export default function PokemonMarket() {
   })
 
   const [replyForm, setReplyForm] = useState({
-    listingId: null,
+    listingId: -1,
     pokemonId: "",
     message: "",
   })
 
   const [selectedListing, setSelectedListing] = useState(null)
 
-  // Get user's own Pokemon that aren't already listed
-  const getAvailablePokemon = () => {
-    const listedPokemonIds = listings
-      .filter((listing) => listing.userId === currentUser.id)
-      .map((listing) => listing.pokemon.id)
 
-    return mockPokemon.filter((pokemon) => !listedPokemonIds.includes(pokemon.id))
-  }
+  const handleCreateListing = async () => {
+    console.log("Handling create listing");
+    
+    try {
+      const response = await fetch("http://localhost:8081/listPokemon", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          iid: newListing.pokemonId,
+          uid: currentUser.id,
+          desc: newListing.description
+        }),
+      });
 
-  const handleCreateListing = () => {
-    if (!newListing.pokemonId || !newListing.description.trim()) return
+      if (response.ok) {
+        const data = await response.json();
 
-    const selectedPokemon = mockPokemon.find((p) => p.id === Number.parseInt(newListing.pokemonId))
-
-    const listing = {
-      id: Date.now(),
-      userId: currentUser.id,
-      userName: currentUser.name,
-      userAvatar: currentUser.avatar,
-      pokemon: selectedPokemon,
-      description: newListing.description,
-    //   createdAt: "Just now",
-      replyCount: 0,
+      } else {
+        const errMsg = await response.text();
+        console.error("Failed to create listing:", errMsg);
+      }
+    } catch (err) {
+      console.error("Error creating listing:", err);
+      alert("Something went wrong during trade listing.");
     }
 
-    setListings([listing, ...listings])
-    setNewListing({ pokemonId: "", description: "" })
   }
 
   const handleReply = () => {
-    if (!replyForm.pokemonId || !replyForm.message.trim()) return
+    console.log("handling reply");
+    // if (!replyForm.pokemonId || !replyForm.message.trim()) return
 
-    const selectedPokemon = mockPokemon.find((p) => p.id === Number.parseInt(replyForm.pokemonId))
+    // const selectedPokemon = mockPokemon.find((p) => p.id === Number.parseInt(replyForm.pokemonId))
 
-    const reply = {
-      id: Date.now(),
-      userId: currentUser.id,
-      userName: currentUser.name,
-      userAvatar: currentUser.avatar,
-      pokemon: selectedPokemon,
-      message: replyForm.message,
-    }
+    // const reply = {
+    //   id: Date.now(),
+    //   userId: currentUser.id,
+    //   userName: currentUser.name,
+    //   userAvatar: currentUser.avatar,
+    //   pokemon: selectedPokemon,
+    //   message: replyForm.message,
+    // }
 
-    setListings(
-      listings.map((listing) =>
-        listing.id === replyForm.listingId ? { ...listing, replies: [...listing.replies, reply] } : listing,
-      ),
-    )
+    // setListings(
+    //   listings.map((listing) =>
+    //     listing.id === replyForm.listingId ? { ...listing, replies: [...listing.replies, reply] } : listing,
+    //   ),
+    // )
 
-    setReplyForm({ listingId: null, pokemonId: "", message: "" })
+    // setReplyForm({ listingId: null, pokemonId: "", message: "" })
   }
 
 //   const userListings = listings.filter((listing) => listing.userId === currentUser.id)
-  const otherListings = listings.filter((listing) => listing.userId !== currentUser.id)
+  const myAvailablePokemon = getAvailablePokemon()
 
   return (
     <div className="container mx-auto p-6 max-w-6xl">
@@ -384,14 +394,14 @@ export default function PokemonMarket() {
                     <SelectValue placeholder="Choose a Pokemon" />
                   </SelectTrigger>
                   <SelectContent>
-                    {getAvailablePokemon().map((pokemon) => (
+                    {myAvailablePokemon.map((pokemon) => (
                       <SelectItem key={pokemon.id} value={pokemon.id.toString()}>
                         {pokemon.name} (Level {pokemon.level}) - {pokemon.type}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
-                {getAvailablePokemon().length === 0 && (
+                {myAvailablePokemon.length === 0 && (
                   <p className="text-sm text-muted-foreground mt-2">All your Pokemon are already listed for trade</p>
                 )}
               </div>

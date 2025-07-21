@@ -497,21 +497,23 @@ app.get('/userPokemon', (req, res) => {
 
 
     app.get('/availablePokemon/:uID', (req, res) => {
-        const uID = req.params.uid;
+        const uID = req.params.uID;
         console.log("Incoming request to /availablePokemon with uID:", uID);
 
         const sql = `
         SELECT 
-            pokedex.pid,
+            pokedex.pID,
             pokedex.name,
             pokedex.type1,
-            pokedex.type2
+            pokedex.type2,
             myPokemon.level
         FROM myPokemon JOIN pokedex ON myPokemon.pid = pokedex.pid
         WHERE uid = ${uID} AND myPokemon.instanceID NOT IN (SELECT instanceID from listing);
         `;
 
-        db.query((err, results) => {
+        console.log(sql);
+
+        db.query(sql, (err, results) => {
             if (err) {
                 console.error("Error fetching user's available Pokémon:", err);
                 return res.status(500).json({ error: "Database error" });
@@ -525,10 +527,10 @@ app.get('/userPokemon', (req, res) => {
                 image: `https://www.pokemon.com/static-assets/content-assets/cms2/img/pokedex/detail/${row.pID.toString().padStart(3, "0")}.png`
             }));
 
-
+            return res.json(formatted);
         });
 
-    })
+    });
 
 
 }
