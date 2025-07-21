@@ -80,6 +80,7 @@ CREATE TABLE Attacks(
 	accuracy INT, 
 	PP INT, 
 	effect VARCHAR(100) NOT NULL,
+    tm BIT,
     CHECK (power >=0 AND accuracy >= 0 AND PP >= 0)
 );
 
