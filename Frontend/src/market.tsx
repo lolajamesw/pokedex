@@ -47,13 +47,21 @@ type pokemonType = {
     image: string,
 }
 
+type ReplyType = {
+  id: number,
+  userAvatar: string,
+  userName: string,
+  pokemon: pokemonType,
+  message: string
+}
+
 type ListingType = {
     id: number,
     userId: number,
     userName: string,
     pokemon: pokemonType,
     description: string,
-    replyCount: number
+    replies: ReplyType[]
 }
 
 export default function PokemonMarket() {
@@ -61,20 +69,37 @@ export default function PokemonMarket() {
   const [tabValue, setTabValue] = useState("browse");
   const [bannerMessage, setBannerMessage] = useState("");
   const [availablePokemon, setAvailablePokemon] = useState<pokemonType[]>([]);
+  const [userListings, setUserListings] = useState<ListingType[]>([]);
+
 
   useEffect(() => {
-    fetch(`http://localhost:8081/availableListings/${localStorage.getItem("uID")}`)
-        .then((res)=>res.json())
-        .then((data)=>setListings(data))
-        .catch((err)=>console.error("Failed to fetch available listings"))
-  }, [])
+    switch (tabValue){
+      case "browse":
+        fetch(`http://localhost:8081/availableListings/${localStorage.getItem("uID")}`)
+            .then((res)=>res.json())
+            .then((data)=>setListings(data))
+            .catch((err)=>console.error("Failed to fetch available listings"))
+        break;
+      case "my-listings":
+        fetch(`http://localhost:8081/myListings/${localStorage.getItem("uID")}`)
+            .then((res) => res.json())
+            .then((data) => setUserListings(data))
+            .catch((error) => console.error("There was a problem getting the pokemon available for trade.", error));
+        break;
+      case "create":
+        fetch(`http://localhost:8081/availablePokemon/${localStorage.getItem("uID")}`)
+            .then((res) => res.json())
+            .then((data) => setAvailablePokemon(data))
+            .catch((error) => console.error("There was a problem getting the pokemon available for trade.", error));
+        break;
+      default:
+        console.error("Invalid tab name:", tabValue);
+        break;
+    }
+  }, [tabValue]);
 
-  useEffect(() => {
-    fetch(`http://localhost:8081/availablePokemon/${localStorage.getItem("uID")}`)
-        .then((res) => res.json())
-        .then((data) => setAvailablePokemon(data))
-        .catch((error) => console.error("There was a problem getting the pokemon available for trade.", error));
-  }, [])
+
+
     // {
     //   id: 1,
     //   userId: 2,
@@ -116,7 +141,7 @@ export default function PokemonMarket() {
     message: "",
   })
 
-  const [selectedListing, setSelectedListing] = useState(null)
+  const [selectedListing, setSelectedListing] = useState<ListingType|null>(null)
 
 
   const handleCreateListing = async () => {
@@ -225,7 +250,7 @@ export default function PokemonMarket() {
                         {/* <CardDescription>{listing.createdAt}</CardDescription> */}
                       </div>
                     </div>
-                    <Badge variant="secondary">{listing.replyCount} replies</Badge>
+                    <Badge variant="secondary">{listing.replies.length} replies</Badge>
                   </div>
                 </CardHeader>
                 <CardContent>
@@ -307,7 +332,7 @@ export default function PokemonMarket() {
         </TabsContent>
 
         <TabsContent value="my-listings" className="space-y-4">
-          {/* {userListings.length === 0 ? (*/}
+          {userListings.length === 0 ? (
             <Card>
               <CardContent className="text-center py-8">
                 <p className="text-muted-foreground">You haven{"'"}t created any listings yet.</p>
@@ -317,7 +342,7 @@ export default function PokemonMarket() {
                   Create Your First Listing
                 </Button>
               </CardContent>
-            </Card>{/*
+            </Card>
           ) : (
             <div className="grid gap-4">
               {userListings.map((listing) => (
@@ -326,7 +351,7 @@ export default function PokemonMarket() {
                     <div className="flex items-center justify-between">
                       <CardTitle className="text-lg">Your Listing</CardTitle>
                       <div className="flex items-center space-x-2">
-                        <Badge variant="secondary">{listing.replyCount} replies</Badge>
+                        <Badge variant="secondary">{listing.replies.length} replies</Badge>
                         <Dialog>
                           <DialogTrigger asChild>
                             <Button variant="outline" size="sm" onClick={() => setSelectedListing(listing)}>
@@ -399,7 +424,7 @@ export default function PokemonMarket() {
                 </Card>
               ))}
             </div>
-          )} */}
+          )}
         </TabsContent>
 
         <TabsContent value="create" className="space-y-4">

@@ -488,10 +488,59 @@ app.get('/userPokemon', (req, res) => {
                 image: `https://www.pokemon.com/static-assets/content-assets/cms2/img/pokedex/detail/${row.pID.toString().padStart(3, "0")}.png`
             },
             description: row.description,
-            replyCount: row.replyCount
+            replies: []
             }));
 
-            console.log(formatted);
+            return res.json(formatted);
+        });
+    });
+
+    app.get("/myListings/:uID", (req, res) => {
+        const uID = req.params.uID;
+        console.log("Incoming request to /myListings with uID:", uID);
+
+        const sql = `
+            SELECT 
+              l.listingID
+            , u.uID
+            , u.username
+            , p.pID
+            , p.name
+            , type1
+            , type2
+            , level
+            , l.description
+            , COUNT(replyID) as replyCount
+            FROM Listing l
+            LEFT JOIN MyPokemon mp ON mp.instanceID=l.instanceID
+            LEFT JOIN Pokedex p ON p.pID=mp.pID
+            LEFT JOIN User u ON u.uID=mp.uID
+            LEFT JOIN Reply r ON l.listingID=r.listingID
+            WHERE u.uID=${uID}
+            GROUP BY l.listingID, u.uID, u.username, p.pID, p.name, 
+                type1, type2, level, l.description;
+        `;
+
+        db.query(sql, (err, results) => {
+            if (err) {
+            console.error("Error fetching user's Pokémon data:", err);
+            return res.status(500).json({ error: "Database error" });
+            }
+
+            const formatted = results.map((row) => ({
+            id: row.listingID,
+            userId: row.uID,
+            userName: row.username,
+            pokemon: {
+                id: row.pID,
+                name: row.name,
+                type: row.type2 ? `${row.type1}/${row.type2}` : row.type1,
+                level: row.level,
+                image: `https://www.pokemon.com/static-assets/content-assets/cms2/img/pokedex/detail/${row.pID.toString().padStart(3, "0")}.png`
+            },
+            description: row.description,
+            replies: []
+            }));
 
             return res.json(formatted);
         });
