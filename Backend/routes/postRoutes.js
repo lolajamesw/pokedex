@@ -305,7 +305,7 @@ module.exports = (app, db) => {
 
     app.post("/listPokemon/", async (req, res) => {
         const {iid, uid, desc} = req.body;
-        console.log("Incoming request to /listpokemon with:", req.body);
+        console.log("Incoming request to /listPokemon with:", req.body);
 
         try {
             const db = await mysqlPromise.createConnection({
@@ -318,7 +318,7 @@ module.exports = (app, db) => {
 
             const [result] = await db.execute(
             `INSERT INTO Listing (instanceID, sellerID, description)
-            VALUES (?, ?, ?)`,
+            VALUES (?, ?, ?);`,
             [iid, uid, desc]
             );
 

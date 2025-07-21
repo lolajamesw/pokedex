@@ -40,6 +40,7 @@ const otherUsers = [
 
 type pokemonType = {
     id: number,
+    nickname: string,
     name: string,
     type: string,
     level: number,
@@ -57,6 +58,9 @@ type ListingType = {
 
 export default function PokemonMarket() {
   const [listings, setListings] = useState<ListingType[]>([])
+  const [tabValue, setTabValue] = useState("browse");
+  const [bannerMessage, setBannerMessage] = useState("");
+  const [availablePokemon, setAvailablePokemon] = useState<pokemonType[]>([]);
 
   useEffect(() => {
     fetch(`http://localhost:8081/availableListings/${localStorage.getItem("uID")}`)
@@ -64,9 +68,7 @@ export default function PokemonMarket() {
         .then((data)=>setListings(data))
         .catch((err)=>console.error("Failed to fetch available listings"))
   }, [])
-  console.log(listings);
 
-  const [availablePokemon, setAvailablePokemon] = useState<pokemonType[]>([]);
   useEffect(() => {
     fetch(`http://localhost:8081/availablePokemon/${localStorage.getItem("uID")}`)
         .then((res) => res.json())
@@ -118,7 +120,6 @@ export default function PokemonMarket() {
 
 
   const handleCreateListing = async () => {
-    console.log("Handling create listing");
     
     try {
       const response = await fetch("http://localhost:8081/listPokemon", {
@@ -133,6 +134,24 @@ export default function PokemonMarket() {
 
       if (response.ok) {
         const data = await response.json();
+
+        //display confirmation message
+        setBannerMessage(
+          "Your pokemon has been posted for trading."
+        );
+        setTimeout(() => setBannerMessage(""), 4000);
+
+        //update the available pokemon
+        const newAvailable = await fetch(`http://localhost:8081/availablePokemon/${localStorage.getItem("uID")}`)
+              .then((res) => res.json())
+              .catch((error) => console.error("There was a problem getting the pokemon available for trade.", error));
+        setAvailablePokemon(newAvailable);
+
+        //clear the data we've already entered
+        setNewListing({pokemonId: "", description: ""});
+
+        //switch to the myListings tab to see the new listing
+        setTabValue("my-listings");
 
       } else {
         const errMsg = await response.text();
@@ -170,16 +189,20 @@ export default function PokemonMarket() {
   }
 
 //   const userListings = listings.filter((listing) => listing.userId === currentUser.id)
-  const myAvailablePokemon = getAvailablePokemon()
 
   return (
     <div className="container mx-auto p-6 max-w-6xl">
+      {bannerMessage && (
+        <div className="banner">
+          <p>{bannerMessage}</p>
+        </div>
+      )}
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2">Pokemon Market</h1>
         <p className="text-muted-foreground">Trade your Pokemon with other trainers</p>
       </div>
 
-      <Tabs defaultValue="browse" className="w-full">
+      <Tabs value={tabValue} onValueChange={setTabValue} className="w-full">
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="browse">Browse Listings</TabsTrigger>
           <TabsTrigger value="my-listings">My Listings (0{/* userListings.length */})</TabsTrigger>
@@ -288,7 +311,9 @@ export default function PokemonMarket() {
             <Card>
               <CardContent className="text-center py-8">
                 <p className="text-muted-foreground">You haven{"'"}t created any listings yet.</p>
-                <Button className="mt-4"> {/* onClick={() => document.querySelector('[value="create"]').click()} */}
+                <Button 
+                  onClick={() => setTabValue("create")}
+                  className="mt-4"> 
                   Create Your First Listing
                 </Button>
               </CardContent>
@@ -394,14 +419,14 @@ export default function PokemonMarket() {
                     <SelectValue placeholder="Choose a Pokemon" />
                   </SelectTrigger>
                   <SelectContent>
-                    {myAvailablePokemon.map((pokemon) => (
+                    {availablePokemon.map((pokemon) => (
                       <SelectItem key={pokemon.id} value={pokemon.id.toString()}>
-                        {pokemon.name} (Level {pokemon.level}) - {pokemon.type}
+                        {pokemon.nickname}: {pokemon.name} (Level {pokemon.level}) - {pokemon.type}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
-                {myAvailablePokemon.length === 0 && (
+                {availablePokemon.length === 0 && (
                   <p className="text-sm text-muted-foreground mt-2">All your Pokemon are already listed for trade</p>
                 )}
               </div>

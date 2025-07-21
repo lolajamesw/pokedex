@@ -491,6 +491,8 @@ app.get('/userPokemon', (req, res) => {
             replyCount: row.replyCount
             }));
 
+            console.log(formatted);
+
             return res.json(formatted);
         });
     });
@@ -502,7 +504,8 @@ app.get('/userPokemon', (req, res) => {
 
         const sql = `
         SELECT 
-            pokedex.pID,
+            myPokemon.instanceID,
+            myPokemon.nickname,
             pokedex.name,
             pokedex.type1,
             pokedex.type2,
@@ -511,8 +514,6 @@ app.get('/userPokemon', (req, res) => {
         WHERE uid = ${uID} AND myPokemon.instanceID NOT IN (SELECT instanceID from listing);
         `;
 
-        console.log(sql);
-
         db.query(sql, (err, results) => {
             if (err) {
                 console.error("Error fetching user's available Pokémon:", err);
@@ -520,11 +521,12 @@ app.get('/userPokemon', (req, res) => {
             }
 
             const formatted = results.map((row) => ({
-                id: row.pID,
+                id: row.instanceID,
+                nickname: row.nickname,
                 name: row.name,
                 type: row.type2 ? `${row.type1}/${row.type2}` : row.type1,
                 level: row.level,
-                image: `https://www.pokemon.com/static-assets/content-assets/cms2/img/pokedex/detail/${row.pID.toString().padStart(3, "0")}.png`
+                image: `https://www.pokemon.com/static-assets/content-assets/cms2/img/pokedex/detail/${row.instanceID.toString().padStart(3, "0")}.png`
             }));
 
             return res.json(formatted);
