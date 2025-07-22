@@ -101,6 +101,7 @@ CREATE TABLE Listing(
 	listingID INT AUTO_INCREMENT PRIMARY KEY,
     instanceID INT NOT NULL REFERENCES MyPokemon(instanceID),
     sellerID INT NOT NULL REFERENCES User(uID),
+    postedTime DATETIME DEFAULT '2000-01-01',
     description VARCHAR(100)
 );
 
@@ -115,6 +116,7 @@ CREATE TABLE Trades(
 	tradeID INT AUTO_INCREMENT PRIMARY KEY,
 	listingID INT NOT NULL,
     replyID INT NOT NULL,
+    `time` DATETIME DEFAULT '2000-01-01',
     FOREIGN KEY (listingID) REFERENCES Listing(listingID),
     FOREIGN KEY (replyID) REFERENCES Reply(replyID)
 );
@@ -171,4 +173,5 @@ BEGIN
 		END IF;
 	END IF;
 END //
+
 
