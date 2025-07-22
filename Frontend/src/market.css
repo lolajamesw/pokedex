@@ -67,6 +67,9 @@
   .text-balance {
     text-wrap: balance;
   }
+  .header {
+    text-align: center;
+  }
 }
 
 
