@@ -21,7 +21,7 @@ async function fetchFlavorText(pID) {
     const entry = entries.find(e => e.language.name === 'en');
     if (entry) {
       // Normalize whitespace and line breaks
-      return entry.flavor_text.replace(/\f/g, ' ').replace(/\s+/g, ' ').trim();
+      return entry.flavor_text.replace(/\f/g, ' ').replace(/\s+/g, ' ').replace(/\n/g, '').trim();
     }
   } catch (error) {
     console.error(`Error fetching pID ${pID}:`, error.message);
@@ -32,7 +32,7 @@ async function fetchFlavorText(pID) {
 async function updateDatabase() {
   const connection = await mysqlPromise.createConnection(dbConfig);
 // 265, 268, 277, 292, 303, 313, 331, 353, 356, 368, 373, 375, 721
-  for (let pID = 721; pID <= 721; pID++) {
+  for (let pID = 1; pID <= 721; pID++) {
     const flavorText = await fetchFlavorText(pID);
     if (flavorText) {
       try {
