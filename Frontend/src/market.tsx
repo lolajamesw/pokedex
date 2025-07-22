@@ -205,7 +205,38 @@ export default function PokemonMarket() {
 
   }
 
-//   const userListings = listings.filter((listing) => listing.userId === currentUser.id)
+  const handleTrade = async (reply: ReplyType) => {
+    console.log("handling trade");
+
+    try {
+      // const response = await fetch("http://localhost:8081/trade", {
+      //   method: "POST",
+      //   headers: {"Content-Type": "application/json"},
+      //   body: JSON.stringify({
+      //     replyID: reply.id
+      //   })
+      // });
+
+      // if (response.ok){
+        //display confirmation message
+
+        setBannerMessage(
+          "Trade complete"
+        );
+        setTimeout(() => setBannerMessage(""), 4000);
+
+        setTabValue("my-listings");
+        
+      // } else {
+      //   const errMsg = await response.text();
+      //   console.error("Failed to create reply:", errMsg);
+      // }
+    } catch (err) {
+      console.error("Error creating reply:", err);
+      alert("Something went wrong during trade reply.");
+    }
+  }
+
 
   return (
     <div className="container mx-auto p-6 max-w-6xl">
@@ -386,6 +417,7 @@ export default function PokemonMarket() {
                                           alt={reply.pokemon.name}
                                           className="w-12 h-12 rounded border"
                                         />
+                                        <Button onClick={() => handleTrade(reply)}>Accept</Button>
                                       </div>
                                     </CardContent>
                                   </Card>

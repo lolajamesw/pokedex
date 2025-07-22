@@ -374,4 +374,59 @@ module.exports = (app, db) => {
 
     });
 
+
+    app.post("/trade/", async (req, res) => {
+        const replyID = req.body;
+
+        const sql = `
+        DROP TABLE IF EXISTS tradeGoingThrough;
+
+        CREATE TEMPORARY TABLE tradeGoingThrough as (
+        SELECT l.listingID, r.replyID, l.instanceID as forSalePokemon, l.sellerID AS seller, r.instanceID AS replyPokemon, r.respondantID as replyer
+        FROM reply r, listing l
+        WHERE r.listingID = l.listingID AND r.replyID = ${replyID});
+
+        -- actually swap ownership
+        UPDATE mypokemon seller, mypokemon replyer, tradeGoingThrough
+        SET seller.uid = tradeGoingThrough.replyer, replyer.uid = tradeGoingThrough.seller
+        WHERE seller.instanceID = tradeGoingThrough.forSalePokemon AND replyer.instanceID = tradeGoingThrough.replyPokemon;
+
+        -- increment each users trade count
+        UPDATE user, tradeGoingThrough
+        SET tradeCount = tradecount + 1
+        WHERE uID = tradeGoingThrough.seller;
+
+        UPDATE user, tradeGoingThrough
+        SET tradeCount = tradecount + 1
+        WHERE uID = tradeGoingThrough.replyer;
+
+        -- add completed trade to trade table
+        INSERT INTO trades (listingID, replyID)
+        SELECT listingID, replyID FROM tradeGoingThrough;
+
+        drop TABLE tradeGoingThrough;
+        `;
+
+        try {
+            const db = await mysqlPromise.createConnection({
+            host: process.env.DB_HOST,
+            port: process.env.DB_PORT,
+            user: process.env.DB_USER,
+            password: process.env.DB_PASSWORD,
+            database: process.env.DB_NAME
+            });
+
+            const [result] = await db.execute(sql);
+
+            await db.end();
+            res.status(201);
+        } catch (err) {
+            console.error("Error accepting reply:", err);
+
+            res.status(500).send("Server error while accepting reply.");
+        }
+
+
+    });
+
 }
