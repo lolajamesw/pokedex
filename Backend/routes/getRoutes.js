@@ -465,7 +465,7 @@ app.get('/userPokemon', (req, res) => {
             LEFT JOIN Pokedex p ON p.pID=mp.pID
             LEFT JOIN User u ON u.uID=mp.uID
             LEFT JOIN Reply r ON l.listingID=r.listingID
-            WHERE l.sellerID!=${uID}
+            WHERE l.sellerID!=${uID} AND l.listingID NOT IN (SELECT listingID FROM trades)
             GROUP BY l.listingID, u.uID, u.username, p.pID, p.name, 
                 type1, type2, level, l.description;
         `;
@@ -541,8 +541,6 @@ app.get('/userPokemon', (req, res) => {
                 description: row.description,
                 replyCount: row.replyCount
             }));
-
-            console.log(listingFormatted);
 
             return res.json(listingFormatted);
         });

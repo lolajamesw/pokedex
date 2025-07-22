@@ -194,7 +194,7 @@ BEGIN
 		CREATE TEMPORARY TABLE tradeGoingThrough as (
 		SELECT l.listingID, r.replyID, l.instanceID as forSalePokemon, l.sellerID AS seller, r.instanceID AS replyPokemon, r.respondantID as replyer
 		FROM reply r, listing l
-		WHERE r.listingID = l.listingID AND r.replyID = 11);
+		WHERE r.listingID = l.listingID AND r.replyID = tradeID);
 
 		-- actually swap ownership
 		UPDATE mypokemon seller, mypokemon replyer, tradeGoingThrough
