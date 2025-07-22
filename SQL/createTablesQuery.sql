@@ -49,7 +49,7 @@ CREATE TABLE Pokedex (
     spDef INT NOT NULL,
     speed INT NOT NULL,
     legendary BIT NOT NULL,
-	description varchar(200),
+	description varchar(300),
     CHECK (HP >=0 AND atk >= 0 AND def >= 0 AND spAtk >= 0 AND spDef >= 0 AND speed >= 0)
 );
     
