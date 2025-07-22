@@ -116,6 +116,7 @@ export default function PokemonMarket() {
         console.error("Invalid tab name:", tabValue);
         break;
     }
+    console.log(availablePokemon);
   }, [tabValue]);
 
   const handleCreateListing = async () => {
@@ -324,7 +325,7 @@ export default function PokemonMarket() {
                                   <SelectContent>
                                     {availablePokemon.map((pokemon) => (
                                       <SelectItem key={pokemon.id} value={pokemon.id.toString()}>
-                                        {pokemon.nickname}: {pokemon.name} (Level {pokemon.level})
+                                        {!pokemon.nickname ? "" : pokemon.nickname+": "}{pokemon.name} (Level {pokemon.level})
                                       </SelectItem>
                                     ))}
                                   </SelectContent>
@@ -468,7 +469,7 @@ export default function PokemonMarket() {
                     <SelectContent>
                       {availablePokemon.map((pokemon) => (
                         <SelectItem key={pokemon.id} value={pokemon.id.toString()}>
-                          {pokemon.nickname}: {pokemon.name} (Level {pokemon.level}) - {pokemon.type}
+                          {!pokemon.nickname ? "" : pokemon.nickname+": "}{pokemon.name} (Level {pokemon.level}) - {pokemon.type}
                         </SelectItem>
                       ))}
                     </SelectContent>

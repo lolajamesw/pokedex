@@ -990,7 +990,7 @@ const MyPokeDetail = () => {
                                 <div className="pl-6">
                                   <div className="text-sm text-muted-foreground">Received:</div>
                                   <div className="flex items-center gap-2 mt-1">
-                                    <span className="font-medium">
+                                    <span className={"font-medium"+(trade.tradedFor.pokemon===pokemon.name?" underlined":"")}>
                                       {trade.tradedFor.nickname || trade.tradedFor.pokemon}
                                     </span>
                                     {trade.tradedFor.nickname && (
@@ -1015,9 +1015,9 @@ const MyPokeDetail = () => {
                                   From: {trade.fromTrainer}
                                 </div>
                                 <div className="pl-6">
-                                  <div className="text-sm text-muted-foreground">In return for:</div>
+                                  <div className="text-sm text-muted-foreground">Received:</div>
                                   <div className="flex items-center gap-2 mt-1">
-                                    <span className="font-medium">
+                                    <span className={"font-medium"+(trade.tradedAway.pokemon===pokemon.name?" underlined":"")}>
                                       {trade.tradedAway.nickname || trade.tradedAway.pokemon}
                                     </span>
                                     {trade.tradedAway.nickname && (

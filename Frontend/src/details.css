@@ -508,6 +508,10 @@
   .text-destructive-foreground {
     color: rgb(var(--color-destructive-foreground));
   }
+  
+  .underlined {
+    text-decoration: underline;
+  }
 
   /* Background color utilities */
   .bg-background {
