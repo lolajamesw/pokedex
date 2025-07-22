@@ -379,7 +379,7 @@ export default function PokemonMarket() {
                     <div className="flex items-center justify-between">
                       <CardTitle className="text-lg">Your Listing</CardTitle>
                       <div className="flex items-center space-x-2">
-                        <Badge variant="secondary">{listing.replyCount} replies</Badge>
+                        <Badge variant="secondary">{listing.replyCount} {listing.replyCount == 1 ? "reply" : "replies"}</Badge>
                         <Dialog open={replyListVis} onOpenChange={setReplyListVis}>
                           <DialogTrigger asChild>
                             <Button variant="outline" size="sm" onClick={(e) => { getReplies(listing.id); setSelectedListing(listing); setReplyListVis(true);}}>

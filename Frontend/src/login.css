@@ -54,7 +54,7 @@ button[type="submit"]:hover {
   color: #111827;
 }
 
-p {
+.create-account {
   margin-top: 16px;
   text-align: center;
   text-decoration: underline;
