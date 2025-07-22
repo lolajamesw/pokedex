@@ -434,6 +434,11 @@ BEGIN
 		UPDATE mypokemon seller, mypokemon replyer, tradeGoingThrough
 		SET seller.uid = tradeGoingThrough.replyer, replyer.uid = tradeGoingThrough.seller
 		WHERE seller.instanceID = tradeGoingThrough.forSalePokemon AND replyer.instanceID = tradeGoingThrough.replyPokemon;
+        
+        -- reset pokemonInstance bit values
+        UPDATE myPokemon 
+        SET favourite=0, onteam=0, showcased=0
+        WHERE instanceID IN (SELECT forSalePokemon FROM tradeGoingThrough) OR instanceID IN (SELECT replyPokemon FROM tradeGoingThrough);
 
 		-- increment each users trade count
 		UPDATE user, tradeGoingThrough
@@ -445,8 +450,8 @@ BEGIN
 		WHERE uID = tradeGoingThrough.replyer;
 
 		-- add completed trade to trade table
-		INSERT INTO trades (listingID, replyID)
-		SELECT listingID, replyID FROM tradeGoingThrough;
+		INSERT INTO trades (listingID, replyID, time)
+		SELECT listingID, replyID, NOW() FROM tradeGoingThrough;
 
 		drop TABLE tradeGoingThrough;
     COMMIT;
@@ -493,4 +498,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-07-22 15:31:26
+-- Dump completed on 2025-07-22 15:38:11
