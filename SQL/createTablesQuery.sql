@@ -14,6 +14,7 @@ DROP TABLE IF EXISTS Types;
 DROP TRIGGER IF EXISTS limit_attacks;
 DROP TRIGGER IF EXISTS max_6_onTeam;
 DROP TRIGGER IF EXISTS max_6_showcase;
+DROP PROCEDURE IF EXISTS doTrade;
 
 CREATE TABLE Types(type VARCHAR(10) NOT NULL PRIMARY KEY);
 
@@ -175,5 +176,47 @@ BEGIN
 		END IF;
 	END IF;
 END //
+
+-- stored procedure to trade pokemon. Allows client to call it in one request
+
+DELIMITER //
+CREATE PROCEDURE doTrade(tradeID INT)
+BEGIN
+
+	DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+		ROLLBACK;
+	END;
+    
+    START TRANSACTION;
+		DROP TABLE IF EXISTS tradeGoingThrough;
+
+		CREATE TEMPORARY TABLE tradeGoingThrough as (
+		SELECT l.listingID, r.replyID, l.instanceID as forSalePokemon, l.sellerID AS seller, r.instanceID AS replyPokemon, r.respondantID as replyer
+		FROM reply r, listing l
+		WHERE r.listingID = l.listingID AND r.replyID = 11);
+
+		-- actually swap ownership
+		UPDATE mypokemon seller, mypokemon replyer, tradeGoingThrough
+		SET seller.uid = tradeGoingThrough.replyer, replyer.uid = tradeGoingThrough.seller
+		WHERE seller.instanceID = tradeGoingThrough.forSalePokemon AND replyer.instanceID = tradeGoingThrough.replyPokemon;
+
+		-- increment each users trade count
+		UPDATE user, tradeGoingThrough
+		SET tradeCount = tradecount + 1
+		WHERE uID = tradeGoingThrough.seller;
+
+		UPDATE user, tradeGoingThrough
+		SET tradeCount = tradecount + 1
+		WHERE uID = tradeGoingThrough.replyer;
+
+		-- add completed trade to trade table
+		INSERT INTO trades (listingID, replyID)
+		SELECT listingID, replyID FROM tradeGoingThrough;
+
+		drop TABLE tradeGoingThrough;
+    COMMIT;
+END//
+DELIMITER ;
 
 
