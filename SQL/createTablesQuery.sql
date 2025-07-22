@@ -109,7 +109,9 @@ CREATE TABLE Reply(
 	replyID INT AUTO_INCREMENT PRIMARY KEY,
     listingID INT NOT NULL REFERENCES Listing(listingID),
     instanceID INT NOT NULL REFERENCES MyPokemon(instanceID),
-    respondantID INT NOT NULL REFERENCES User(uID)
+    respondantID INT NOT NULL REFERENCES User(uID),
+    sentTime DATETIME DEFAULT '2000-01-01',
+    message CHAR(100) NOT NULL
 );
 
 CREATE TABLE Trades(
