@@ -177,8 +177,7 @@ BEGIN
 	END IF;
 END //
 
--- stored procedure to trade pokemon. Allows client to call it in one request
-
+-- stored procedure to trade pokemon. Uses a transaction to ensure data consistency during concurrent requests and system failures
 DELIMITER //
 CREATE PROCEDURE doTrade(tradeID INT)
 BEGIN
