@@ -472,23 +472,23 @@ app.get('/userPokemon', (req, res) => {
 
         db.query(sql, (err, results) => {
             if (err) {
-            console.error("Error fetching user's Pokémon data:", err);
-            return res.status(500).json({ error: "Database error" });
+                console.error("Error fetching user's Pokémon data:", err);
+                return res.status(500).json({ error: "Database error" });
             }
 
             const formatted = results.map((row) => ({
-            id: row.listingID,
-            userId: row.uID,
-            userName: row.username,
-            pokemon: {
-                id: row.pID,
-                name: row.name,
-                type: row.type2 ? `${row.type1}/${row.type2}` : row.type1,
-                level: row.level,
-                image: `https://www.pokemon.com/static-assets/content-assets/cms2/img/pokedex/detail/${row.pID.toString().padStart(3, "0")}.png`
-            },
-            description: row.description,
-            replies: []
+                id: row.listingID,
+                userId: row.uID,
+                userName: row.username,
+                pokemon: {
+                    id: row.pID,
+                    name: row.name,
+                    type: row.type2 ? `${row.type1}/${row.type2}` : row.type1,
+                    level: row.level,
+                    image: `https://www.pokemon.com/static-assets/content-assets/cms2/img/pokedex/detail/${row.pID.toString().padStart(3, "0")}.png`
+                },
+                description: row.description,
+                replies: []
             }));
 
             return res.json(formatted);
@@ -499,9 +499,9 @@ app.get('/userPokemon', (req, res) => {
         const uID = req.params.uID;
         console.log("Incoming request to /myListings with uID:", uID);
 
-        const sql = `
+        const listingSql = `
             SELECT 
-              l.listingID
+            l.listingID
             , u.uID
             , u.username
             , p.pID
@@ -520,30 +520,81 @@ app.get('/userPokemon', (req, res) => {
             GROUP BY l.listingID, u.uID, u.username, p.pID, p.name, 
                 type1, type2, level, l.description;
         `;
-
-        db.query(sql, (err, results) => {
+        
+        db.query(listingSql, (err, results) => {
             if (err) {
-            console.error("Error fetching user's Pokémon data:", err);
-            return res.status(500).json({ error: "Database error" });
+                console.error("Error fetching user's Pokémon data:", err);
+                return res.status(500).json({ error: "Database error" });
             }
 
-            const formatted = results.map((row) => ({
-            id: row.listingID,
-            userId: row.uID,
-            userName: row.username,
-            pokemon: {
-                id: row.pID,
-                name: row.name,
-                type: row.type2 ? `${row.type1}/${row.type2}` : row.type1,
-                level: row.level,
-                image: `https://www.pokemon.com/static-assets/content-assets/cms2/img/pokedex/detail/${row.pID.toString().padStart(3, "0")}.png`
-            },
-            description: row.description,
-            replies: []
+            const listingFormatted = results.map((row) => ({
+                id: row.listingID,
+                userId: row.uID,
+                userName: row.username,
+                pokemon: {
+                    id: row.pID,
+                    name: row.name,
+                    type: row.type2 ? `${row.type1}/${row.type2}` : row.type1,
+                    level: row.level,
+                    image: `https://www.pokemon.com/static-assets/content-assets/cms2/img/pokedex/detail/${row.pID.toString().padStart(3, "0")}.png`
+                },
+                description: row.description,
+                replyCount: row.replyCount
             }));
 
-            return res.json(formatted);
+            return res.json(listingFormatted);
         });
+    });
+
+    app.get("/replies/:listingID", (req, res) => {
+        const listingID = req.params.listingFormatted;
+        console.log("Incoming request to /replies with listingID:", listingID);
+
+        const repliesSql = `
+        SELECT 
+            mp.instanceID, 
+            p.pID,
+            p.name AS species, 
+            p.type1, 
+            p.type2, 
+            mp.level, 
+            mp.nickname, 
+            mp.uid, 
+            u.name AS respondantName,
+            r.message,
+            r.sentTime,
+            r.replyID
+        FROM listing l, reply r, mypokemon mp, pokedex p, user u
+        WHERE l.listingID = r.listingID 
+            AND mp.instanceID = r.instanceID 
+            AND p.pid = mp.pID 
+            AND u.uid = r.respondantID;
+        `;
+
+        db.query(repliesSql, (err, results) => {
+            if (err) {
+                console.error("Error fetching reply data:", err);
+                return res.status(500).json({ error: "Database error" });
+            }
+
+            const repliesFormatted = results.map((row) => ({
+                id: row.replyID,
+                userName: row.respondantName,
+                pokemon: {
+                    id: row.instanceID,
+                    nickname: row.nickname,
+                    name: row.species,
+                    type: row.type2 ? `${row.type1}/${row.type2}` : row.type1,
+                    level: row.level,
+                    image: `https://www.pokemon.com/static-assets/content-assets/cms2/img/pokedex/detail/${row.pID.toString().padStart(3, "0")}.png`
+                },
+                message: row.message,
+                sentTime: row.sentTime
+            }));
+
+            return res.json(repliesFormatted);
+        });
+
     });
 
 

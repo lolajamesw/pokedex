@@ -61,7 +61,7 @@ type ListingType = {
     userName: string,
     pokemon: pokemonType,
     description: string,
-    replies: ReplyType[]
+    replyCount: number
 }
 
 export default function PokemonMarket() {
@@ -70,7 +70,16 @@ export default function PokemonMarket() {
   const [bannerMessage, setBannerMessage] = useState("");
   const [availablePokemon, setAvailablePokemon] = useState<pokemonType[]>([]);
   const [userListings, setUserListings] = useState<ListingType[]>([]);
+  const [replies, setReplies] = useState<ReplyType[]>([]);
+  const [selectedListing, setSelectedListing] = useState<ListingType|null>(null)
 
+  //need to get an initial value for the user's available pokemon
+  useEffect(() => {
+    fetch(`http://localhost:8081/availablePokemon/${localStorage.getItem("uID")}`)
+      .then((res) => res.json())
+      .then((data) => setAvailablePokemon(data))
+      .catch((error) => console.error("There was a problem getting the pokemon available for trade.", error))
+  }, []);
 
   useEffect(() => {
     switch (tabValue){
@@ -84,7 +93,7 @@ export default function PokemonMarket() {
         fetch(`http://localhost:8081/myListings/${localStorage.getItem("uID")}`)
             .then((res) => res.json())
             .then((data) => setUserListings(data))
-            .catch((error) => console.error("There was a problem getting the pokemon available for trade.", error));
+            .catch((error) => console.error("There was a problem getting your listed pokemon", error));
         break;
       case "create":
         fetch(`http://localhost:8081/availablePokemon/${localStorage.getItem("uID")}`)
@@ -98,37 +107,14 @@ export default function PokemonMarket() {
     }
   }, [tabValue]);
 
-
-
-    // {
-    //   id: 1,
-    //   userId: 2,
-    //   userName: "Misty",
-    //   userAvatar: "/placeholder.svg?height=40&width=40",
-    //   pokemon: mockPokemon[1], // Blastoise
-    //   description: "Looking for a strong Fire-type Pokemon. Preferably level 50+",
-    //   createdAt: "2 hours ago",
-    //   replies: [
-    //     {
-    //       id: 1,
-    //       userId: 1,
-    //       userName: "Ash Ketchum",
-    //       userAvatar: "/placeholder.svg?height=40&width=40",
-    //       pokemon: mockPokemon[0], // Charizard
-    //       message: "Would love to trade my Charizard!",
-    //     },
-    //   ],
-    // },
-    // {
-    //   id: 2,
-    //   userId: 3,
-    //   userName: "Brock",
-    //   userAvatar: "/placeholder.svg?height=40&width=40",
-    //   pokemon: mockPokemon[4], // Gengar
-    //   description: "Seeking a Dragon-type or Flying-type Pokemon for my team",
-    //   createdAt: "5 hours ago",
-    //   replies: [],
-    // },
+  useEffect(() => {
+    if (selectedListing?.userId.toString() == localStorage.getItem("uID") && selectedListing != null) {
+      fetch(`http://localhost:8081/replies/${selectedListing.id}`)
+        .then((res) => res.json())
+        .then((data) => setReplies(data))
+        .catch((error) => console.error("There was a problem getting the replies for this listing.", error));
+    }
+  }, [selectedListing]);
 
   const [newListing, setNewListing] = useState({
     pokemonId: "",
@@ -141,7 +127,6 @@ export default function PokemonMarket() {
     message: "",
   })
 
-  const [selectedListing, setSelectedListing] = useState<ListingType|null>(null)
 
 
   const handleCreateListing = async () => {
@@ -166,16 +151,10 @@ export default function PokemonMarket() {
         );
         setTimeout(() => setBannerMessage(""), 4000);
 
-        //update the available pokemon
-        const newAvailable = await fetch(`http://localhost:8081/availablePokemon/${localStorage.getItem("uID")}`)
-              .then((res) => res.json())
-              .catch((error) => console.error("There was a problem getting the pokemon available for trade.", error));
-        setAvailablePokemon(newAvailable);
-
         //clear the data we've already entered
         setNewListing({pokemonId: "", description: ""});
 
-        //switch to the myListings tab to see the new listing
+        //switch to the myListings tab to see the newly created listing
         setTabValue("my-listings");
 
       } else {
@@ -189,31 +168,75 @@ export default function PokemonMarket() {
 
   }
 
-  const handleReply = () => {
+  const handleReply = async () => {
     console.log("handling reply");
-    // if (!replyForm.pokemonId || !replyForm.message.trim()) return
+    if (!replyForm.pokemonId || !replyForm.message.trim()) return
 
-    // const selectedPokemon = mockPokemon.find((p) => p.id === Number.parseInt(replyForm.pokemonId))
+    try {
+      const response = await fetch("http://localhost:8081/reply", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({
+          instanceID: replyForm.pokemonId,
+          listingID: replyForm.listingId,
+          respondantID: currentUser.id,
+          message: replyForm.message,
+        })
+      });
 
-    // const reply = {
-    //   id: Date.now(),
-    //   userId: currentUser.id,
-    //   userName: currentUser.name,
-    //   userAvatar: currentUser.avatar,
-    //   pokemon: selectedPokemon,
-    //   message: replyForm.message,
-    // }
+      if (response.ok){
+        const data = await response.json();
 
-    // setListings(
-    //   listings.map((listing) =>
-    //     listing.id === replyForm.listingId ? { ...listing, replies: [...listing.replies, reply] } : listing,
-    //   ),
-    // )
+        //display confirmation message
+        setBannerMessage(
+          "Trade offer sent"
+        );
+        setTimeout(() => setBannerMessage(""), 4000);
 
-    // setReplyForm({ listingId: null, pokemonId: "", message: "" })
+        setReplyForm({ listingId: -1, pokemonId: "", message: "" })
+      } else {
+        const errMsg = await response.text();
+        console.error("Failed to create reply:", errMsg);
+      }
+    } catch (err) {
+      console.error("Error creating reply:", err);
+      alert("Something went wrong during trade reply.");
+    }
+
   }
 
-//   const userListings = listings.filter((listing) => listing.userId === currentUser.id)
+  const handleTrade = async (reply: ReplyType) => {
+    console.log("handling trade");
+
+    try {
+      // const response = await fetch("http://localhost:8081/trade", {
+      //   method: "POST",
+      //   headers: {"Content-Type": "application/json"},
+      //   body: JSON.stringify({
+      //     replyID: reply.id
+      //   })
+      // });
+
+      // if (response.ok){
+        //display confirmation message
+
+        setBannerMessage(
+          "Trade complete"
+        );
+        setTimeout(() => setBannerMessage(""), 4000);
+
+        setTabValue("my-listings");
+        
+      // } else {
+      //   const errMsg = await response.text();
+      //   console.error("Failed to create reply:", errMsg);
+      // }
+    } catch (err) {
+      console.error("Error creating reply:", err);
+      alert("Something went wrong during trade reply.");
+    }
+  }
+
 
   return (
     <div className="container mx-auto p-6 max-w-6xl">
@@ -250,7 +273,7 @@ export default function PokemonMarket() {
                         {/* <CardDescription>{listing.createdAt}</CardDescription> */}
                       </div>
                     </div>
-                    <Badge variant="secondary">{listing.replies.length} replies</Badge>
+                    <Badge variant="secondary">{listing.replyCount} replies</Badge>
                   </div>
                 </CardHeader>
                 <CardContent>
@@ -301,9 +324,9 @@ export default function PokemonMarket() {
                                   <SelectValue placeholder="Choose a Pokemon" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                  {mockPokemon.map((pokemon) => (
+                                  {availablePokemon.map((pokemon) => (
                                     <SelectItem key={pokemon.id} value={pokemon.id.toString()}>
-                                      {pokemon.name} (Level {pokemon.level})
+                                      {pokemon.nickname}: {pokemon.name} (Level {pokemon.level})
                                     </SelectItem>
                                   ))}
                                 </SelectContent>
@@ -351,7 +374,7 @@ export default function PokemonMarket() {
                     <div className="flex items-center justify-between">
                       <CardTitle className="text-lg">Your Listing</CardTitle>
                       <div className="flex items-center space-x-2">
-                        <Badge variant="secondary">{listing.replies.length} replies</Badge>
+                        <Badge variant="secondary">{listing.replyCount} replies</Badge>
                         <Dialog>
                           <DialogTrigger asChild>
                             <Button variant="outline" size="sm" onClick={() => setSelectedListing(listing)}>
@@ -363,14 +386,14 @@ export default function PokemonMarket() {
                             <DialogHeader>
                               <DialogTitle>Replies to Your Listing</DialogTitle>
                               <DialogDescription>
-                                {listing.replies.length} trainers have replied to your {listing.pokemon.name} listing
+                                {listing.replyCount} trainers have replied to your {listing.pokemon.name} listing
                               </DialogDescription>
                             </DialogHeader>
                             <div className="space-y-4 max-h-96 overflow-y-auto">
-                              {listing.replies.length === 0 ? (
+                              {listing.replyCount === 0 ? ( 
                                 <p className="text-center text-muted-foreground py-8">No replies yet</p>
-                              ) : (
-                                listing.replies.map((reply) => (
+                               ) : (
+                                replies.map((reply) => (
                                   <Card key={reply.id}>
                                     <CardContent className="pt-4">
                                       <div className="flex items-start space-x-3">
@@ -394,6 +417,7 @@ export default function PokemonMarket() {
                                           alt={reply.pokemon.name}
                                           className="w-12 h-12 rounded border"
                                         />
+                                        <Button onClick={() => handleTrade(reply)}>Accept</Button>
                                       </div>
                                     </CardContent>
                                   </Card>
