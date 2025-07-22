@@ -1,7 +1,7 @@
 INSERT INTO `Types`(`type`) VALUES 
--- ('Normal'), ('Fire'), ('Water'), ('Electric'), ('Grass'),
--- ('Ice'), ('Fighting'), ('Poison'), ('Ground'), ('Flying'),
--- ('Psychic'), ('Bug'), ('Rock'), ('Ghost'), ('Dragon'), 
+('Normal'), ('Fire'), ('Water'), ('Electric'), ('Grass'),
+('Ice'), ('Fighting'), ('Poison'), ('Ground'), ('Flying'),
+('Psychic'), ('Bug'), ('Rock'), ('Ghost'), ('Dragon'), 
 ('Steel'), ('Dark'), ('Fairy')
 ;
 DELETE FROM TypeFX WHERE True;
