@@ -376,38 +376,13 @@ module.exports = (app, db) => {
 
 
     app.post("/trade/", async (req, res) => {
-        const replyID = req.body;
+        const {replyID} = req.body;
+        console.log("Incoming request to /trade with replyID:", replyID);
 
-        const sql = `
-        DROP TABLE IF EXISTS tradeGoingThrough;
-
-        CREATE TEMPORARY TABLE tradeGoingThrough as (
-        SELECT l.listingID, r.replyID, l.instanceID as forSalePokemon, l.sellerID AS seller, r.instanceID AS replyPokemon, r.respondantID as replyer
-        FROM reply r, listing l
-        WHERE r.listingID = l.listingID AND r.replyID = ${replyID});
-
-        -- actually swap ownership
-        UPDATE mypokemon seller, mypokemon replyer, tradeGoingThrough
-        SET seller.uid = tradeGoingThrough.replyer, replyer.uid = tradeGoingThrough.seller
-        WHERE seller.instanceID = tradeGoingThrough.forSalePokemon AND replyer.instanceID = tradeGoingThrough.replyPokemon;
-
-        -- increment each users trade count
-        UPDATE user, tradeGoingThrough
-        SET tradeCount = tradecount + 1
-        WHERE uID = tradeGoingThrough.seller;
-
-        UPDATE user, tradeGoingThrough
-        SET tradeCount = tradecount + 1
-        WHERE uID = tradeGoingThrough.replyer;
-
-        -- add completed trade to trade table
-        INSERT INTO trades (listingID, replyID)
-        SELECT listingID, replyID FROM tradeGoingThrough;
-
-        drop TABLE tradeGoingThrough;
-        `;
+        const sql = `CALL doTrade(${replyID});`;
 
         try {
+            console.log("connecting");
             const db = await mysqlPromise.createConnection({
             host: process.env.DB_HOST,
             port: process.env.DB_PORT,
@@ -415,11 +390,13 @@ module.exports = (app, db) => {
             password: process.env.DB_PASSWORD,
             database: process.env.DB_NAME
             });
-
+            console.log("executing");
             const [result] = await db.execute(sql);
+            console.log("execution complete");
 
             await db.end();
-            res.status(201);
+            console.log("db.ended");
+            res.status(201).json({});
         } catch (err) {
             console.error("Error accepting reply:", err);
 
