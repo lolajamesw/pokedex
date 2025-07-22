@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, use } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./components/ui/card"
 import { Button } from "./components/ui/button"
 import { Textarea } from "./components/ui/textarea"
@@ -71,51 +71,8 @@ export default function PokemonMarket() {
   const [availablePokemon, setAvailablePokemon] = useState<pokemonType[]>([]);
   const [userListings, setUserListings] = useState<ListingType[]>([]);
   const [replies, setReplies] = useState<ReplyType[]>([]);
-  const [selectedListing, setSelectedListing] = useState<ListingType|null>(null)
-
-  //need to get an initial value for the user's available pokemon
-  useEffect(() => {
-    fetch(`http://localhost:8081/availablePokemon/${localStorage.getItem("uID")}`)
-      .then((res) => res.json())
-      .then((data) => setAvailablePokemon(data))
-      .catch((error) => console.error("There was a problem getting the pokemon available for trade.", error))
-  }, []);
-
-  useEffect(() => {
-    switch (tabValue){
-      case "browse":
-        fetch(`http://localhost:8081/availableListings/${localStorage.getItem("uID")}`)
-            .then((res)=>res.json())
-            .then((data)=>setListings(data))
-            .catch((err)=>console.error("Failed to fetch available listings"))
-        break;
-      case "my-listings":
-        fetch(`http://localhost:8081/myListings/${localStorage.getItem("uID")}`)
-            .then((res) => res.json())
-            .then((data) => setUserListings(data))
-            .catch((error) => console.error("There was a problem getting your listed pokemon", error));
-        break;
-      case "create":
-        fetch(`http://localhost:8081/availablePokemon/${localStorage.getItem("uID")}`)
-            .then((res) => res.json())
-            .then((data) => setAvailablePokemon(data))
-            .catch((error) => console.error("There was a problem getting the pokemon available for trade.", error));
-        break;
-      default:
-        console.error("Invalid tab name:", tabValue);
-        break;
-    }
-  }, [tabValue]);
-
-  useEffect(() => {
-    if (selectedListing?.userId.toString() == localStorage.getItem("uID") && selectedListing != null) {
-      fetch(`http://localhost:8081/replies/${selectedListing.id}`)
-        .then((res) => res.json())
-        .then((data) => setReplies(data))
-        .catch((error) => console.error("There was a problem getting the replies for this listing.", error));
-    }
-  }, [selectedListing]);
-
+  const [selectedListing, setSelectedListing] = useState<ListingType|null>(null);
+  const [replyListVis, setReplyListVis] = useState<boolean>(false);
   const [newListing, setNewListing] = useState({
     pokemonId: "",
     description: "",
@@ -127,7 +84,51 @@ export default function PokemonMarket() {
     message: "",
   })
 
+  async function getAvailablePokemon(){
+    fetch(`http://localhost:8081/availablePokemon/${localStorage.getItem("uID")}`)
+      .then((res) => res.json())
+      .then((data) => setAvailablePokemon(data))
+      .catch((error) => console.error("There was a problem getting the pokemon available for trade.", error));
+  }
 
+  async function getMyListings() {
+    fetch(`http://localhost:8081/myListings/${localStorage.getItem("uID")}`)
+        .then((res) => res.json())
+        .then((data) => setUserListings(data))
+        .catch((error) => console.error("There was a problem getting your listed pokemon", error));
+  }
+
+  async function getAvailableListings() {
+    fetch(`http://localhost:8081/availableListings/${localStorage.getItem("uID")}`)
+        .then((res)=>res.json())
+        .then((data)=>setListings(data))
+        .catch((err)=>console.error("Failed to fetch available listings"))
+  }
+
+  async function getReplies(listingID){
+    await fetch(`http://localhost:8081/replies/${listingID}`)
+      .then((res) => res.json())
+      .then(async (data) => setReplies(data))
+      .catch((error) => console.error("There was a problem getting the replies for this listing.", error));
+  }
+
+  useEffect(() => {
+    switch (tabValue){
+      case "browse":
+        getAvailableListings();
+        getAvailablePokemon();
+        break;
+      case "my-listings":
+        getMyListings();
+        break;
+      case "create":
+        getAvailablePokemon();
+        break;
+      default:
+        console.error("Invalid tab name:", tabValue);
+        break;
+    }
+  }, [tabValue]);
 
   const handleCreateListing = async () => {
     
@@ -221,11 +222,15 @@ export default function PokemonMarket() {
         //display confirmation message
 
         setBannerMessage(
+          // TODO: fix selectedListing.pokemon.nickname is undefined
+          // `Congratulations! You traded a level ${selectedListing?.pokemon.level} ${selectedListing?.pokemon.name} named ${selectedListing?.pokemon.nickname} for a level ${reply.pokemon.level} ${reply.pokemon.name} named ${reply.pokemon.nickname}!
+          // ${reply.pokemon.nickname} has been added to your collection.`
           "Trade complete"
         );
         setTimeout(() => setBannerMessage(""), 4000);
 
-        setTabValue("my-listings");
+        setReplyListVis(false);
+        getMyListings(); //to get the updated list without the pokemon we just traded.
         
       // } else {
       //   const errMsg = await response.text();
@@ -253,7 +258,7 @@ export default function PokemonMarket() {
       <Tabs value={tabValue} onValueChange={setTabValue} className="w-full">
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="browse">Browse Listings</TabsTrigger>
-          <TabsTrigger value="my-listings">My Listings (0{/* userListings.length */})</TabsTrigger>
+          <TabsTrigger value="my-listings">My Listings ({userListings.length})</TabsTrigger>
           <TabsTrigger value="create">Create Listing</TabsTrigger>
         </TabsList>
 
@@ -375,9 +380,9 @@ export default function PokemonMarket() {
                       <CardTitle className="text-lg">Your Listing</CardTitle>
                       <div className="flex items-center space-x-2">
                         <Badge variant="secondary">{listing.replyCount} replies</Badge>
-                        <Dialog>
+                        <Dialog open={replyListVis} onOpenChange={setReplyListVis}>
                           <DialogTrigger asChild>
-                            <Button variant="outline" size="sm" onClick={() => setSelectedListing(listing)}>
+                            <Button variant="outline" size="sm" onClick={(e) => { getReplies(listing.id); setSelectedListing(listing); setReplyListVis(true);}}>
                               <Eye className="w-4 h-4 mr-2" />
                               View Replies
                             </Button>
@@ -386,11 +391,11 @@ export default function PokemonMarket() {
                             <DialogHeader>
                               <DialogTitle>Replies to Your Listing</DialogTitle>
                               <DialogDescription>
-                                {listing.replyCount} trainers have replied to your {listing.pokemon.name} listing
+                                {selectedListing?.replyCount} trainers have replied to your {selectedListing?.pokemon.name} listing
                               </DialogDescription>
                             </DialogHeader>
                             <div className="space-y-4 max-h-96 overflow-y-auto">
-                              {listing.replyCount === 0 ? ( 
+                              {selectedListing?.replyCount === 0 ? ( 
                                 <p className="text-center text-muted-foreground py-8">No replies yet</p>
                                ) : (
                                 replies.map((reply) => (

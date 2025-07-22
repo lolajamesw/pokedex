@@ -547,7 +547,7 @@ app.get('/userPokemon', (req, res) => {
     });
 
     app.get("/replies/:listingID", (req, res) => {
-        const listingID = req.params.listingFormatted;
+        const listingID = req.params.listingID;
         console.log("Incoming request to /replies with listingID:", listingID);
 
         const repliesSql = `
@@ -565,7 +565,8 @@ app.get('/userPokemon', (req, res) => {
             r.sentTime,
             r.replyID
         FROM listing l, reply r, mypokemon mp, pokedex p, user u
-        WHERE l.listingID = r.listingID 
+        WHERE l.listingID = ${listingID}
+            AND l.listingID = r.listingID 
             AND mp.instanceID = r.instanceID 
             AND p.pid = mp.pID 
             AND u.uid = r.respondantID;
