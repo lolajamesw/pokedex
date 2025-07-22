@@ -195,6 +195,13 @@ BEGIN
 		SELECT l.listingID, r.replyID, l.instanceID as forSalePokemon, l.sellerID AS seller, r.instanceID AS replyPokemon, r.respondantID as replyer
 		FROM reply r, listing l
 		WHERE r.listingID = l.listingID AND r.replyID = tradeID);
+        
+        -- Nullify other replies with replyPokemon
+        DELETE FROM Reply WHERE (
+			instanceID IN (SELECT replyPokemon FROM tradeGoingThrough) 
+            AND respondantID IN (SELECT replyer FROM tradeGoingThrough) 
+            AND replyID NOT IN (SELECT replyID FROM tradeGoingThrough)
+		);
 
 		-- actually swap ownership
 		UPDATE mypokemon seller, mypokemon replyer, tradeGoingThrough
