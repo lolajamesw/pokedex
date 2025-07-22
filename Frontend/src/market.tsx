@@ -20,11 +20,6 @@ import { MessageSquare, Plus, Eye } from "lucide-react"
 import "./market.css"
 import { Description } from "@radix-ui/react-dialog"
 
-
-
-// const currentUser = { id: 1, name: "Ash Ketchum", avatar: "/placeholder.svg?height=40&width=40" }
-
-
 type pokemonType = {
     id: number,
     nickname: string,
@@ -99,12 +94,17 @@ export default function PokemonMarket() {
       .catch((error) => console.error("There was a problem getting the replies for this listing.", error));
   }
 
+  //initial values
+  useEffect(() => {
+    getAvailablePokemon();
+    getMyListings();
+  }, [])
+
   useEffect(() => {
     getMyListings();
     switch (tabValue){
       case "browse":
         getAvailableListings();
-        getAvailablePokemon();
         break;
       // case "my-listings":
       //   getMyListings();
@@ -126,7 +126,7 @@ export default function PokemonMarket() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           iid: newListing.pokemonId,
-          uid: currentUser.id,
+          uid: localStorage.getItem("uID"),
           desc: newListing.description
         }),
       });
@@ -168,7 +168,7 @@ export default function PokemonMarket() {
         body: JSON.stringify({
           instanceID: replyForm.pokemonId,
           listingID: replyForm.listingId,
-          respondantID: currentUser.id,
+          respondantID: localStorage.getItem("uID"),
           message: replyForm.message,
         })
       });
@@ -198,16 +198,18 @@ export default function PokemonMarket() {
     console.log("handling trade");
 
     try {
-      // const response = await fetch("http://localhost:8081/trade", {
-      //   method: "POST",
-      //   headers: {"Content-Type": "application/json"},
-      //   body: JSON.stringify({
-      //     replyID: reply.id
-      //   })
-      // });
+      const response = await fetch("http://localhost:8081/trade", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({
+          replyID: reply.id
+        })
+      });
 
-      // if (response.ok){
-        //display confirmation message
+      console.log(response);
+
+      if (response.status == 201){
+        // display confirmation message
 
         setBannerMessage(
           // TODO: fix selectedListing.pokemon.nickname is undefined
@@ -220,10 +222,10 @@ export default function PokemonMarket() {
         setReplyListVis(false);
         getMyListings(); //to get the updated list without the pokemon we just traded.
         
-      // } else {
-      //   const errMsg = await response.text();
-      //   console.error("Failed to create reply:", errMsg);
-      // }
+      } else {
+        const errMsg = await response.text();
+        console.error("Failed to create reply:", errMsg);
+      }
     } catch (err) {
       console.error("Error creating reply:", err);
       alert("Something went wrong during trade reply.");
