@@ -584,4 +584,62 @@ app.get('/userPokemon', (req, res) => {
     });
 
 
+    app.get('/pastTrades/:instanceID', (req, res) => {
+        const instanceID = req.params.instanceID;
+        console.log("Incoming request to /pastTrades with instanceID:", instanceID);
+
+        const sql = `
+            SELECT t.time, fromU.name fromUser, toU.name toUser, l.description,
+
+            fromP.name fromName, fromMP.nickname fromNickname, 
+            fromMP.level fromLevel, fromP.type1 fromType1, fromP.type2 fromType2,
+
+            toP.name toName, toMP.nickname toNickname, 
+            toMP.level toLevel, toP.type1 toType1, toP.type2 toType2 
+
+            FROM Trades t 
+                JOIN Listing l ON t.listingID=l.listingID
+                JOIN MyPokemon fromMP ON l.instanceID=fromMP.instanceID
+                JOIN User fromU ON l.sellerID=fromU.uID
+                JOIN Pokedex fromP ON fromMP.pID=fromP.pID
+                JOIN Reply r ON t.replyID=r.replyID
+                JOIN MyPokemon toMP ON r.instanceID=toMP.instanceID
+                JOIN User toU ON r.respondantID=toU.uID
+                JOIN Pokedex toP ON toMP.pID=toP.pID
+            WHERE fromMP.instanceID=${instanceID} OR toMP.instanceID=${instanceID}
+            ORDER BY time ASC;
+        `;
+
+        db.query(sql, (err, results) => {
+            if (err) {
+            console.error("Error fetching user's Pokémon data:", err);
+            return res.status(500).json({ error: "Database error" });
+            }
+
+            const formatted = results.map((row, index) => ({
+                id: index,
+                date: row.time,
+                fromTrainer: row.fromUser,
+                toTrainer: row.toUser,
+                tradedAway: {
+                    pokemon: row.toName,
+                    nickname: row.toNickname,
+                    level: row.toLevel,
+                    types: row.toType2 ? [row.toType1, row.toType2] : [row.toType1],
+                },
+                tradedFor: {
+                    pokemon: row.fromName,
+                    nickname: row.fromNickname,
+                    level: row.fromLevel,
+                    types: row.fromType2 ? [row.fromType1, row.fromType2] : [row.fromType1],
+                },
+                notes: row.description,
+
+            }));
+
+            return res.json(formatted);
+        });
+    });
+
+
 }
