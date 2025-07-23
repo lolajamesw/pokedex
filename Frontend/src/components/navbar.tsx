@@ -2,13 +2,14 @@
 
 import { useState, useRef, useEffect } from "react"
 import { useLocation, Link, useNavigate } from "react-router-dom"
-import { Menu, User, LogOut, BookOpen, ShoppingCart } from "lucide-react"
+import { Menu, User, LogOut, BookOpen, ShoppingCart, Sword } from "lucide-react"
 import "./navbar.css"
 
 const navigationItems = [
   { name: "Pokédex", href: "/pokedex", icon: BookOpen },
   { name: "My Pokémon", href: "/my-pokemon", icon: User },
   { name: "Market", href: "/market", icon: ShoppingCart },
+  { name: "Battle", href: "/battle", icon: Sword},
 ]
 
 export default function Navbar({ currentPage, setCurrentPage }) {
