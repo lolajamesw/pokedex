@@ -245,8 +245,8 @@ export default function PokemonMarket() {
           </div>
         )}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">Pokemon Market</h1>
-          <p className="text-muted-foreground">Trade your Pokemon with other trainers</p>
+          <h1 className="text-3xl font-bold mb-2 header">Pokemon Market</h1>
+          <p className="text-muted-foreground header">Trade your Pokemon with other trainers</p>
         </div>
 
         <Tabs value={tabValue} onValueChange={setTabValue} className="w-full">

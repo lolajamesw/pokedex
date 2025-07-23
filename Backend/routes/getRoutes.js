@@ -668,7 +668,7 @@ app.get('/userPokemon', (req, res) => {
                 JOIN User toU ON r.respondantID=toU.uID
                 JOIN Pokedex toP ON toMP.pID=toP.pID
             WHERE fromMP.instanceID=${instanceID} OR toMP.instanceID=${instanceID}
-            ORDER BY time ASC;
+            ORDER BY time DESC;
         `;
 
         db.query(sql, (err, results) => {
