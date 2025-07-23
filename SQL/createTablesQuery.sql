@@ -195,12 +195,26 @@ BEGIN
 		FROM reply r, listing l
 		WHERE r.listingID = l.listingID AND r.replyID = tradeID);
         
-        -- Nullify other replies with replyPokemon
+        -- Nullify other active replies with replyPokemon
         DELETE FROM Reply WHERE (
 			instanceID IN (SELECT replyPokemon FROM tradeGoingThrough) 
             AND respondantID IN (SELECT replyer FROM tradeGoingThrough) 
-            AND replyID NOT IN (SELECT replyID FROM tradeGoingThrough)
+            AND replyID NOT IN (SELECT replyID FROM tradeGoingThrough UNION SELECT replyID FROM trades)
 		);
+
+        -- If the reply pokemon was listed, delete the listing and any replies to it
+        DELETE FROM Reply WHERE (
+            listingID IN 
+            (
+                (SELECT listingID FROM listing WHERE (listing.instanceID IN (SELECT instanceID FROM tradeGoingThrough)))
+                EXCEPT ALL
+                (SELECT listingID FROM trades)
+            )
+        );
+        DELETE FROM listing WHERE (
+            instanceID IN (SELECT instanceID FROM tradeGoingThrough)
+            AND listingID NOT IN (SELECT listingID FROM trades)
+        );
 
 		-- actually swap ownership
 		UPDATE mypokemon seller, mypokemon replyer, tradeGoingThrough
