@@ -639,9 +639,18 @@ app.get('/userPokemon', (req, res) => {
     app.get('/pastTrades/:instanceID', (req, res) => {
         const instanceID = req.params.instanceID;
         console.log("Incoming request to /pastTrades with instanceID:", instanceID);
+        var username="";
+        db.query(`SELECT username FROM User WHERE uID=(SELECT uID FROM MyPokemon WHERE instanceID=${instanceID})`, 
+            (err, results) => {
+            if (err) {
+            console.error("Error fetching user's data:", err);
+            return res.status(500).json({ error: "Database error" });
+            }
+            username = results[0].username;
+        });
 
         const sql = `
-            SELECT t.time, fromU.name fromUser, toU.name toUser, l.description,
+            SELECT t.time, fromU.username fromUser, toU.username toUser, l.description,
 
             fromP.name fromName, fromMP.nickname fromNickname, 
             fromMP.level fromLevel, fromP.type1 fromType1, fromP.type2 fromType2,
@@ -667,12 +676,12 @@ app.get('/userPokemon', (req, res) => {
             console.error("Error fetching user's Pokémon data:", err);
             return res.status(500).json({ error: "Database error" });
             }
-
+            console.log(username);
             const formatted = results.map((row, index) => ({
                 id: index,
                 date: row.time,
-                fromTrainer: row.fromUser,
-                toTrainer: row.toUser,
+                fromTrainer: row.fromUser === username ? 'You' : row.fromUser,
+                toTrainer: row.toUser === username ? 'You' : row.toUser,
                 tradedAway: {
                     pokemon: row.toName,
                     nickname: row.toNickname,

@@ -317,8 +317,8 @@ module.exports = (app, db) => {
             });
 
             const [result] = await db.execute(
-            `INSERT INTO Listing (instanceID, sellerID, description)
-            VALUES (?, ?, ?);`,
+            `INSERT INTO Listing (instanceID, sellerID, description, postedTime)
+            VALUES (?, ?, ?, NOW());`,
             [iid, uid, desc]
             );
 
@@ -351,8 +351,8 @@ module.exports = (app, db) => {
             });
 
             const [result] = await db.execute(
-            `INSERT INTO Reply (listingID, instanceID, respondantID, message)
-            VALUES (?, ?, ?, ?);`,
+            `INSERT INTO Reply (listingID, instanceID, respondantID, message, sentTime)
+            VALUES (?, ?, ?, ?, NOW());`,
             [listingID, instanceID, respondantID, message]
             );
 

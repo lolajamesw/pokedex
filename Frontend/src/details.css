@@ -2,7 +2,7 @@
 
 @theme {
   /* Base color system */
-  --color-background: 253 247 240;
+  --color-background: 255 255 255;
   --color-foreground: 0 0 0;
   --color-card: 255 255 255;
   --color-card-foreground: 15 23 42;
@@ -507,6 +507,10 @@
   }
   .text-destructive-foreground {
     color: rgb(var(--color-destructive-foreground));
+  }
+  
+  .underlined {
+    text-decoration: underline;
   }
 
   /* Background color utilities */
