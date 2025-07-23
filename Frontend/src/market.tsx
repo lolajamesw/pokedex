@@ -55,6 +55,7 @@ export default function PokemonMarket() {
   const [replies, setReplies] = useState<ReplyType[]>([]);
   const [selectedListing, setSelectedListing] = useState<ListingType|null>(null);
   const [replyListVis, setReplyListVis] = useState<boolean>(false);
+  const [replyVis, setReplyVis] = useState<boolean>(false);
   const [newListing, setNewListing] = useState({
     pokemonId: "",
     description: "",
@@ -160,7 +161,7 @@ export default function PokemonMarket() {
 
   const handleReply = async () => {
     console.log("handling reply");
-    if (!replyForm.pokemonId || !replyForm.message.trim()) return
+    if (!replyForm.pokemonId) return
 
     try {
       const response = await fetch("http://localhost:8081/reply", {
@@ -183,6 +184,7 @@ export default function PokemonMarket() {
         );
         setTimeout(() => setBannerMessage(""), 4000);
 
+        setReplyVis(false);
         setReplyForm({ listingId: -1, pokemonId: "", message: "" })
       } else {
         const errMsg = await response.text();
@@ -291,7 +293,7 @@ export default function PokemonMarket() {
                         </p>
                         <p className="text-sm mb-4">{listing.description}</p>
 
-                        <Dialog>
+                        <Dialog open={replyVis} onOpenChange={setReplyVis}>
                           <DialogTrigger asChild>
                             <Button
                               variant="outline"
