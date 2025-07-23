@@ -283,7 +283,7 @@ export default function PokemonMarket() {
                           {/* <CardDescription>{listing.createdAt}</CardDescription> */}
                         </div>
                       </div>
-                      <Badge variant="secondary">{listing.replyCount} replies</Badge>
+                      <Badge variant="outline">{listing.replyCount} replies</Badge>
                     </div>
                   </CardHeader>
                   <CardContent>

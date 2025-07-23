@@ -488,7 +488,7 @@ app.get('/userPokemon', (req, res) => {
                     image: `https://www.pokemon.com/static-assets/content-assets/cms2/img/pokedex/detail/${row.pID.toString().padStart(3, "0")}.png`
                 },
                 description: row.description,
-                replies: []
+                replyCount: row.replyCount
             }));
 
             return res.json(formatted);
