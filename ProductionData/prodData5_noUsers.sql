@@ -161,7 +161,7 @@ CREATE TABLE `listing` (
   `postedTime` datetime DEFAULT '2000-01-01 00:00:00',
   `description` varchar(100) DEFAULT NULL,
   PRIMARY KEY (`listingID`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -170,6 +170,7 @@ CREATE TABLE `listing` (
 
 LOCK TABLES `listing` WRITE;
 /*!40000 ALTER TABLE `listing` DISABLE KEYS */;
+INSERT INTO `listing` VALUES (8,1189,99,'2025-07-23 17:19:39','Jigglypuff'),(10,1187,99,'2025-07-23 17:20:06','Jigglypuff'),(12,375,56,'2025-07-23 17:21:51','idk'),(13,376,56,'2025-07-23 17:50:56','Boo');
 /*!40000 ALTER TABLE `listing` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -254,7 +255,7 @@ CREATE TABLE `reply` (
   `sentTime` datetime DEFAULT '2000-01-01 00:00:00',
   `message` char(100) NOT NULL,
   PRIMARY KEY (`replyID`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -263,6 +264,7 @@ CREATE TABLE `reply` (
 
 LOCK TABLES `reply` WRITE;
 /*!40000 ALTER TABLE `reply` DISABLE KEYS */;
+INSERT INTO `reply` VALUES (8,8,366,56,'2025-07-23 17:20:36',''),(10,10,370,56,'2025-07-23 17:20:58',''),(11,12,1184,99,'2025-07-23 17:47:10',''),(12,13,7,9,'2025-07-23 17:51:25',''),(13,13,7,9,'2025-07-23 17:51:28',''),(14,13,8,9,'2025-07-23 18:07:26','');
 /*!40000 ALTER TABLE `reply` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -305,7 +307,7 @@ CREATE TABLE `trades` (
   KEY `replyID` (`replyID`),
   CONSTRAINT `trades_ibfk_1` FOREIGN KEY (`listingID`) REFERENCES `listing` (`listingID`),
   CONSTRAINT `trades_ibfk_2` FOREIGN KEY (`replyID`) REFERENCES `reply` (`replyID`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -314,6 +316,7 @@ CREATE TABLE `trades` (
 
 LOCK TABLES `trades` WRITE;
 /*!40000 ALTER TABLE `trades` DISABLE KEYS */;
+INSERT INTO `trades` VALUES (2,8,8,'2025-07-23 17:23:04'),(3,10,10,'2025-07-23 17:23:36'),(4,12,11,'2025-07-23 17:47:48');
 /*!40000 ALTER TABLE `trades` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -420,15 +423,38 @@ BEGIN
 	DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
 		ROLLBACK;
+		RESIGNAL;
 	END;
     
     START TRANSACTION;
 		DROP TABLE IF EXISTS tradeGoingThrough;
 
-		CREATE TEMPORARY TABLE tradeGoingThrough as (
+		CREATE TABLE tradeGoingThrough as (
 		SELECT l.listingID, r.replyID, l.instanceID as forSalePokemon, l.sellerID AS seller, r.instanceID AS replyPokemon, r.respondantID as replyer
 		FROM reply r, listing l
 		WHERE r.listingID = l.listingID AND r.replyID = tradeID);
+        
+		-- delete conflicting active replies and listings
+		DELETE FROM Reply
+        WHERE instanceID IN (
+			(SELECT forSalePokemon AS instanceID FROM tradeGoingThrough) 
+            UNION 
+            (SELECT replyPokemon AS instanceID FROM tradeGoingThrough)
+		) AND replyID NOT IN (
+			(SELECT replyID FROM tradeGoingThrough)
+            UNION
+            (SELECT replyID FROM trades)
+		);
+		DELETE FROM Listing
+        WHERE instanceID IN (
+			(SELECT forSalePokemon AS instanceID FROM tradeGoingThrough) 
+            UNION 
+            (SELECT replyPokemon AS instanceID FROM tradeGoingThrough)
+		) AND listingID NOT IN (
+			(SELECT listingID FROM tradeGoingThrough)
+            UNION
+            (SELECT listingID FROM trades)
+		);
 
 		-- actually swap ownership
 		UPDATE mypokemon seller, mypokemon replyer, tradeGoingThrough
@@ -437,7 +463,7 @@ BEGIN
         
         -- reset pokemonInstance bit values
         UPDATE myPokemon 
-        SET favourite=0, onteam=0, showcased=0
+        SET favourite=0, onteam=0, showcase=0
         WHERE instanceID IN (SELECT forSalePokemon FROM tradeGoingThrough) OR instanceID IN (SELECT replyPokemon FROM tradeGoingThrough);
 
 		-- increment each users trade count
@@ -453,7 +479,7 @@ BEGIN
 		INSERT INTO trades (listingID, replyID, time)
 		SELECT listingID, replyID, NOW() FROM tradeGoingThrough;
 
-		drop TABLE tradeGoingThrough;
+		DROP TABLE tradeGoingThrough;
     COMMIT;
 END ;;
 DELIMITER ;
@@ -498,4 +524,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-07-22 15:38:11
+-- Dump completed on 2025-07-23 18:23:09
