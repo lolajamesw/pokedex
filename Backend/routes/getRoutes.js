@@ -1,3 +1,4 @@
+const mysqlPromise = require('mysql2/promise');
 
 module.exports = (app, db) => {
     
@@ -389,60 +390,60 @@ module.exports = (app, db) => {
     });
 
 
-app.get('/userPokemon', (req, res) => {
-  const uID = req.query.uID;
-  console.log("Incoming request to /userPokemon with uID:", uID);
+    app.get('/userPokemon', (req, res) => {
+    const uID = req.query.uID;
+    console.log("Incoming request to /userPokemon with uID:", uID);
 
-  const sql = `
-    SELECT
-      mp.instanceID AS id,
-      p.pID AS number,
-      p.name,
-      p.type1,
-      p.type2,
-      p.hp,
-      p.atk,
-      p.def,
-      p.spAtk,
-      p.spDef,
-      p.speed,
-      mp.level,
-      mp.nickname,
-      mp.showcase,
-      mp.onteam
-    FROM MyPokemon mp
-    JOIN Pokedex p ON mp.pID = p.pID
-    WHERE mp.uID = ?
-  `;
+    const sql = `
+        SELECT
+        mp.instanceID AS id,
+        p.pID AS number,
+        p.name,
+        p.type1,
+        p.type2,
+        p.hp,
+        p.atk,
+        p.def,
+        p.spAtk,
+        p.spDef,
+        p.speed,
+        mp.level,
+        mp.nickname,
+        mp.showcase,
+        mp.onteam
+        FROM MyPokemon mp
+        JOIN Pokedex p ON mp.pID = p.pID
+        WHERE mp.uID = ?
+    `;
 
-  db.query(sql, [uID], (err, results) => {
-    if (err) {
-      console.error("Error fetching user's Pokémon data:", err);
-      return res.status(500).json({ error: "Database error" });
-    }
+    db.query(sql, [uID], (err, results) => {
+        if (err) {
+        console.error("Error fetching user's Pokémon data:", err);
+        return res.status(500).json({ error: "Database error" });
+        }
 
-    const formatted = results.map((row) => ({
-      id: row.id,
-      number: row.number,
-      name: row.name,
-      types: row.type2 ? [row.type1, row.type2] : [row.type1],
-      stats: {
-        hp: row.hp,
-        attack: row.atk,
-        defense: row.def,
-        spAttack: row.spAtk,
-        spDefense: row.spDef,
-        speed: row.speed,
-      },
-      level: row.level,
-      nickname: row.nickname,
-      showcase: row.showcase[0]===1,
-      onTeam: row.onteam[0]===1
-    }));
+        const formatted = results.map((row) => ({
+            id: row.id,
+            number: row.number,
+            name: row.name,
+            types: row.type2 ? [row.type1, row.type2] : [row.type1],
+            stats: {
+                hp: row.hp,
+                attack: row.atk,
+                defense: row.def,
+                spAttack: row.spAtk,
+                spDefense: row.spDef,
+                speed: row.speed,
+            },
+            level: row.level,
+            nickname: row.nickname,
+            showcase: row.showcase[0]===1,
+            onTeam: row.onteam[0]===1
+            }));
 
-    return res.json(formatted);
-  });
-});
+            return res.json(formatted);
+        });
+    });
 
     app.get('/availableListings/:uID', (req, res) => {
         const uID = req.params.uID;
@@ -836,6 +837,34 @@ app.get('/userPokemon', (req, res) => {
 
             return res.json(formatted);
         });
+    });
+    app.get("/searchUser", async (req, res) => {
+    const { query } = req.query;
+
+    if (!query) {
+        return res.status(400).json({ error: "No user found" });
+    }
+
+    try {
+        const db = await mysqlPromise.createConnection({
+            host: process.env.DB_HOST,
+            port: process.env.DB_PORT,
+            user: process.env.DB_USER,
+            password: process.env.DB_PASSWORD,
+            database: process.env.DB_NAME
+        });
+
+        const isNumeric = /^\d+$/.test(query);
+        const [results] = isNumeric
+        ? await db.execute("SELECT uID, name, username FROM User WHERE uID = ?", [query])
+        : await db.execute("SELECT uID, name, username FROM User WHERE username LIKE ?", [`%${query}%`]);
+
+        await db.end();
+        res.json(results);
+    } catch (err) {
+        console.error("Search error:", err);
+        res.status(500).json({ error: "Server error while searching" });
+    }
     });
 
 

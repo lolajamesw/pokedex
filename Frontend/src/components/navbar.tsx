@@ -10,6 +10,7 @@ const navigationItems = [
   { name: "My Pokémon", href: "/my-pokemon", icon: User },
   { name: "Market", href: "/market", icon: ShoppingCart },
   { name: "Battle", href: "/battle", icon: Sword},
+  { name: "Search User", href: "/search-user", icon: User }
 ]
 
 export default function Navbar({ currentPage, setCurrentPage }) {
@@ -70,7 +71,7 @@ export default function Navbar({ currentPage, setCurrentPage }) {
           <div className="desktop-profile">
             <button onClick={() => setShowProfileDropdown(!showProfileDropdown)} className="profile-button">
               <div className="avatar">
-                <div className="avatar-fallback">T</div>
+                <div className="avatar-fallback">{user.displayName.charAt(0)}</div>
               </div>
             </button>
             {showProfileDropdown && (

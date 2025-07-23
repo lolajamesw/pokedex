@@ -128,7 +128,11 @@ export default function PokemonCounterPage() {
               <p className="text-gray-600">Found {results.counters.length} Pokemon in your collection</p>
             </div>
 
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            <div className={ 
+              results.counters.length > 3 ? "grid gap-4 md:grid-cols-2 lg:grid-cols-3" : 
+              results.counters.length > 1 ? "flex justify-between items-center gap-4" : 
+              "flex justify-center items-center gap-4"
+            }>
               {results.counters.map((pokemon) => (
                 <Card key={pokemon.id} className="hover:shadow-lg transition-shadow">
                   <Link
@@ -153,7 +157,10 @@ export default function PokemonCounterPage() {
                           className="rounded-lg bg-white/20 p-4"
                         />
                       </div>
-                      <div className="flex gap-2">
+                    </CardHeader>
+                    <CardContent className="pt-0">
+                      <div className="flex gap-6 text-sm">
+                        <div className="flex gap-1">
                         <span key={pokemon.type1} className={`type-badge type-${pokemon.type1.toLowerCase()}`}>
                           {pokemon.type1}
                         </span>
@@ -163,16 +170,9 @@ export default function PokemonCounterPage() {
                           </span>
                         )}
                       </div>
-                    </CardHeader>
-                    <CardContent className="pt-0">
-                      <div className="grid grid-cols-2 gap-4 text-sm">
                         <div className="flex items-center gap-2">
                           <Shield className="w-4 h-4 text-blue-500" />
                           <span>Level {pokemon.level}</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Sword className="w-4 h-4 text-red-500" />
-                          <span>{pokemon.cp} CP</span>
                         </div>
                       </div>
                     </CardContent>
