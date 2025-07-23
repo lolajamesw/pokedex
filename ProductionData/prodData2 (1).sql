@@ -184,6 +184,7 @@ CREATE TABLE `listing` (
   `instanceID` int NOT NULL,
   `sellerID` int NOT NULL,
   `description` varchar(100) DEFAULT NULL,
+  `postedTime` datetime DEFAULT '2000-01-01 00:00:00',
   PRIMARY KEY (`listingID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -216,7 +217,7 @@ CREATE TABLE `mypokemon` (
   `dateAdded` datetime DEFAULT '2000-01-01 00:00:00',
   PRIMARY KEY (`instanceID`),
   CONSTRAINT `mypokemon_chk_1` CHECK ((`level` > 0))
-) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -225,7 +226,7 @@ CREATE TABLE `mypokemon` (
 
 LOCK TABLES `mypokemon` WRITE;
 /*!40000 ALTER TABLE `mypokemon` DISABLE KEYS */;
-INSERT INTO `mypokemon` VALUES (151,101,1,'Kitty',67,_binary '\0',_binary '',_binary '','2025-07-15 16:46:33'),(59,101,2,'Jaws',15,_binary '\0',_binary '',_binary '\0','2025-07-15 16:46:54'),(381,101,3,'Gent',40,_binary '\0',_binary '',_binary '','2025-07-15 16:47:09'),(151,1,4,'Kitty',67,_binary '',_binary '\0',_binary '','2025-07-15 16:49:03'),(381,1,5,'Gent',50,_binary '\0',_binary '\0',_binary '\0','2025-07-15 16:49:24'),(381,1,6,'Gent',50,_binary '\0',_binary '\0',_binary '','2025-07-15 16:49:24'),(59,1,7,'Jaws',34,_binary '\0',_binary '\0',_binary '\0','2025-07-15 16:49:38'),(571,1,8,'Lad',37,_binary '',_binary '',_binary '\0','2025-07-15 19:21:53');
+INSERT INTO `mypokemon` VALUES (151,101,1,'Kitty',67,_binary '\0',_binary '',_binary '','2025-07-15 16:46:33'),(59,101,2,'Jaws',15,_binary '\0',_binary '',_binary '\0','2025-07-15 16:46:54'),(381,101,3,'Gent',40,_binary '\0',_binary '',_binary '','2025-07-15 16:47:09'),(151,1,4,'Kitty',67,_binary '',_binary '\0',_binary '','2025-07-15 16:49:03'),(381,1,5,'Gent',50,_binary '\0',_binary '\0',_binary '\0','2025-07-15 16:49:24'),(381,1,6,'Gent',50,_binary '\0',_binary '\0',_binary '','2025-07-15 16:49:24'),(59,1,7,'Jaws',34,_binary '\0',_binary '\0',_binary '\0','2025-07-15 16:49:38'),(571,1,8,'Lad',37,_binary '',_binary '',_binary '\0','2025-07-15 19:21:53'),(571,3,9,'Lad',47,_binary '\0',_binary '\0',_binary '\0','2025-07-21 21:42:29');
 /*!40000 ALTER TABLE `mypokemon` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
@@ -354,6 +355,7 @@ CREATE TABLE `trades` (
   `tradeID` int NOT NULL AUTO_INCREMENT,
   `listingID` int NOT NULL,
   `replyID` int NOT NULL,
+  `time` datetime DEFAULT '2000-01-01 00:00:00',
   PRIMARY KEY (`tradeID`),
   KEY `listingID` (`listingID`),
   KEY `replyID` (`replyID`),
@@ -439,7 +441,7 @@ CREATE TABLE `user` (
   UNIQUE KEY `username` (`username`),
   UNIQUE KEY `password` (`password`),
   CONSTRAINT `user_chk_1` CHECK (((length(`password`) > 7) and regexp_like(`password`,_utf8mb4'[0-9]') and regexp_like(`password`,_utf8mb4'[a-z]') and regexp_like(`password`,_utf8mb4'[A-Z]') and regexp_like(`password`,_utf8mb4'[^a-zA-Z0-9]')))
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=102 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -448,7 +450,7 @@ CREATE TABLE `user` (
 
 LOCK TABLES `user` WRITE;
 /*!40000 ALTER TABLE `user` DISABLE KEYS */;
-INSERT INTO `user` VALUES (1,'Lola',0,'Kami','Letters123&');
+INSERT INTO `user` VALUES (1,'Lola',0,'Kami','Letters123&'),(3,'Lola',0,'Kamigoroshi','TyneRdmn4$'),(101,'Tyne',0,'Haze','Password!2');
 /*!40000 ALTER TABLE `user` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -469,4 +471,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-07-15 23:47:25
+-- Dump completed on 2025-07-21 22:22:01

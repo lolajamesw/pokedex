@@ -2,8 +2,8 @@
 
 @theme {
   /* Base color system */
-  --color-background: 253 247 240;
-  --color-foreground: 255 255 42;
+  --color-background: 255 255 255;
+  --color-foreground: 0 0 0;
   --color-card: 255 255 255;
   --color-card-foreground: 15 23 42;
   --color-popover: 255 255 255;
@@ -72,7 +72,7 @@
   --animate-slide-in: slide-in 0.3s ease-out;
 }
 
-@media (prefers-color-scheme: light) {
+/* @media (prefers-color-scheme: light) {
   @theme {
     --color-background: 255 255 255;
     --color-foreground: 0 0 0;
@@ -94,7 +94,7 @@
     --color-input: 30 41 59;
     --color-ring: 99 102 241;
   }
-}
+} */
 
 /* Keyframe animations */
 @keyframes accordion-down {
@@ -494,7 +494,7 @@
   }
   .text-muted-foreground {
     color: rgb(var(--color-muted-foreground));
-    text-align: left !important;
+    text-align: left;
   }
   .text-accent {
     color: rgb(var(--color-accent));
@@ -507,6 +507,10 @@
   }
   .text-destructive-foreground {
     color: rgb(var(--color-destructive-foreground));
+  }
+
+  .underlined {
+    text-decoration: underline;
   }
 
   /* Background color utilities */

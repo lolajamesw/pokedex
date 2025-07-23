@@ -69,7 +69,7 @@ export default function LoginPage() {
         </div>
         <button type="submit">Login</button>
       </form>
-      <p>
+      <p className="create-account">
         <Link to="/create-account">Don't have an account? Create one</Link>
       </p>
     </div>

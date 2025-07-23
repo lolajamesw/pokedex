@@ -465,30 +465,30 @@ app.get('/userPokemon', (req, res) => {
             LEFT JOIN Pokedex p ON p.pID=mp.pID
             LEFT JOIN User u ON u.uID=mp.uID
             LEFT JOIN Reply r ON l.listingID=r.listingID
-            WHERE u.uID!=${uID}
+            WHERE l.sellerID!=${uID} AND l.listingID NOT IN (SELECT listingID FROM Trades)
             GROUP BY l.listingID, u.uID, u.username, p.pID, p.name, 
                 type1, type2, level, l.description;
         `;
 
         db.query(sql, (err, results) => {
             if (err) {
-            console.error("Error fetching user's Pokémon data:", err);
-            return res.status(500).json({ error: "Database error" });
+                console.error("Error fetching user's Pokémon data:", err);
+                return res.status(500).json({ error: "Database error" });
             }
 
             const formatted = results.map((row) => ({
-            id: row.listingID,
-            userId: row.uID,
-            userName: row.username,
-            pokemon: {
-                id: row.pID,
-                name: row.name,
-                type: row.type2 ? `${row.type1}/${row.type2}` : row.type1,
-                level: row.level,
-                image: `https://www.pokemon.com/static-assets/content-assets/cms2/img/pokedex/detail/${row.pID.toString().padStart(3, "0")}.png`
-            },
-            description: row.description,
-            replies: []
+                id: row.listingID,
+                userId: row.uID,
+                userName: row.username,
+                pokemon: {
+                    id: row.pID,
+                    name: row.name,
+                    type: row.type2 ? `${row.type1}/${row.type2}` : row.type1,
+                    level: row.level,
+                    image: `https://www.pokemon.com/static-assets/content-assets/cms2/img/pokedex/detail/${row.pID.toString().padStart(3, "0")}.png`
+                },
+                description: row.description,
+                replies: []
             }));
 
             return res.json(formatted);
@@ -499,9 +499,9 @@ app.get('/userPokemon', (req, res) => {
         const uID = req.params.uID;
         console.log("Incoming request to /myListings with uID:", uID);
 
-        const sql = `
+        const listingSql = `
             SELECT 
-              l.listingID
+            l.listingID
             , u.uID
             , u.username
             , p.pID
@@ -516,34 +516,88 @@ app.get('/userPokemon', (req, res) => {
             LEFT JOIN Pokedex p ON p.pID=mp.pID
             LEFT JOIN User u ON u.uID=mp.uID
             LEFT JOIN Reply r ON l.listingID=r.listingID
-            WHERE u.uID=${uID}
+            WHERE u.uID=${uID} AND l.listingID NOT IN (SELECT listingID FROM trades)
             GROUP BY l.listingID, u.uID, u.username, p.pID, p.name, 
                 type1, type2, level, l.description;
         `;
-
-        db.query(sql, (err, results) => {
+        
+        db.query(listingSql, (err, results) => {
             if (err) {
-            console.error("Error fetching user's Pokémon data:", err);
-            return res.status(500).json({ error: "Database error" });
+                console.error("Error fetching user's Pokémon data:", err);
+                return res.status(500).json({ error: "Database error" });
             }
 
-            const formatted = results.map((row) => ({
-            id: row.listingID,
-            userId: row.uID,
-            userName: row.username,
-            pokemon: {
-                id: row.pID,
-                name: row.name,
-                type: row.type2 ? `${row.type1}/${row.type2}` : row.type1,
-                level: row.level,
-                image: `https://www.pokemon.com/static-assets/content-assets/cms2/img/pokedex/detail/${row.pID.toString().padStart(3, "0")}.png`
-            },
-            description: row.description,
-            replies: []
+            const listingFormatted = results.map((row) => ({
+                id: row.listingID,
+                userId: row.uID,
+                userName: row.username,
+                pokemon: {
+                    id: row.pID,
+                    name: row.name,
+                    type: row.type2 ? `${row.type1}/${row.type2}` : row.type1,
+                    level: row.level,
+                    image: `https://www.pokemon.com/static-assets/content-assets/cms2/img/pokedex/detail/${row.pID.toString().padStart(3, "0")}.png`
+                },
+                description: row.description,
+                replyCount: row.replyCount
             }));
 
-            return res.json(formatted);
+            console.log(listingFormatted);
+
+            return res.json(listingFormatted);
         });
+    });
+
+    app.get("/replies/:listingID", (req, res) => {
+        const listingID = req.params.listingID;
+        console.log("Incoming request to /replies with listingID:", listingID);
+
+        const repliesSql = `
+        SELECT 
+            mp.instanceID, 
+            p.pID,
+            p.name AS species, 
+            p.type1, 
+            p.type2, 
+            mp.level, 
+            mp.nickname, 
+            mp.uid, 
+            u.name AS respondantName,
+            r.message,
+            r.sentTime,
+            r.replyID
+        FROM listing l, reply r, mypokemon mp, pokedex p, user u
+        WHERE l.listingID = ${listingID}
+            AND l.listingID = r.listingID 
+            AND mp.instanceID = r.instanceID 
+            AND p.pid = mp.pID 
+            AND u.uid = r.respondantID;
+        `;
+
+        db.query(repliesSql, (err, results) => {
+            if (err) {
+                console.error("Error fetching reply data:", err);
+                return res.status(500).json({ error: "Database error" });
+            }
+
+            const repliesFormatted = results.map((row) => ({
+                id: row.replyID,
+                userName: row.respondantName,
+                pokemon: {
+                    id: row.instanceID,
+                    nickname: row.nickname,
+                    name: row.species,
+                    type: row.type2 ? `${row.type1}/${row.type2}` : row.type1,
+                    level: row.level,
+                    image: `https://www.pokemon.com/static-assets/content-assets/cms2/img/pokedex/detail/${row.pID.toString().padStart(3, "0")}.png`
+                },
+                message: row.message,
+                sentTime: row.sentTime
+            }));
+
+            return res.json(repliesFormatted);
+        });
+
     });
 
 
@@ -712,6 +766,73 @@ app.get('/userPokemon', (req, res) => {
         });
 
         
+    });
+
+
+    app.get('/pastTrades/:instanceID', (req, res) => {
+        const instanceID = req.params.instanceID;
+        console.log("Incoming request to /pastTrades with instanceID:", instanceID);
+        var username="";
+        db.query(`SELECT username FROM User WHERE uID=(SELECT uID FROM MyPokemon WHERE instanceID=${instanceID})`, 
+            (err, results) => {
+            if (err) {
+            console.error("Error fetching user's data:", err);
+            return res.status(500).json({ error: "Database error" });
+            }
+            username = results[0].username;
+        });
+
+        const sql = `
+            SELECT t.time, fromU.username fromUser, toU.username toUser, l.description,
+
+            fromP.name fromName, fromMP.nickname fromNickname, 
+            fromMP.level fromLevel, fromP.type1 fromType1, fromP.type2 fromType2,
+
+            toP.name toName, toMP.nickname toNickname, 
+            toMP.level toLevel, toP.type1 toType1, toP.type2 toType2 
+
+            FROM Trades t 
+                JOIN Listing l ON t.listingID=l.listingID
+                JOIN MyPokemon fromMP ON l.instanceID=fromMP.instanceID
+                JOIN User fromU ON l.sellerID=fromU.uID
+                JOIN Pokedex fromP ON fromMP.pID=fromP.pID
+                JOIN Reply r ON t.replyID=r.replyID
+                JOIN MyPokemon toMP ON r.instanceID=toMP.instanceID
+                JOIN User toU ON r.respondantID=toU.uID
+                JOIN Pokedex toP ON toMP.pID=toP.pID
+            WHERE fromMP.instanceID=${instanceID} OR toMP.instanceID=${instanceID}
+            ORDER BY time DESC;
+        `;
+
+        db.query(sql, (err, results) => {
+            if (err) {
+            console.error("Error fetching user's Pokémon data:", err);
+            return res.status(500).json({ error: "Database error" });
+            }
+            console.log(username);
+            const formatted = results.map((row, index) => ({
+                id: index,
+                date: row.time,
+                fromTrainer: row.fromUser === username ? 'You' : row.fromUser,
+                toTrainer: row.toUser === username ? 'You' : row.toUser,
+                tradedAway: {
+                    pokemon: row.toName,
+                    nickname: row.toNickname,
+                    level: row.toLevel,
+                    types: row.toType2 ? [row.toType1, row.toType2] : [row.toType1],
+                },
+                tradedFor: {
+                    pokemon: row.fromName,
+                    nickname: row.fromNickname,
+                    level: row.fromLevel,
+                    types: row.fromType2 ? [row.fromType1, row.fromType2] : [row.fromType1],
+                },
+                notes: row.description,
+
+            }));
+
+            return res.json(formatted);
+        });
     });
 
 

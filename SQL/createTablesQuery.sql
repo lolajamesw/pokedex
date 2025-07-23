@@ -14,6 +14,7 @@ DROP TABLE IF EXISTS Types;
 DROP TRIGGER IF EXISTS limit_attacks;
 DROP TRIGGER IF EXISTS max_6_onTeam;
 DROP TRIGGER IF EXISTS max_6_showcase;
+DROP PROCEDURE IF EXISTS doTrade;
 
 CREATE TABLE Types(type VARCHAR(10) NOT NULL PRIMARY KEY);
 
@@ -49,7 +50,7 @@ CREATE TABLE Pokedex (
     spDef INT NOT NULL,
     speed INT NOT NULL,
     legendary BIT NOT NULL,
-	description varchar(200),
+	description varchar(300),
     CHECK (HP >=0 AND atk >= 0 AND def >= 0 AND spAtk >= 0 AND spDef >= 0 AND speed >= 0)
 );
     
@@ -101,6 +102,7 @@ CREATE TABLE Listing(
 	listingID INT AUTO_INCREMENT PRIMARY KEY,
     instanceID INT NOT NULL REFERENCES MyPokemon(instanceID),
     sellerID INT NOT NULL REFERENCES User(uID),
+    postedTime DATETIME DEFAULT '2000-01-01',
     description VARCHAR(100)
 );
 
@@ -108,13 +110,16 @@ CREATE TABLE Reply(
 	replyID INT AUTO_INCREMENT PRIMARY KEY,
     listingID INT NOT NULL REFERENCES Listing(listingID),
     instanceID INT NOT NULL REFERENCES MyPokemon(instanceID),
-    respondantID INT NOT NULL REFERENCES User(uID)
+    respondantID INT NOT NULL REFERENCES User(uID),
+    sentTime DATETIME DEFAULT '2000-01-01',
+    message CHAR(100) NOT NULL
 );
 
 CREATE TABLE Trades(
 	tradeID INT AUTO_INCREMENT PRIMARY KEY,
 	listingID INT NOT NULL,
     replyID INT NOT NULL,
+    `time` DATETIME DEFAULT '2000-01-01',
     FOREIGN KEY (listingID) REFERENCES Listing(listingID),
     FOREIGN KEY (replyID) REFERENCES Reply(replyID)
 );
@@ -171,4 +176,59 @@ BEGIN
 		END IF;
 	END IF;
 END //
+
+-- stored procedure to trade pokemon. Allows client to call it in one request
+
+DELIMITER //
+CREATE PROCEDURE doTrade(tradeID INT)
+BEGIN
+
+	DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+		ROLLBACK;
+	END;
+    
+    START TRANSACTION;
+		DROP TABLE IF EXISTS tradeGoingThrough;
+
+		CREATE TEMPORARY TABLE tradeGoingThrough as (
+		SELECT l.listingID, r.replyID, l.instanceID as forSalePokemon, l.sellerID AS seller, r.instanceID AS replyPokemon, r.respondantID as replyer
+		FROM reply r, listing l
+		WHERE r.listingID = l.listingID AND r.replyID = tradeID);
+        
+        -- Nullify other replies with replyPokemon
+        DELETE FROM Reply WHERE (
+			instanceID IN (SELECT replyPokemon FROM tradeGoingThrough) 
+            AND respondantID IN (SELECT replyer FROM tradeGoingThrough) 
+            AND replyID NOT IN (SELECT replyID FROM tradeGoingThrough)
+		);
+
+		-- actually swap ownership
+		UPDATE mypokemon seller, mypokemon replyer, tradeGoingThrough
+		SET seller.uid = tradeGoingThrough.replyer, replyer.uid = tradeGoingThrough.seller
+		WHERE seller.instanceID = tradeGoingThrough.forSalePokemon AND replyer.instanceID = tradeGoingThrough.replyPokemon;
+        
+        -- reset pokemonInstance bit values
+        UPDATE myPokemon 
+        SET favourite=0, onteam=0, showcased=0
+        WHERE instanceID IN (SELECT forSalePokemon FROM tradeGoingThrough) OR instanceID IN (SELECT replyPokemon FROM tradeGoingThrough);
+
+		-- increment each users trade count
+		UPDATE user, tradeGoingThrough
+		SET tradeCount = tradecount + 1
+		WHERE uID = tradeGoingThrough.seller;
+
+		UPDATE user, tradeGoingThrough
+		SET tradeCount = tradecount + 1
+		WHERE uID = tradeGoingThrough.replyer;
+
+		-- add completed trade to trade table
+		INSERT INTO trades (listingID, replyID, time)
+		SELECT listingID, replyID, NOW() FROM tradeGoingThrough;
+
+		drop TABLE tradeGoingThrough;
+    COMMIT;
+END//
+DELIMITER ;
+
 
