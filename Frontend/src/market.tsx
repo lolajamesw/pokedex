@@ -350,7 +350,7 @@ export default function PokemonMarket() {
                                   onChange={(e) => setReplyForm({ ...replyForm, message: e.target.value })}
                                 />
                               </div>
-                              <Button onClick={handleReply} className="w-full">
+                              <Button onClick={handleReply} className="w-full" disabled={replyForm.pokemonId == ""}>
                                 Send Reply
                               </Button>
                             </div>
