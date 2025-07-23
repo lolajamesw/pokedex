@@ -614,7 +614,10 @@ app.get('/userPokemon', (req, res) => {
             pokedex.type2,
             myPokemon.level
         FROM myPokemon JOIN pokedex ON myPokemon.pid = pokedex.pid
-        WHERE uid = ${uID} AND myPokemon.instanceID NOT IN (SELECT instanceID from listing);
+        WHERE uid = ${uID} AND myPokemon.instanceID NOT IN (
+            SELECT instanceID from listing WHERE listingID NOT IN (
+                SELECT listingID FROM Trades
+        ));
         `;
 
         db.query(sql, (err, results) => {
