@@ -179,7 +179,7 @@ END //
 
 -- stored procedure to trade pokemon. Uses a transaction to ensure data consistency during concurrent requests and system failures
 DROP PROCEDURE IF EXISTS doTrade;
-DELIMITER //
+
 CREATE PROCEDURE doTrade(tradeID INT)
 BEGIN
 
@@ -246,5 +246,4 @@ BEGIN
     COMMIT;
 END//
 DELIMITER ;
-
 
