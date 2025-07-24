@@ -81,7 +81,7 @@ export default function CreateAccountPage() {
         </div>
         <button type="submit">Create Account</button>
       </form>
-      <p>
+      <p className='create-account'>
         <Link to="/login">Already have an account? Login here</Link>
       </p>
     </div>

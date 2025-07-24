@@ -96,7 +96,7 @@
 .search-icon {
   position: absolute;
   left: 0.75rem;
-  top: 50%;
+  top: 37%;
   transform: translateY(-50%);
   color: #9ca3af;
   height: 1rem;
@@ -127,6 +127,7 @@
 
 .search-input::placeholder {
   color: #6b7280;
+  transform: translateX(23px);
 }
 
 .type-select {

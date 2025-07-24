@@ -12,6 +12,10 @@
   margin-bottom: 1rem;
 }
 
+.searching::placeholder {
+  transform: translateX(0px)
+}
+
 .search-results {
   list-style: none;
   padding: 0;

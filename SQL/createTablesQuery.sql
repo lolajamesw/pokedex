@@ -171,3 +171,76 @@ BEGIN
 	END IF;
 END //
 
+<<<<<<< Updated upstream
+=======
+-- stored procedure to trade pokemon. Uses a transaction to ensure data consistency during concurrent requests and system failures
+DROP PROCEDURE IF EXISTS doTrade;
+CREATE PROCEDURE doTrade(tradeID INT)
+BEGIN
+
+	DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+		ROLLBACK;
+		RESIGNAL;
+	END;
+    
+    START TRANSACTION;
+		DROP TABLE IF EXISTS tradeGoingThrough;
+
+		CREATE TABLE tradeGoingThrough as (
+		SELECT l.listingID, r.replyID, l.instanceID as forSalePokemon, l.sellerID AS seller, r.instanceID AS replyPokemon, r.respondantID as replyer
+		FROM reply r, listing l
+		WHERE r.listingID = l.listingID AND r.replyID = tradeID);
+        
+		-- delete conflicting active replies and listings
+		DELETE FROM Reply
+        WHERE instanceID IN (
+			(SELECT forSalePokemon AS instanceID FROM tradeGoingThrough) 
+            UNION 
+            (SELECT replyPokemon AS instanceID FROM tradeGoingThrough)
+		) AND replyID NOT IN (
+			(SELECT replyID FROM tradeGoingThrough)
+            UNION
+            (SELECT replyID FROM trades)
+		);
+		DELETE FROM Listing
+        WHERE instanceID IN (
+			(SELECT forSalePokemon AS instanceID FROM tradeGoingThrough) 
+            UNION 
+            (SELECT replyPokemon AS instanceID FROM tradeGoingThrough)
+		) AND listingID NOT IN (
+			(SELECT listingID FROM tradeGoingThrough)
+            UNION
+            (SELECT listingID FROM trades)
+		);
+
+		-- actually swap ownership
+		UPDATE mypokemon seller, mypokemon replyer, tradeGoingThrough
+		SET seller.uid = tradeGoingThrough.replyer, replyer.uid = tradeGoingThrough.seller
+		WHERE seller.instanceID = tradeGoingThrough.forSalePokemon AND replyer.instanceID = tradeGoingThrough.replyPokemon;
+        
+        -- reset pokemonInstance bit values
+        UPDATE myPokemon 
+        SET favourite=0, onteam=0, showcase=0, dateAdded=NOW()
+        WHERE instanceID IN (SELECT forSalePokemon FROM tradeGoingThrough) OR instanceID IN (SELECT replyPokemon FROM tradeGoingThrough);
+
+		-- increment each users trade count
+		UPDATE user, tradeGoingThrough
+		SET tradeCount = tradecount + 1
+		WHERE uID = tradeGoingThrough.seller;
+
+		UPDATE user, tradeGoingThrough
+		SET tradeCount = tradecount + 1
+		WHERE uID = tradeGoingThrough.replyer;
+
+		-- add completed trade to trade table
+		INSERT INTO trades (listingID, replyID, time)
+		SELECT listingID, replyID, NOW() FROM tradeGoingThrough;
+
+		DROP TABLE tradeGoingThrough;
+    COMMIT;
+END//
+DELIMITER ;
+
+
+>>>>>>> Stashed changes
