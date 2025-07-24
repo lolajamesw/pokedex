@@ -155,7 +155,7 @@ const PokemonDetail = () => {
         {/* Header Section */}
         <Card className="overflow-hidden">
           <CardContent className="p-0">
-            <div className={`bg-gradient-to-r gradient-${pokemon.types[0].toLowerCase()} p-6 text-white`}>
+            <div className={`gradient-${pokemon.types[0].toLowerCase()} p-6 text-white`}>
               <div className="flex flex-col md:flex-row items-center gap-6">
                 <div className="relative">
                   <img

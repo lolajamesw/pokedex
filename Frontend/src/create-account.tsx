@@ -37,7 +37,7 @@ export default function CreateAccountPage() {
         const errMsg = await response.text();
         console.error("Failed to create account:", errMsg);
 
-        alert("Failed to create account. Please check your name, username, and password.");
+        alert("Failed to create account. Please check your name, username, and password.\nUsernames must be unique\nPasswords must be between 8 and 20 characters, contain at least 2 numbers, and at least 1 special character.");
       }
     } catch (err) {
       console.error("Error creating account:", err);
@@ -70,12 +70,12 @@ export default function CreateAccountPage() {
           />
         </div>
         <div className="input-group">
-          <label>Password</label>
+          <label>Password (8+ characters)</label>
           <input 
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)} 
-            placeholder="Choose a password" 
+            placeholder="e.g. Pa$$word101" 
             required 
           />
         </div>

@@ -30,15 +30,15 @@ INSERT INTO LearnableAttacks (pid, aid) VALUES
 INSERT INTO User (uid, Name, tradeCount, username, password) VALUES
 (4, 'Cynthia', 5, 'championcyn', 'Garchomp142*');
 
-INSERT INTO MyPokemon (pid, uid, nickname, favourite, onteam, level, showcase) VALUES
-(150, 4, 'CloneGod', 0, 1, 70, 1),  -- On team + Showcased
-(3, 4, 'Bulky', 1, 1, 42, 1),     -- On team + Showcased
-(25, 4, 'Zaps', 0, 1, 35, 0),      -- On team
-(26, 4, 'Zoomer', 0, 1, 55, 1),    -- On team + Showcased
-(1, 4, 'Leafy', 0, 1, 14, 0),     -- On team
-(2, 4, 'Evolver', 0, 1, 25, 1),   -- On team + Showcased
-(1, 4, 'Seedling', 0, 0, 9, 1),   -- Not on team, but Showcased
-(3, 4, 'Tanky', 0, 0, 40, 1);     -- Not on team, but Showcased
+INSERT INTO MyPokemon (instanceID, pid, uid, nickname, favourite, onteam, level, showcase) VALUES
+(1, 150, 4, 'CloneGod', 0, 1, 70, 1),  -- On team + Showcased
+(2, 3, 4, 'Bulky', 1, 1, 42, 1),     -- On team + Showcased
+(3, 25, 4, 'Zaps', 0, 1, 35, 0),      -- On team
+(4, 26, 4, 'Zoomer', 0, 1, 55, 1),    -- On team + Showcased
+(5, 1, 4, 'Leafy', 0, 1, 14, 0),     -- On team
+(6, 2, 4, 'Evolver', 0, 1, 25, 1),   -- On team + Showcased
+(7, 1, 4, 'Seedling', 0, 0, 9, 1),   -- Not on team, but Showcased
+(8, 3, 4, 'Tanky', 0, 0, 40, 1);     -- Not on team, but Showcased
 
 INSERT INTO CurrentAttacks (instanceID, aID) VALUES
 (1, 7), (1,24), (1,53);
@@ -47,20 +47,56 @@ INSERT INTO CurrentAttacks (instanceID, aID) VALUES
 INSERT INTO User (uid, Name, tradeCount, username, password) VALUES
 (5, 'Gary Oak', 2, 'rivalgary', 'Eeveelutions21*');
 
-INSERT INTO MyPokemon (pid, uid, nickname, favourite, onteam, level, showcase) VALUES
-(25, 5, 'Sparkles', 1, 0, 18, 0),  -- Favourite
-(2, 5, 'IvyBoy', 0, 1, 25, 0);    -- On team
+INSERT INTO MyPokemon (instanceID, pid, uid, nickname, favourite, onteam, level, showcase) VALUES
+(9, 25, 5, 'Sparkles', 1, 0, 18, 0),  -- Favourite
+(10, 2, 5, 'IvyBoy', 0, 1, 25, 0);    -- On team
 
 
 -- User with 3 pokemon --
 INSERT INTO User (uid, Name, tradeCount, username, password) VALUES
 (6, 'Erika', 1, 'flowerqueen', 'Bellsprout13*');
 
-INSERT INTO MyPokemon (pid, uid, nickname, favourite, onteam, level, showcase) VALUES
-(1, 6, 'Sprouter', 0, 1, 15, 0),
-(2, 6, 'Bloomy', 0, 0, 25, 0),
-(3, 6, 'VineBoss', 0, 1, 45, 1);
+INSERT INTO MyPokemon (instanceID, pid, uid, nickname, favourite, onteam, level, showcase) VALUES
+(11, 1, 6, 'Sprouter', 0, 1, 15, 0),
+(12, 2, 6, 'Bloomy', 0, 0, 25, 0),
+(13, 3, 6, 'VineBoss', 0, 1, 45, 1);
 
-INSERT INTO Evolutions (base, stage1, stage2) VALUES
-(1,2,3), (25,26,NULL), (133,134,NULL), (133,135,NULL), (133,136,NULL);
+-- A fourth user with 3 pokemon, to facilitate trades testing --
+INSERT INTO User (uid, Name, tradeCount, username, password) VALUES
+(7, 'Felicity', 0, 'sugarAndSpice', 'Pa$$word15');
+
+INSERT INTO MyPokemon (instanceID, pid, uid, nickname, favourite, onteam, level, showcase) VALUES
+(14, 134, 7, 'Squirt', 0, 0, 9, 0),
+(15, 135, 7, 'Jasper', 0, 0, 11, 0),
+(16, 136, 7, 'Phillip', 0, 0, 2, 0);
+
+INSERT INTO Evolutions (evolvesFrom, evolvesInto) 
+VALUES
+(1,2),
+(2,3), 
+(25,26), 
+(133,134), 
+(133,135), 
+(133,136);
+
+INSERT INTO listing(listingID, instanceID, sellerID)
+VALUES
+(1, 11, 6), -- 1-1 trade, no conflicts
+(2, 12, 6), -- multiple replies
+(3, 13, 6), -- reply G has been sent here and...
+(4, 6, 4), -- this listing D has been sent as a reply elsewhere 
+(5, 14, 7), -- reply F has also been listed
+(6, 9, 5); -- this is reply F. G and D replies
+
+INSERT INTO Reply(replyID, listingID, instanceID, respondantID)
+VALUES
+(1, 1, 1, 4), -- basic 1-1 trade
+(2, 2, 2, 4), -- 2 offers for 1 listing with no conflicts
+(3, 2, 15, 7),
+(4, 3, 4, 4),  -- G to C
+(5, 4, 10, 5), -- reply to D
+(6, 5, 9, 5), -- F to E
+(7, 6, 6, 4), -- D to F
+(8, 6, 4, 4); -- G to F
+
 

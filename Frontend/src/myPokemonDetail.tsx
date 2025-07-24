@@ -1,13 +1,93 @@
 import { useParams, Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 
-import { Badge } from "./components/ui/badge"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./components/ui/card"
 import { Progress } from "./components/ui/progress"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./components/ui/tabs.tsx"
-import { ArrowRight, Shield, Swords, Footprints, Heart, X, Plus, Star } from "lucide-react"
+import { ArrowRight, Shield, Swords, Footprints, Heart, X, Plus, Star, ArrowLeftRight, Calendar, User } from "lucide-react"
 import "./pokedex.css"
 import "./details.css"
+
+
+// const tradeHistory = [
+//     {
+//       id: 1,
+//       date: "2024-01-15",
+//       fromTrainer: "Alex_Trainer92",
+//       toTrainer: "You",
+//       tradedAway: {
+//         pokemon: "Caterpie",
+//         nickname: "Greenie",
+//         level: 8,
+//         types: ["Bug"],
+//       },
+//       tradedFor: {
+//         pokemon: "Wurmple",
+//         nickname: "Wiggly",
+//         level: 10,
+//         types: ["Bug"],
+//       },
+//       location: "Petalburg City",
+//       notes: "Great trade! Both Pokemon were well-trained.",
+//     },
+//     {
+//       id: 2,
+//       date: "2023-12-03",
+//       fromTrainer: "Sarah_PokeMaster",
+//       toTrainer: "Alex_Trainer92",
+//       tradedAway: {
+//         pokemon: "Wurmple",
+//         nickname: "Wiggly",
+//         level: 8,
+//         types: ["Bug"],
+//       },
+//       tradedFor: {
+//         pokemon: "Pidgey",
+//         nickname: "Skyler",
+//         level: 12,
+//         types: ["Normal", "Flying"],
+//       },
+//       location: "Route 104",
+//       notes: "Traded to help complete Pokedex.",
+//     },
+//     {
+//       id: 3,
+//       date: "2023-11-20",
+//       fromTrainer: "Mike_BugCatcher",
+//       toTrainer: "Sarah_PokeMaster",
+//       tradedAway: {
+//         pokemon: "Weedle",
+//         nickname: null,
+//         level: 5,
+//         types: ["Bug", "Poison"],
+//       },
+//       tradedFor: {
+//         pokemon: "Wurmple",
+//         nickname: "Wiggly",
+//         level: 5,
+//         types: ["Bug"],
+//       },
+//       location: "Rustboro City Pokemon Center",
+//       notes: "First trade for this Pokemon! Excited to train it.",
+//     },
+//   ]
+
+type TradedPokemonType = {
+  pokemon: string,
+  nickname: string,
+  level: number,
+  types: string[],
+}
+
+type TradeType = {
+  id: number,
+  date: Date,
+  fromTrainer: string,
+  toTrainer: string,
+  tradedAway: TradedPokemonType,
+  tradedFor: TradedPokemonType,
+  notes: string
+}
 
 type PokemonStatType = {
     hp: number,
@@ -71,7 +151,8 @@ const MyPokeDetail = () => {
     const { id, pID } = useParams<{ id: string, pID: string}>();
     const [pokemon, setPokemonDetail] = useState<PokemonDetailType | null>(null);
     const [evolutions, setEvolutions] = useState<Evolution[] | null>(null);
-    const isBranchingEvolution = 133 == Number(id);
+    const [tradeHistory, setTradeHistory] = useState<TradeType[]>([])
+
     
     useEffect(() => {
         const fetchData = async () => {
@@ -99,12 +180,18 @@ const MyPokeDetail = () => {
                 const evolutionData = await evolutionRes.json();
                 console.log("fetched evolution data");
                 setEvolutions(evolutionData);
+
+                const tradeRes = await fetch(`http://localhost:8081/pastTrades/${id}`);
+                const tradeData = await tradeRes.json();
+                console.log("fetched trade data");
+                setTradeHistory(tradeData);
             } catch (error) {
                 console.error(error);
             }
         };
         fetchData();
     }, [id])
+
 
     if (!pokemon) return <div>Loading...first {id}</div>;
     console.log("learnableAttacks: ", pokemon.learnableAttacks);
@@ -222,6 +309,15 @@ const MyPokeDetail = () => {
         return "bg-red-500"
     }
 
+    const formatDate = (dateString: string) => {
+      const date = new Date(dateString)
+      return date.toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      })
+    }
+
     // return (<div className="bg-testcolor w-32 h-32">
     //   Test box
     //   </div>);
@@ -232,7 +328,7 @@ const MyPokeDetail = () => {
       const response = await fetch("http://localhost:8081/setFavourite", {
         method: "POST",
         headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({instanceID: pokemon.id, user: 4, value:Number(!pokemon.favourite)}),
+        body: JSON.stringify({instanceID: pokemon.id, user: localStorage.getItem("uID"), value:Number(!pokemon.favourite)}),
       });
       // Convert UserPokemon to ShowcasedPokemon format
       setPokemonDetail((prev) => {
@@ -333,11 +429,12 @@ const MyPokeDetail = () => {
         </div>
 
         {/* Main Content Tabs */}
-        <Tabs defaultValue="stats" className="space-y-3">
-          <TabsList className="grid w-full grid-cols-3">
+        <Tabs defaultValue="stats" className="space-y-4">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="stats">Stats</TabsTrigger>
             <TabsTrigger value="evolution">Evolution</TabsTrigger>
             <TabsTrigger value="moves">Moves</TabsTrigger>
+            <TabsTrigger value="trades">Trades</TabsTrigger>
           </TabsList>
 
           <TabsContent value="stats" className="space-y-3">
@@ -833,6 +930,148 @@ const MyPokeDetail = () => {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+          <TabsContent value="trades" className="space-y-4">
+            <div className="card">
+              <div className="card-header">
+                <h3 className="card-title flex items-center gap-2">
+                  <ArrowLeftRight className="h-5 w-5" />
+                  Trade History
+                </h3>
+                <p className="card-description">
+                  Complete trading history for this Pokémon, including all previous owners and trades
+                </p>
+              </div>
+              <div className="card-content">
+                {tradeHistory.length === 0 ? (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <ArrowLeftRight className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                    <p>No trade history available for this Pokémon.</p>
+                    <p className="text-sm">
+                      This Pokémon may have been caught in the wild or obtained through other means.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {tradeHistory.map((trade, index) => (
+                      <div key={trade.id} className="relative">
+                        {/* Timeline connector */}
+                        {index < tradeHistory.length - 1 && (
+                          <div className="absolute left-6 top-16 w-0.5 h-8 bg-border"></div>
+                        )}
+
+                        <div className="flex gap-4 p-4 border rounded-lg hover:bg-muted/30 transition-colors">
+                          {/* Trade indicator */}
+                          <div className="flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center bg-blue-100 text-blue-600">
+                            <ArrowLeftRight className="h-5 w-5" />
+                          </div>
+
+                          <div className="flex-1 space-y-3">
+                            {/* Trade header */}
+                            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                              <div className="flex items-center gap-2">
+                                <span className="badge bg-blue-100 text-blue-800">Trade</span>
+                                <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                                  <Calendar className="h-4 w-4" />
+                                  {formatDate(trade.date.toString())}
+                                </div>
+                              </div>
+                              {/* <div className="text-sm text-muted-foreground">📍 {trade.location}</div> */}
+                            </div>
+
+                            {/* Trade details */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              {/* To trainer (left side) */}
+                              <div className="space-y-2">
+                                <div className="flex items-center gap-2 text-sm font-medium">
+                                  <User className="h-4 w-4" />
+                                  To: {trade.toTrainer}
+                                </div>
+                                <div className="pl-6">
+                                  <div className="text-sm text-muted-foreground">Received:</div>
+                                  <div className="flex items-center gap-2 mt-1">
+                                    <span className={"font-medium"+(trade.tradedFor.pokemon===pokemon.name?" underlined":"")}>
+                                      {trade.tradedFor.nickname || trade.tradedFor.pokemon}
+                                    </span>
+                                    {trade.tradedFor.nickname && (
+                                      <span className="text-sm text-muted-foreground">({trade.tradedFor.pokemon})</span>
+                                    )}
+                                    <span className="text-sm text-muted-foreground">Lv. {trade.tradedFor.level}</span>
+                                  </div>
+                                  <div className="flex gap-1 mt-1">
+                                    {trade.tradedFor.types.map((type) => (
+                                      <span key={type} className={`badge type-${type.toLowerCase()} text-white text-xs`}>
+                                        {type}
+                                      </span>
+                                    ))}
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* From trainer (right side) */}
+                              <div className="space-y-2">
+                                <div className="flex items-center gap-2 text-sm font-medium">
+                                  <User className="h-4 w-4" />
+                                  From: {trade.fromTrainer}
+                                </div>
+                                <div className="pl-6">
+                                  <div className="text-sm text-muted-foreground">Received:</div>
+                                  <div className="flex items-center gap-2 mt-1">
+                                    <span className={"font-medium"+(trade.tradedAway.pokemon===pokemon.name?" underlined":"")}>
+                                      {trade.tradedAway.nickname || trade.tradedAway.pokemon}
+                                    </span>
+                                    {trade.tradedAway.nickname && (
+                                      <span className="text-sm text-muted-foreground">
+                                        ({trade.tradedAway.pokemon})
+                                      </span>
+                                    )}
+                                    <span className="text-sm text-muted-foreground">Lv. {trade.tradedAway.level}</span>
+                                  </div>
+                                  <div className="flex gap-1 mt-1">
+                                    {trade.tradedAway.types.map((type) => (
+                                      <span key={type} className={`badge type-${type.toLowerCase()} text-white text-xs`}>
+                                        {type}
+                                      </span>
+                                    ))}
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Trade notes */}
+                            {trade.notes && (
+                              <div className="p-3 bg-muted/50 rounded-lg">
+                                <div className="text-sm font-medium mb-1">Trade Listing Description:</div>
+                                <div className="text-sm text-muted-foreground italic">"{trade.notes}"</div>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Trade summary */}
+                {tradeHistory.length > 0 && (
+                  <div className="mt-6 p-4 bg-muted/50 rounded-lg">
+                    <h4 className="font-semibold mb-2 text-sm text-foreground">Trade Summary</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs text-muted-foreground">
+                      <div>
+                        <strong>Total Trades:</strong> {tradeHistory.length}
+                      </div>
+                      <div>
+                        <strong>Trading Partners:</strong>{" "}
+                        {
+                          new Set(tradeHistory.flatMap((t) => [t.fromTrainer, t.toTrainer]).filter((t) => t !== "You"))
+                            .size
+                        }
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
           </TabsContent>
         </Tabs>
       </div>
