@@ -316,7 +316,9 @@ const PokemonDetail = () => {
                     </div>
 
                     {/* Evolution Paths */}
-                    <div className="evolution-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div className={`evolution-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-${
+                      evolutions.length % 4===0 ? 4 : evolutions.length % 3===0 ? 3 : 2
+                    } gap-4`}>
                       {evolutions.map((evo: any) => (
                         <div key={evo.id} className="relative">
                           <Link
