@@ -239,7 +239,7 @@ export default function MyPokedex() {
           <div className="filters-content">
             <div className="search-row">
               <div className="search-input-container">
-                {searchTerm === '' && <Search className="search-icon" />}
+                <Search className="search-icon" />
                 <input
                   placeholder="Search by name or number..."
                   value={searchTerm}
