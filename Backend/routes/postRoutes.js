@@ -390,12 +390,11 @@ module.exports = (app, db) => {
             password: process.env.DB_PASSWORD,
             database: process.env.DB_NAME
             });
-            console.log("executing");
             const [result] = await db.execute(sql);
-            console.log("execution complete");
 
             await db.end();
-            console.log("db.ended");
+
+
             res.status(201).json({});
         } catch (err) {
             console.error("Error accepting reply:", err);

@@ -466,7 +466,7 @@ module.exports = (app, db) => {
             LEFT JOIN Pokedex p ON p.pID=mp.pID
             LEFT JOIN User u ON u.uID=mp.uID
             LEFT JOIN Reply r ON l.listingID=r.listingID
-            WHERE l.sellerID!=${uID} AND l.listingID NOT IN (SELECT listingID FROM Trades)
+            WHERE l.sellerID!=${uID} AND l.listingID NOT IN (SELECT listingID FROM trades)
             GROUP BY l.listingID, u.uID, u.username, p.pID, p.name, 
                 type1, type2, level, l.description;
         `;
@@ -489,7 +489,7 @@ module.exports = (app, db) => {
                     image: `https://www.pokemon.com/static-assets/content-assets/cms2/img/pokedex/detail/${row.pID.toString().padStart(3, "0")}.png`
                 },
                 description: row.description,
-                replies: []
+                replyCount: row.replyCount
             }));
 
             return res.json(formatted);
@@ -542,8 +542,6 @@ module.exports = (app, db) => {
                 description: row.description,
                 replyCount: row.replyCount
             }));
-
-            console.log(listingFormatted);
 
             return res.json(listingFormatted);
         });
@@ -602,9 +600,9 @@ module.exports = (app, db) => {
     });
 
 
-    app.get('/availablePokemon/:uID', (req, res) => {
+    app.get('/listablePokemon/:uID', (req, res) => {
         const uID = req.params.uID;
-        console.log("Incoming request to /availablePokemon with uID:", uID);
+        console.log("Incoming request to /listablePokemon with uID:", uID);
 
         const sql = `
         SELECT 
@@ -772,6 +770,42 @@ module.exports = (app, db) => {
         
     });
 
+    app.get('/replyablePokemon/uID=:user&listingID=:lid', (req, res) => {
+        const uID = req.params.user;
+        const listingID = req.params.lid;
+        console.log("Incoming request to /replyablePokemon with uID:", uID, "and listingID:", listingID);
+
+        const sql = `
+        SELECT 
+            myPokemon.instanceID,
+            myPokemon.nickname,
+            pokedex.name,
+            pokedex.type1,
+            pokedex.type2,
+            myPokemon.level
+        FROM myPokemon JOIN pokedex ON myPokemon.pid = pokedex.pid
+        WHERE uid = ${uID} AND myPokemon.instanceID NOT IN (SELECT instanceID FROM Reply WHERE listingID = ${listingID});
+        `;
+
+        db.query(sql, (err, results) => {
+            if (err) {
+                console.error("Error fetching user's available Pokémon:", err);
+                return res.status(500).json({ error: "Database error" });
+            }
+
+            const formatted = results.map((row) => ({
+                id: row.instanceID,
+                nickname: row.nickname,
+                name: row.name,
+                type: row.type2 ? `${row.type1}/${row.type2}` : row.type1,
+                level: row.level,
+                image: `https://www.pokemon.com/static-assets/content-assets/cms2/img/pokedex/detail/${row.instanceID.toString().padStart(3, "0")}.png`
+            }));
+
+            return res.json(formatted);
+        });
+
+    });
 
     app.get('/pastTrades/:instanceID', (req, res) => {
         const instanceID = req.params.instanceID;

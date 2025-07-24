@@ -50,11 +50,13 @@ export default function PokemonMarket() {
   const [listings, setListings] = useState<ListingType[]>([])
   const [tabValue, setTabValue] = useState("browse");
   const [bannerMessage, setBannerMessage] = useState("");
-  const [availablePokemon, setAvailablePokemon] = useState<pokemonType[]>([]);
+  const [listablePokemon, setListablePokemon] = useState<pokemonType[]>([]);
+  const [replyablePokemon, setReplyablePokemon] = useState<pokemonType[]>([]);
   const [userListings, setUserListings] = useState<ListingType[]>([]);
   const [replies, setReplies] = useState<ReplyType[]>([]);
   const [selectedListing, setSelectedListing] = useState<ListingType|null>(null);
   const [replyListVis, setReplyListVis] = useState<boolean>(false);
+  const [replyVis, setReplyVis] = useState<boolean>(false);
   const [newListing, setNewListing] = useState({
     pokemonId: "",
     description: "",
@@ -66,11 +68,18 @@ export default function PokemonMarket() {
     message: "",
   })
 
-  async function getAvailablePokemon(){
-    fetch(`http://localhost:8081/availablePokemon/${localStorage.getItem("uID")}`)
+  async function getListablePokemon(){
+    fetch(`http://localhost:8081/listablePokemon/${localStorage.getItem("uID")}`)
       .then((res) => res.json())
-      .then((data) => setAvailablePokemon(data))
-      .catch((error) => console.error("There was a problem getting the pokemon available for trade.", error));
+      .then((data) => setListablePokemon(data))
+      .catch((error) => console.error("There was a problem getting the pokemon available for listing.", error));
+  }
+
+  async function getReplyablePokemon(lid: number){
+    fetch(`http://localhost:8081/replyablePokemon/uID=${localStorage.getItem("uID")}&listingID=${lid}`)
+      .then((res) => res.json())
+      .then((data) => setReplyablePokemon(data))
+      .catch((error) => console.error("There was a problem getting the pokemon available for listing.", error));
   }
 
   async function getMyListings() {
@@ -96,28 +105,29 @@ export default function PokemonMarket() {
 
   //initial values
   useEffect(() => {
-    getAvailablePokemon();
     getMyListings();
   }, [])
 
   useEffect(() => {
-    getMyListings();
     switch (tabValue){
       case "browse":
         getAvailableListings();
         break;
-      // case "my-listings":
-      //   getMyListings();
-      //   break;
+      case "my-listings":
+        getMyListings();
+        break;
       case "create":
-        getAvailablePokemon();
+        getListablePokemon();
         break;
       default:
         console.error("Invalid tab name:", tabValue);
         break;
     }
-    console.log(availablePokemon);
   }, [tabValue]);
+
+  useEffect(() => {
+
+  })
 
   const handleCreateListing = async () => {
     
@@ -160,7 +170,7 @@ export default function PokemonMarket() {
 
   const handleReply = async () => {
     console.log("handling reply");
-    if (!replyForm.pokemonId || !replyForm.message.trim()) return
+    if (!replyForm.pokemonId) return
 
     try {
       const response = await fetch("http://localhost:8081/reply", {
@@ -183,6 +193,7 @@ export default function PokemonMarket() {
         );
         setTimeout(() => setBannerMessage(""), 4000);
 
+        setReplyVis(false);
         setReplyForm({ listingId: -1, pokemonId: "", message: "" })
       } else {
         const errMsg = await response.text();
@@ -272,7 +283,7 @@ export default function PokemonMarket() {
                           {/* <CardDescription>{listing.createdAt}</CardDescription> */}
                         </div>
                       </div>
-                      <Badge variant="secondary">{listing.replyCount} replies</Badge>
+                      <Badge variant="outline">{listing.replyCount} replies</Badge>
                     </div>
                   </CardHeader>
                   <CardContent>
@@ -291,12 +302,12 @@ export default function PokemonMarket() {
                         </p>
                         <p className="text-sm mb-4">{listing.description}</p>
 
-                        <Dialog>
+                        <Dialog open={replyVis} onOpenChange={setReplyVis}>
                           <DialogTrigger asChild>
                             <Button
                               variant="outline"
                               size="sm"
-                              onClick={() => setReplyForm({ ...replyForm, listingId: listing.id })}
+                              onClick={() => { getReplyablePokemon(listing.id); setReplyForm({ ...replyForm, listingId: listing.id })}}
                             >
                               <MessageSquare className="w-4 h-4 mr-2" />
                               Reply to Listing
@@ -323,7 +334,7 @@ export default function PokemonMarket() {
                                     <SelectValue placeholder="Choose a Pokemon" />
                                   </SelectTrigger>
                                   <SelectContent>
-                                    {availablePokemon.map((pokemon) => (
+                                    {replyablePokemon.map((pokemon) => (
                                       <SelectItem key={pokemon.id} value={pokemon.id.toString()}>
                                         {!pokemon.nickname ? "" : pokemon.nickname+": "}{pokemon.name} (Level {pokemon.level})
                                       </SelectItem>
@@ -339,7 +350,7 @@ export default function PokemonMarket() {
                                   onChange={(e) => setReplyForm({ ...replyForm, message: e.target.value })}
                                 />
                               </div>
-                              <Button onClick={handleReply} className="w-full">
+                              <Button onClick={handleReply} className="w-full" disabled={replyForm.pokemonId == ""}>
                                 Send Reply
                               </Button>
                             </div>
@@ -467,14 +478,14 @@ export default function PokemonMarket() {
                       <SelectValue placeholder="Choose a Pokemon" />
                     </SelectTrigger>
                     <SelectContent>
-                      {availablePokemon.map((pokemon) => (
+                      {listablePokemon.map((pokemon) => (
                         <SelectItem key={pokemon.id} value={pokemon.id.toString()}>
                           {!pokemon.nickname ? "" : pokemon.nickname+": "}{pokemon.name} (Level {pokemon.level}) - {pokemon.type}
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
-                  {availablePokemon.length === 0 && (
+                  {listablePokemon.length === 0 && (
                     <p className="text-sm text-muted-foreground mt-2">All your Pokemon are already listed for trade</p>
                   )}
                 </div>
