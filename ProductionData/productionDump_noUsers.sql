@@ -72,6 +72,30 @@ LOCK TABLES `currentattacks` WRITE;
 /*!40000 ALTER TABLE `currentattacks` DISABLE KEYS */;
 /*!40000 ALTER TABLE `currentattacks` ENABLE KEYS */;
 UNLOCK TABLES;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `limit_attacks` BEFORE INSERT ON `currentattacks` FOR EACH ROW BEGIN
+	DECLARE atkCount INT;
+    SELECT COUNT(DISTINCT(instanceID)) INTO atkCount
+    FROM CurrentAttacks;
+    
+    IF atkCount >= 4 THEN 
+		SIGNAL SQLSTATE '45000'
+		SET MESSAGE_TEXT = 'Pokemon cannot learn more than 4 moves';
+    END IF;
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
 -- Table structure for table `evolutions`
@@ -203,6 +227,60 @@ LOCK TABLES `mypokemon` WRITE;
 /*!40000 ALTER TABLE `mypokemon` DISABLE KEYS */;
 /*!40000 ALTER TABLE `mypokemon` ENABLE KEYS */;
 UNLOCK TABLES;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `max_6_showcase` BEFORE UPDATE ON `mypokemon` FOR EACH ROW BEGIN
+	DECLARE numShowcased INT;
+	IF OLD.showcase = 0 AND NEW.showcase = 1 THEN
+		SELECT COUNT(instanceID) INTO numShowcased 
+			FROM MyPokemon 
+			WHERE uid = OLD.uid AND showcase = 1;
+
+		IF numShowcased >= 6 THEN
+			SIGNAL SQLSTATE '45000'
+			SET MESSAGE_TEXT = 'A user cannot showcase more than 6 pokemon at a time';
+		END IF;
+	END IF;
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `max_6_onTeam` BEFORE UPDATE ON `mypokemon` FOR EACH ROW BEGIN
+	DECLARE numTeam INT;
+    IF OLD.onTeam = 0 AND NEW.onTeam = 1 THEN
+		SELECT COUNT(instanceID) INTO numTeam 
+			FROM MyPokemon 
+			WHERE uid = OLD.uid AND onTeam = 1;
+			
+		IF numTeam >= 6 AND NEW.onTeam = 1 THEN
+			SIGNAL SQLSTATE '45000'
+			SET MESSAGE_TEXT = 'The maximum team size is 6.';
+		END IF;
+	END IF;
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
 -- Table structure for table `pokedex`
@@ -252,7 +330,7 @@ CREATE TABLE `reply` (
   `instanceID` int NOT NULL,
   `respondantID` int NOT NULL,
   `sentTime` datetime DEFAULT '2000-01-01 00:00:00',
-  `message` char(100) NOT NULL,
+  `message` varchar(100) DEFAULT NULL,
   PRIMARY KEY (`replyID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -264,28 +342,6 @@ CREATE TABLE `reply` (
 LOCK TABLES `reply` WRITE;
 /*!40000 ALTER TABLE `reply` DISABLE KEYS */;
 /*!40000 ALTER TABLE `reply` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `tm_list`
---
-
-DROP TABLE IF EXISTS `tm_list`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `tm_list` (
-  `move_name` char(25) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `tm_list`
---
-
-LOCK TABLES `tm_list` WRITE;
-/*!40000 ALTER TABLE `tm_list` DISABLE KEYS */;
-INSERT INTO `tm_list` VALUES ('Mega Punch'),('Razor Wind'),('Swords Dance'),('Whirlwind'),('Mega Kick'),('Toxic'),('Horn Drill'),('Body Slam'),('Take Down'),('Double-Edge'),('BubbleBeam'),('Water Gun'),('Ice Beam'),('Blizzard'),('Hyper Beam'),('Pay Day'),('Submission'),('Counter'),('Seismic Toss'),('Rage'),('Mega Drain'),('SolarBeam'),('Dragon Rage'),('Thunderbolt'),('Thunder'),('Earthquake'),('Fissure'),('Dig'),('Psychic'),('Teleport'),('Mimic'),('Double Team'),('Reflect'),('Bide'),('Metronome'),('Selfdestruct'),('Egg Bomb'),('Fire Blast'),('Swift'),('Skull Bash'),('Softboiled'),('Dream Eater'),('Sky Attack'),('Rest'),('Thunder Wave'),('Psywave'),('Explosion'),('Rock Slide'),('Tri Attack'),('Substitute'),('DynamicPunch'),('Headbutt'),('Curse'),('Rollout'),('Roar'),('Toxic'),('Zap Cannon'),('Rock Smash'),('Psych Up'),('Hidden Power'),('Sunny Day'),('Sweet Scent'),('Snore'),('Blizzard'),('Hyper Beam'),('Icy Wind'),('Protect'),('Rain Dance'),('Giga Drain'),('Endure'),('Frustration'),('SolarBeam'),('Iron Tail'),('DragonBreath'),('Thunder'),('Earthquake'),('Return'),('Dig'),('Psychic'),('Shadow Ball'),('Mud-Slap'),('Double Team'),('Ice Punch'),('Swagger'),('Sleep Talk'),('Sludge Bomb'),('Sandstorm'),('Fire Blast'),('Swift'),('Defense Curl'),('ThunderPunch'),('Dream Eater'),('Detect'),('Rest'),('Attract'),('Thief'),('Steel Wing'),('Fire Punch'),('Fury Cutter'),('Nightmare'),('Focus Punch'),('Dragon Claw'),('Water Pulse'),('Calm Mind'),('Roar'),('Toxic'),('Hail'),('Bulk Up'),('Bullet Seed'),('Hidden Power'),('Sunny Day'),('Taunt'),('Ice Beam'),('Blizzard'),('Hyper Beam'),('Light Screen'),('Protect'),('Rain Dance'),('Giga Drain'),('Safeguard'),('Frustration'),('SolarBeam'),('Iron Tail'),('Thunderbolt'),('Thunder'),('Earthquake'),('Return'),('Dig'),('Psychic'),('Shadow Ball'),('Brick Break'),('Double Team'),('Reflect'),('Shock Wave'),('Flamethrower'),('Sludge Bomb'),('Sandstorm'),('Fire Blast'),('Rock Tomb'),('Aerial Ace'),('Torment'),('Facade'),('Secret Power'),('Rest'),('Attract'),('Thief'),('Steel Wing'),('Skill Swap'),('Snatch'),('Overheat'),('Focus Punch'),('Dragon Claw'),('Water Pulse'),('Calm Mind'),('Roar'),('Toxic'),('Hail'),('Bulk Up'),('Bullet Seed'),('Hidden Power'),('Sunny Day'),('Taunt'),('Ice Beam'),('Blizzard'),('Hyper Beam'),('Light Screen'),('Protect'),('Rain Dance'),('Giga Drain'),('Safeguard'),('Frustration'),('SolarBeam'),('Iron Tail'),('Thunderbolt'),('Thunder'),('Earthquake'),('Return'),('Dig'),('Psychic'),('Shadow Ball'),('Brick Break'),('Double Team'),('Reflect'),('Shock Wave'),('Flamethrower'),('Sludge Bomb'),('Sandstorm'),('Fire Blast'),('Rock Tomb'),('Aerial Ace'),('Torment'),('Facade'),('Secret Power'),('Rest'),('Attract'),('Thief'),('Steel Wing'),('Skill Swap'),('Snatch'),('Overheat'),('Roost'),('Focus Blast'),('Energy Ball'),('False Swipe'),('Brine'),('Fling'),('Charge Beam'),('Endure'),('Dragon Pulse'),('Drain Punch'),('Will-O-Wisp'),('Silver Wind'),('Embargo'),('Explosion'),('Shadow Claw'),('Payback'),('Recycle'),('Giga Impact'),('Rock Polish'),('Flash'),('Stone Edge'),('Avalanche'),('Thunder Wave'),('Gyro Ball'),('Swords Dance'),('Stealth Rock'),('Psych Up'),('Captivate'),('Dark Pulse'),('Rock Slide'),('X-Scissor'),('Sleep Talk'),('Natural Gift'),('Poison Jab'),('Dream Eater'),('Grass Knot'),('Swagger'),('Pluck'),('U-turn'),('Substitute'),('Flash Cannon'),('Trick Room'),('Hone Claws'),('Dragon Claw'),('Psyshock'),('Calm Mind'),('Roar'),('Toxic'),('Hail'),('Bulk Up'),('Venoshock'),('Hidden Power'),('Sunny Day'),('Taunt'),('Ice Beam'),('Blizzard'),('Hyper Beam'),('Light Screen'),('Protect'),('Rain Dance'),('Telekinesis'),('Safeguard'),('Frustration'),('SolarBeam'),('Smack Down'),('Thunderbolt'),('Thunder'),('Earthquake'),('Return'),('Dig'),('Psychic'),('Shadow Ball'),('Brick Break'),('Double Team'),('Reflect'),('Sludge Wave'),('Flamethrower'),('Sludge Bomb'),('Sandstorm'),('Fire Blast'),('Rock Tomb'),('Aerial Ace'),('Torment'),('Facade'),('Flame Charge'),('Rest'),('Attract'),('Thief'),('Low Sweep'),('Round'),('Echoed Voice'),('Overheat'),('Ally Switch'),('Focus Blast'),('Energy Ball'),('False Swipe'),('Scald'),('Fling'),('Charge Beam'),('Sky Drop'),('Incinerate'),('Quash'),('Will-O-Wisp'),('Acrobatics'),('Embargo'),('Explosion'),('Shadow Claw'),('Payback'),('Retaliate'),('Giga Impact'),('Rock Polish'),('Flash'),('Stone Edge'),('Volt Switch'),('Thunder Wave'),('Gyro Ball'),('Swords Dance'),('Struggle Bug'),('Psych Up'),('Bulldoze'),('Frost Breath'),('Rock Slide'),('X-Scissor'),('Dragon Tail'),('Work Up'),('Poison Jab'),('Dream Eater'),('Grass Knot'),('Swagger'),('Pluck'),('U-turn'),('Substitute'),('Flash Cannon'),('Trick Room'),('Wild Charge'),('Rock Smash'),('Snarl'),('Hone Claws'),('Dragon Claw'),('Psyshock'),('Calm Mind'),('Roar'),('Toxic'),('Hail'),('Bulk Up'),('Venoshock'),('Hidden Power'),('Sunny Day'),('Taunt'),('Ice Beam'),('Blizzard'),('Hyper Beam'),('Light Screen'),('Protect'),('Rain Dance'),('Roost'),('Safeguard'),('Frustration'),('Solar Beam'),('Smack Down'),('Thunderbolt'),('Thunder'),('Earthquake'),('Return'),('Dig'),('Psychic'),('Shadow Ball'),('Brick Break'),('Double Team'),('Reflect'),('Sludge Wave'),('Flamethrower'),('Sludge Bomb'),('Sandstorm'),('Fire Blast'),('Rock Tomb'),('Aerial Ace'),('Torment'),('Facade'),('Flame Charge'),('Rest'),('Attract'),('Thief'),('Low Sweep'),('Round'),('Echoed Voice'),('Overheat'),('Steel Wing'),('Focus Blast'),('Energy Ball'),('False Swipe'),('Scald'),('Fling'),('Charge Beam'),('Sky Drop'),('Incinerate'),('Quash'),('Will-O-Wisp'),('Acrobatics'),('Embargo'),('Explosion'),('Shadow Claw'),('Payback'),('Retaliate'),('Giga Impact'),('Rock Polish'),('Flash'),('Stone Edge'),('Volt Switch'),('Thunder Wave'),('Gyro Ball'),('Swords Dance'),('Struggle Bug'),('Psych Up'),('Bulldoze'),('Frost Breath'),('Rock Slide'),('X-Scissor'),('Dragon Tail'),('Infestation'),('Poison Jab'),('Dream Eater'),('Grass Knot'),('Swagger'),('Sleep Talk'),('U-turn'),('Substitute'),('Flash Cannon'),('Trick Room'),('Wild Charge'),('Rock Smash'),('Secret Power'),('Snarl'),('Nature Power'),('Dark Pulse'),('Power-Up Punch'),('Dazzling Gleam'),('Confide'),('Work Up'),('Dragon Claw'),('Psyshock'),('Calm Mind'),('Roar'),('Toxic'),('Hail'),('Bulk Up'),('Venoshock'),('Hidden Power'),('Sunny Day'),('Taunt'),('Ice Beam'),('Blizzard'),('Hyper Beam'),('Light Screen'),('Protect'),('Rain Dance'),('Roost'),('Safeguard'),('Frustration'),('Solar Beam'),('Smack Down'),('Thunderbolt'),('Thunder'),('Earthquake'),('Return'),('Leech Life'),('Psychic'),('Shadow Ball'),('Brick Break'),('Double Team'),('Reflect'),('Sludge Wave'),('Flamethrower'),('Sludge Bomb'),('Sandstorm'),('Fire Blast'),('Rock Tomb'),('Aerial Ace'),('Torment'),('Facade'),('Flame Charge'),('Rest'),('Attract'),('Thief'),('Low Sweep'),('Round'),('Echoed Voice'),('Overheat'),('Steel Wing'),('Focus Blast'),('Energy Ball'),('False Swipe'),('Scald'),('Fling'),('Charge Beam'),('Sky Drop'),('Brutal Swing'),('Quash'),('Will-O-Wisp'),('Acrobatics'),('Embargo'),('Explosion'),('Shadow Claw'),('Payback'),('Smart Strike'),('Giga Impact'),('Rock Polish'),('Aurora Veil'),('Stone Edge'),('Volt Switch'),('Thunder Wave'),('Gyro Ball'),('Swords Dance'),('Fly'),('Psych Up'),('Bulldoze'),('Frost Breath'),('Rock Slide'),('X-Scissor'),('Dragon Tail'),('Infestation'),('Poison Jab'),('Dream Eater'),('Grass Knot'),('Swagger'),('Sleep Talk'),('U-turn'),('Substitute'),('Flash Cannon'),('Trick Room'),('Wild Charge'),('Surf'),('Snarl'),('Nature Power'),('Dark Pulse'),('Waterfall'),('Dazzling Gleam'),('Confide'),('Headbutt'),('Taunt'),('Helping Hand'),('Teleport'),('Rest'),('Light Screen'),('Protect'),('Substitute'),('Reflect'),('Dig'),('Will-O-Wisp'),('Facade'),('Brick Break'),('Fly'),('Seismic Toss'),('Thunder Wave'),('Dragon Tail'),('U-turn'),('Iron Tail'),('Dark Pulse'),('Foul Play'),('Rock Slide'),('Thunder Punch'),('X-Scissor'),('Waterfall'),('Poison Jab'),('Toxic'),('Tri Attack'),('Scald'),('Bulk Up'),('Fire Punch'),('Dazzling Gleam'),('Calm Mind'),('Dragon Pulse'),('Ice Punch'),('Thunderbolt'),('Flamethrower'),('Thunder'),('Outrage'),('Psychic'),('Earthquake'),('Self-Destruct'),('Shadow Ball'),('Play Rough'),('Solar Beam'),('Fire Blast'),('Surf'),('Hyper Beam'),('Superpower'),('Roost'),('Blizzard'),('Sludge Bomb'),('Mega Drain'),('Flash Cannon'),('Ice Beam'),('Stealth Rock'),('Pay Day'),('Drill Run'),('Dream Eater'),('Megahorn'),('');
-/*!40000 ALTER TABLE `tm_list` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -420,15 +476,38 @@ BEGIN
 	DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
 		ROLLBACK;
+		RESIGNAL;
 	END;
     
     START TRANSACTION;
 		DROP TABLE IF EXISTS tradeGoingThrough;
 
-		CREATE TEMPORARY TABLE tradeGoingThrough as (
+		CREATE TABLE tradeGoingThrough as (
 		SELECT l.listingID, r.replyID, l.instanceID as forSalePokemon, l.sellerID AS seller, r.instanceID AS replyPokemon, r.respondantID as replyer
 		FROM reply r, listing l
 		WHERE r.listingID = l.listingID AND r.replyID = tradeID);
+        
+		-- delete conflicting active replies and listings
+		DELETE FROM Reply
+        WHERE instanceID IN (
+			(SELECT forSalePokemon AS instanceID FROM tradeGoingThrough) 
+            UNION 
+            (SELECT replyPokemon AS instanceID FROM tradeGoingThrough)
+		) AND replyID NOT IN (
+			(SELECT replyID FROM tradeGoingThrough)
+            UNION
+            (SELECT replyID FROM trades)
+		);
+		DELETE FROM Listing
+        WHERE instanceID IN (
+			(SELECT forSalePokemon AS instanceID FROM tradeGoingThrough) 
+            UNION 
+            (SELECT replyPokemon AS instanceID FROM tradeGoingThrough)
+		) AND listingID NOT IN (
+			(SELECT listingID FROM tradeGoingThrough)
+            UNION
+            (SELECT listingID FROM trades)
+		);
 
 		-- actually swap ownership
 		UPDATE mypokemon seller, mypokemon replyer, tradeGoingThrough
@@ -437,7 +516,7 @@ BEGIN
         
         -- reset pokemonInstance bit values
         UPDATE myPokemon 
-        SET favourite=0, onteam=0, showcased=0
+        SET favourite=0, onteam=0, showcase=0, dateAdded=NOW()
         WHERE instanceID IN (SELECT forSalePokemon FROM tradeGoingThrough) OR instanceID IN (SELECT replyPokemon FROM tradeGoingThrough);
 
 		-- increment each users trade count
@@ -453,7 +532,7 @@ BEGIN
 		INSERT INTO trades (listingID, replyID, time)
 		SELECT listingID, replyID, NOW() FROM tradeGoingThrough;
 
-		drop TABLE tradeGoingThrough;
+		DROP TABLE tradeGoingThrough;
     COMMIT;
 END ;;
 DELIMITER ;
@@ -488,6 +567,51 @@ DELIMITER ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `tradeStatus` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `tradeStatus`()
+BEGIN
+
+SELECT 
+    tradeID,
+    listingID,
+    replyID
+FROM trades;
+
+SELECT
+	listingID,
+    nickname AS pokemon,
+    user.name AS seller
+FROM listing JOIN myPokemon ON listing.instanceID = myPokemon.instanceID JOIN user ON listing.sellerID = user.uid;
+
+SELECT
+	replyID,
+    listingID,
+    nickname AS pokemon,
+    user.name AS respondant
+FROM reply JOIN myPokemon ON reply.instanceID = myPokemon.instanceId JOIN user ON reply.respondantID = user.uid;
+
+SELECT 
+	user.name,
+    nickname AS pokemon
+FROM myPokemon JOIN user ON user.uid = myPokemon.uid
+ORDER BY user.uid;
+
+
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -498,4 +622,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-07-22 15:38:11
+-- Dump completed on 2025-07-24  0:30:42
