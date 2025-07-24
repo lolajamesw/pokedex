@@ -103,7 +103,7 @@ CREATE TABLE Listing(
     instanceID INT NOT NULL REFERENCES MyPokemon(instanceID),
     sellerID INT NOT NULL REFERENCES User(uID),
     postedTime DATETIME DEFAULT '2000-01-01',
-    description VARCHAR(100)
+    description VARCHAR(100) DEFAULT NULL
 );
 
 CREATE TABLE Reply(
@@ -112,7 +112,7 @@ CREATE TABLE Reply(
     instanceID INT NOT NULL REFERENCES MyPokemon(instanceID),
     respondantID INT NOT NULL REFERENCES User(uID),
     sentTime DATETIME DEFAULT '2000-01-01',
-    message CHAR(100) NOT NULL
+    message VARCHAR(100) DEFAULT NULL
 );
 
 CREATE TABLE Trades(
