@@ -1,6 +1,6 @@
 -- find the best pokemon to fight given an oponent pokemon
 -- if multiple pokemon considered to be equally as good (level and type effectiveness) will return all of them
--- let the opponent pokemon be {opPID}, current user id is {user_id}
+-- let the opponent pokemon be ${opPID}, current user id is {user_id}
 
 WITH FX AS (
     SELECT type1, type2,
@@ -63,13 +63,16 @@ WHERE
     (p.type2 NOT IN (SELECT * FROM TYPES) AND atkType2 IS NULL AND p.type1 = atkType1) 
     ) AND
     mp.pid = p.pid AND
-    defType1 IN (SELECT type1 FROM pokedex WHERE pid = {opPID}) AND
-	(
-		defType2 = (SELECT type2 FROM pokedex WHERE pid = {opPID})
-		OR (defType2 IS NULL AND NULLIF((SELECT type2 FROM pokedex WHERE pid = {opPID}), '') IS NULL)
-	) AND
+    (
+    (defType1 IN (SELECT type1 FROM pokedex WHERE pid = ${opPID}) AND defType2 IN (SELECT type2 FROM pokedex WHERE pid = ${opPID})) OR
+    (defType2 IN (SELECT type1 FROM pokedex WHERE pid = ${opPID}) AND defType1 IN (SELECT type2 FROM pokedex WHERE pid = ${opPID})) OR 
+    (defType1 IN (SELECT type1 FROM pokedex WHERE pid = ${opPID}) AND defType2 IS NULL) OR
+    (defType1 IN (SELECT type1 FROM pokedex WHERE pid = ${opPID}) AND defType2 = '')
+    )
+    
+    AND
     u.uid = mp.uid AND
-    u.uid = {user_id}
+    u.uid = ${user_id}
 ORDER BY total_effect DESC, level DESC, atkType1, atkType2, defType1, defType2 limit 1
 )
 
@@ -82,13 +85,14 @@ WHERE
     (p.type2 NOT IN (SELECT * FROM TYPES) AND atkType2 IS NULL AND p.type1 = atkType1) 
     ) AND
     mp.pid = p.pid AND
-    defType1 IN (SELECT type1 FROM pokedex WHERE pid = {opPID}) AND
 	(
-		defType2 = (SELECT type2 FROM pokedex WHERE pid = {opPID})
-		OR (defType2 IS NULL AND NULLIF((SELECT type2 FROM pokedex WHERE pid = {opPID}), '') IS NULL)
-	) AND
+    (defType1 IN (SELECT type1 FROM pokedex WHERE pid = ${opPID}) AND defType2 IN (SELECT type2 FROM pokedex WHERE pid = ${opPID})) OR
+    (defType2 IN (SELECT type1 FROM pokedex WHERE pid = ${opPID}) AND defType1 IN (SELECT type2 FROM pokedex WHERE pid = ${opPID})) OR 
+    (defType1 IN (SELECT type1 FROM pokedex WHERE pid = ${opPID}) AND defType2 IS NULL) OR
+    (defType1 IN (SELECT type1 FROM pokedex WHERE pid = ${opPID}) AND defType2 = '')
+    ) AND
     u.uid = mp.uid AND
-    u.uid = {user_id} AND
+    u.uid = ${user_id} AND
     all_combos.total_effect = bv.total_effect AND
     mp.level = bv.level
 ;
