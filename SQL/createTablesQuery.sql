@@ -226,7 +226,7 @@ BEGIN
         
         -- reset pokemonInstance bit values
         UPDATE myPokemon 
-        SET favourite=0, onteam=0, showcase=0
+        SET favourite=0, onteam=0, showcase=0, dateAdded=NOW()
         WHERE instanceID IN (SELECT forSalePokemon FROM tradeGoingThrough) OR instanceID IN (SELECT replyPokemon FROM tradeGoingThrough);
 
 		-- increment each users trade count
