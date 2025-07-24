@@ -987,7 +987,7 @@ const MyPokeDetail = () => {
                               <div className="space-y-2">
                                 <div className="flex items-center gap-2 text-sm font-medium">
                                   <User className="h-4 w-4" />
-                                  To: {trade.toTrainer}
+                                  {trade.toTrainer}
                                 </div>
                                 <div className="pl-6">
                                   <div className="text-sm text-muted-foreground">Received:</div>
@@ -1014,7 +1014,7 @@ const MyPokeDetail = () => {
                               <div className="space-y-2">
                                 <div className="flex items-center gap-2 text-sm font-medium">
                                   <User className="h-4 w-4" />
-                                  From: {trade.fromTrainer}
+                                  {trade.fromTrainer}
                                 </div>
                                 <div className="pl-6">
                                   <div className="text-sm text-muted-foreground">Received:</div>

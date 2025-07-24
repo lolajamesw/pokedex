@@ -821,13 +821,17 @@ module.exports = (app, db) => {
         });
 
         const sql = `
-            SELECT t.time, fromU.username fromUser, toU.username toUser, l.description,
+            SELECT t.time, fromU.username as fromUser, toU.username as toUser, l.description, 
+            CASE 
+                WHEN toMP.instanceID=${instanceID} THEN TRUE
+                ELSE FALSE
+            END as isTo,
 
-            fromP.name fromName, fromMP.nickname fromNickname, 
-            fromMP.level fromLevel, fromP.type1 fromType1, fromP.type2 fromType2,
+            fromP.name as fromName, fromMP.nickname as fromNickname, 
+            fromMP.level as fromLevel, fromP.type1 as fromType1, fromP.type2 as fromType2,
 
-            toP.name toName, toMP.nickname toNickname, 
-            toMP.level toLevel, toP.type1 toType1, toP.type2 toType2 
+            toP.name as toName, toMP.nickname as toNickname, 
+            toMP.level as toLevel, toP.type1 as toType1, toP.type2 as toType2 
 
             FROM Trades t 
                 JOIN Listing l ON t.listingID=l.listingID
@@ -848,25 +852,44 @@ module.exports = (app, db) => {
             return res.status(500).json({ error: "Database error" });
             }
             console.log(username);
-            const formatted = results.map((row, index) => ({
-                id: index,
-                date: row.time,
-                fromTrainer: row.fromUser === username ? 'You' : row.fromUser,
-                toTrainer: row.toUser === username ? 'You' : row.toUser,
-                tradedAway: {
-                    pokemon: row.toName,
-                    nickname: row.toNickname,
-                    level: row.toLevel,
-                    types: row.toType2 ? [row.toType1, row.toType2] : [row.toType1],
-                },
-                tradedFor: {
-                    pokemon: row.fromName,
-                    nickname: row.fromNickname,
-                    level: row.fromLevel,
-                    types: row.fromType2 ? [row.fromType1, row.fromType2] : [row.fromType1],
-                },
-                notes: row.description,
-
+            console.log(results[0].isTo, results[1].isTo);
+            const formatted = results.map((row, index) => (
+                row.isTo ? {
+                    id: index,
+                    date: row.time,
+                    fromTrainer: row.toUser === username ? 'You' : row.toUser,
+                    toTrainer: row.fromUser === username ? 'You' : row.fromUser,
+                    tradedAway: {
+                        pokemon: row.fromName,
+                        nickname: row.fromNickname,
+                        level: row.fromLevel,
+                        types: row.fromType2 ? [row.fromType1, row.fromType2] : [row.fromType1],
+                    },
+                    tradedFor: {
+                        pokemon: row.toName,
+                        nickname: row.toNickname,
+                        level: row.toLevel,
+                        types: row.toType2 ? [row.toType1, row.toType2] : [row.toType1],
+                    },
+                    notes: row.description,
+                } : {
+                    id: index,
+                    date: row.time,
+                    fromTrainer: row.fromUser === username ? 'You' : row.fromUser,
+                    toTrainer: row.toUser === username ? 'You' : row.toUser,
+                    tradedAway: {
+                        pokemon: row.toName,
+                        nickname: row.toNickname,
+                        level: row.toLevel,
+                        types: row.toType2 ? [row.toType1, row.toType2] : [row.toType1],
+                    },
+                    tradedFor: {
+                        pokemon: row.fromName,
+                        nickname: row.fromNickname,
+                        level: row.fromLevel,
+                        types: row.fromType2 ? [row.fromType1, row.fromType2] : [row.fromType1],
+                    },
+                    notes: row.description,
             }));
 
             return res.json(formatted);
