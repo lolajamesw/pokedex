@@ -222,7 +222,7 @@ const PokemonDetail = () => {
                         <Progress value={(value / 150) * 100} className="h-2" />
                         <div
                           className={`absolute top-0 left-0 h-2 rounded-full ${getStatColor(value)}`}
-                          style={{ width: `${(value / 150) * 100}%` }}
+                          style={{ width: `${Math.min((value / 150) * 100, 100)}%` }}
                         />
                       </div>
                     </div>

@@ -852,7 +852,6 @@ module.exports = (app, db) => {
             return res.status(500).json({ error: "Database error" });
             }
             console.log(username);
-            console.log(results[0].isTo, results[1].isTo);
             const formatted = results.map((row, index) => (
                 row.isTo ? {
                     id: index,
