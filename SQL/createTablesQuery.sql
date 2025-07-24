@@ -1,7 +1,9 @@
-DROP TABLE IF EXISTS Market;
 DROP TABLE IF EXISTS Trades;
-DROP TABLE IF EXISTS CurrentAttacks;
+DROP TABLE IF EXISTS Market;
+DROP TABLE IF EXISTS Reply;
+DROP TABLE IF EXISTS Listing;
 DROP TABLE IF EXISTS LearnableAttacks;
+DROP TABLE IF EXISTS CurrentAttacks;
 DROP TABLE IF EXISTS Attacks;
 DROP TABLE IF EXISTS MyPokemon;
 DROP TABLE IF EXISTS Evolutions;
@@ -12,6 +14,7 @@ DROP TABLE IF EXISTS Types;
 DROP TRIGGER IF EXISTS limit_attacks;
 DROP TRIGGER IF EXISTS max_6_onTeam;
 DROP TRIGGER IF EXISTS max_6_showcase;
+DROP PROCEDURE IF EXISTS doTrade;
 
 CREATE TABLE Types(type VARCHAR(10) NOT NULL PRIMARY KEY);
 
@@ -47,14 +50,14 @@ CREATE TABLE Pokedex (
     spDef INT NOT NULL,
     speed INT NOT NULL,
     legendary BIT NOT NULL,
-	description varchar(200),
+	description varchar(300),
     CHECK (HP >=0 AND atk >= 0 AND def >= 0 AND spAtk >= 0 AND spDef >= 0 AND speed >= 0)
 );
     
 CREATE TABLE Evolutions (
-	pIDfrom INT NOT NULL REFERENCES Pokedex(pID),
-    pIDinto INT NOT NULL REFERENCES Pokedex(pID),
-    PRIMARY KEY(pIDfrom, pIDinto)
+	evolvesFrom INT REFERENCES Pokedex(pID),
+    evolvesInto INT REFERENCES Pokedex(pID),
+    PRIMARY KEY(evolvesFrom, evolvesInto)
 );
 CREATE TABLE MyPokemon(
 	pID INT NOT NULL REFERENCES Pokedex(pID),
@@ -78,6 +81,7 @@ CREATE TABLE Attacks(
 	accuracy INT, 
 	PP INT, 
 	effect VARCHAR(100) NOT NULL,
+    tm BIT,
     CHECK (power >=0 AND accuracy >= 0 AND PP >= 0)
 );
 
@@ -94,27 +98,30 @@ CREATE TABLE CurrentAttacks(
     FOREIGN KEY (instanceID) REFERENCES MyPokemon(instanceID)
 );
 
-CREATE TABLE Trades(
-	trade_id INT AUTO_INCREMENT PRIMARY KEY,
-	seller_pokemon_instance_id INT NOT NULL, 
-	seller_id INT NOT NULL, 
-	buyer_id INT, 
-	buyer_pokemon_instance_id INT, 
-	status VARCHAR(15) NOT NULL,
-    FOREIGN KEY (seller_pokemon_instance_id) REFERENCES MyPokemon(instanceID),
-    FOREIGN KEY (seller_id) REFERENCES User(uid),
-    FOREIGN KEY (buyer_pokemon_instance_id) REFERENCES MyPokemon(instanceID),
-    FOREIGN KEY (buyer_id) REFERENCES User(uid)
+CREATE TABLE Listing(
+	listingID INT AUTO_INCREMENT PRIMARY KEY,
+    instanceID INT NOT NULL REFERENCES MyPokemon(instanceID),
+    sellerID INT NOT NULL REFERENCES User(uID),
+    postedTime DATETIME DEFAULT '2000-01-01',
+    description VARCHAR(100) DEFAULT NULL
 );
 
-CREATE TABLE Market(
-    offered_pokemon_instance_id INT PRIMARY KEY,
-    offering_user_id INT NOT NULL,
-    request_description VARCHAR(100),
-    reply_pokemon_instance_id INT NOT NULL,
-    reply_user_id INT NOT NULL,
-	FOREIGN KEY (offered_pokemon_instance_id) REFERENCES MyPokemon(instanceID),
-	FOREIGN KEY (reply_pokemon_instance_id) REFERENCES MyPokemon(instanceID)
+CREATE TABLE Reply(
+	replyID INT AUTO_INCREMENT PRIMARY KEY,
+    listingID INT NOT NULL REFERENCES Listing(listingID),
+    instanceID INT NOT NULL REFERENCES MyPokemon(instanceID),
+    respondantID INT NOT NULL REFERENCES User(uID),
+    sentTime DATETIME DEFAULT '2000-01-01',
+    message VARCHAR(100) DEFAULT NULL
+);
+
+CREATE TABLE Trades(
+	tradeID INT AUTO_INCREMENT PRIMARY KEY,
+	listingID INT NOT NULL,
+    replyID INT NOT NULL,
+    `time` DATETIME DEFAULT '2000-01-01',
+    FOREIGN KEY (listingID) REFERENCES Listing(listingID),
+    FOREIGN KEY (replyID) REFERENCES Reply(replyID)
 );
 
 DELIMITER //
@@ -124,7 +131,7 @@ BEFORE INSERT ON CurrentAttacks
 FOR EACH ROW
 BEGIN
 	DECLARE atkCount INT;
-    SELECT COUNT(DISTINCT(pID, instanceID, uID)) INTO atkCount
+    SELECT COUNT(DISTINCT(instanceID)) INTO atkCount
     FROM CurrentAttacks;
     
     IF atkCount >= 4 THEN 
@@ -169,4 +176,75 @@ BEGIN
 		END IF;
 	END IF;
 END //
+
+-- stored procedure to trade pokemon. Uses a transaction to ensure data consistency during concurrent requests and system failures
+DROP PROCEDURE IF EXISTS doTrade;
+DELIMITER //
+CREATE PROCEDURE doTrade(tradeID INT)
+BEGIN
+
+	DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+		ROLLBACK;
+		RESIGNAL;
+	END;
+    
+    START TRANSACTION;
+		DROP TABLE IF EXISTS tradeGoingThrough;
+
+		CREATE TABLE tradeGoingThrough as (
+		SELECT l.listingID, r.replyID, l.instanceID as forSalePokemon, l.sellerID AS seller, r.instanceID AS replyPokemon, r.respondantID as replyer
+		FROM reply r, listing l
+		WHERE r.listingID = l.listingID AND r.replyID = tradeID);
+        
+		-- delete conflicting active replies and listings
+		DELETE FROM Reply
+        WHERE instanceID IN (
+			(SELECT forSalePokemon AS instanceID FROM tradeGoingThrough) 
+            UNION 
+            (SELECT replyPokemon AS instanceID FROM tradeGoingThrough)
+		) AND replyID NOT IN (
+			(SELECT replyID FROM tradeGoingThrough)
+            UNION
+            (SELECT replyID FROM trades)
+		);
+		DELETE FROM Listing
+        WHERE instanceID IN (
+			(SELECT forSalePokemon AS instanceID FROM tradeGoingThrough) 
+            UNION 
+            (SELECT replyPokemon AS instanceID FROM tradeGoingThrough)
+		) AND listingID NOT IN (
+			(SELECT listingID FROM tradeGoingThrough)
+            UNION
+            (SELECT listingID FROM trades)
+		);
+
+		-- actually swap ownership
+		UPDATE mypokemon seller, mypokemon replyer, tradeGoingThrough
+		SET seller.uid = tradeGoingThrough.replyer, replyer.uid = tradeGoingThrough.seller
+		WHERE seller.instanceID = tradeGoingThrough.forSalePokemon AND replyer.instanceID = tradeGoingThrough.replyPokemon;
+        
+        -- reset pokemonInstance bit values
+        UPDATE myPokemon 
+        SET favourite=0, onteam=0, showcase=0, dateAdded=NOW()
+        WHERE instanceID IN (SELECT forSalePokemon FROM tradeGoingThrough) OR instanceID IN (SELECT replyPokemon FROM tradeGoingThrough);
+
+		-- increment each users trade count
+		UPDATE user, tradeGoingThrough
+		SET tradeCount = tradecount + 1
+		WHERE uID = tradeGoingThrough.seller;
+
+		UPDATE user, tradeGoingThrough
+		SET tradeCount = tradecount + 1
+		WHERE uID = tradeGoingThrough.replyer;
+
+		-- add completed trade to trade table
+		INSERT INTO trades (listingID, replyID, time)
+		SELECT listingID, replyID, NOW() FROM tradeGoingThrough;
+
+		DROP TABLE tradeGoingThrough;
+    COMMIT;
+END//
+DELIMITER ;
+
 

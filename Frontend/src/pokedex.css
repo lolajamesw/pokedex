@@ -5,6 +5,7 @@
 }
 
 .pokedex-container {
+  background-color: 253 247 240;
   margin: 0 1rem;
   padding: 1.5rem 0;
   display: flex;
@@ -308,6 +309,14 @@
   gap: 0.375rem;
   padding: 1.5rem;
   padding-bottom: 0.75rem;
+}
+
+.pokemon-image {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  padding: 0;
+  align-items: center;
 }
 
 .pokemon-title-row {

@@ -4,7 +4,7 @@ The file SQL/pokedexBackup.sql is a MySQL dump file for our sample database. To 
 1. downlad the dump file or clone this repo
 2. Open MySQL Workbench
 3. Go to Server > Data Import > Import From Disk
-4. Select "Import Self-Contained File" and enter the path to pokedexBackup.sql
+4. Select "Import Self-Contained File" and enter the path to productionDump.sql
 5. For the Default Target Schema feild, click the "New" button and enter "pokedex".
 6. In the bottom-right corner of the screen, click "Start Import"
 

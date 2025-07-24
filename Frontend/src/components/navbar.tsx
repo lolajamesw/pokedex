@@ -1,24 +1,29 @@
 "use client"
 
 import { useState, useRef, useEffect } from "react"
-import { Menu, User, LogOut, BookOpen, ShoppingCart } from "lucide-react"
+import { useLocation, Link, useNavigate } from "react-router-dom"
+import { Menu, User, LogOut, BookOpen, ShoppingCart, Sword } from "lucide-react"
 import "./navbar.css"
 
 const navigationItems = [
-  { name: "Pokédex", href: "pokedex", icon: BookOpen },
-  { name: "My Pokémon", href: "my-pokemon", icon: User },
-  { name: "Market", href: "market", icon: ShoppingCart },
+  { name: "Pokédex", href: "/pokedex", icon: BookOpen },
+  { name: "My Pokémon", href: "/my-pokemon", icon: User },
+  { name: "Market", href: "/market", icon: ShoppingCart },
+  { name: "Battle", href: "/battle", icon: Sword},
+  { name: "Search User", href: "/search-user", icon: User }
 ]
 
 export default function Navbar({ currentPage, setCurrentPage }) {
-  const [user, setUser] = useState({ displayName: "", username: "" })
+  const [user, setUser] = useState({id: localStorage.getItem("uID"), tradeCount: 0, displayName: "", username: "" })
+  const navigate = useNavigate();
   useEffect(() => {
-    fetch("http://localhost:8081/user/4")
+    fetch("http://localhost:8081/user/" + localStorage.getItem("uID"))
       .then((res) => res.json())
       .then((data) => setUser(data))
       .catch((err) => console.error("Failed to fetch user:", err));
   }, [])
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  useEffect(() => {})
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
   const dropdownRef = useRef(null)
   useEffect(() => {
@@ -34,7 +39,7 @@ export default function Navbar({ currentPage, setCurrentPage }) {
   }
 }, [])
 
-
+  const location = useLocation();
   return (
     <nav className="navbar">
       <div className="navbar-container">
@@ -48,16 +53,16 @@ export default function Navbar({ currentPage, setCurrentPage }) {
           <div className="desktop-nav">
             {navigationItems.map((item) => {
               const Icon = item.icon
-              const isActive = currentPage === item.href
+              const isActive = location.pathname.startsWith(item.href)
               return (
-                <button
+                <Link
                   key={item.name}
-                  onClick={() => setCurrentPage(item.href)}
+                  to={item.href}
                   className={`nav-button ${isActive ? "nav-button-active" : ""}`}
                 >
                   <Icon className="nav-icon" />
                   <span>{item.name}</span>
-                </button>
+                </Link>
               )
             })}
           </div>
@@ -66,7 +71,7 @@ export default function Navbar({ currentPage, setCurrentPage }) {
           <div className="desktop-profile">
             <button onClick={() => setShowProfileDropdown(!showProfileDropdown)} className="profile-button">
               <div className="avatar">
-                <div className="avatar-fallback">T</div>
+                <div className="avatar-fallback">{user.displayName.charAt(0)}</div>
               </div>
             </button>
             {showProfileDropdown && (
@@ -76,11 +81,18 @@ export default function Navbar({ currentPage, setCurrentPage }) {
                 <p className="profile-username">@{user.username}</p>
               </div>
               <hr className="dropdown-divider" />
-              <button onClick={() => setCurrentPage("profile")} className="dropdown-item">
+              <Link to="/profile" onClick={() => setShowProfileDropdown(false)} className="dropdown-item">
                 <User className="dropdown-icon" />
                 <span>Profile</span>
-              </button>
-              <button className="dropdown-item">
+              </Link>
+              <button 
+                className="dropdown-item" 
+                onClick={() => {
+                  localStorage.removeItem("uID");
+                  setShowProfileDropdown(false);
+                  navigate("/login");
+                }}
+              >
                 <LogOut className="dropdown-icon" />
                 <span>Log out</span>
               </button>
@@ -115,35 +127,31 @@ export default function Navbar({ currentPage, setCurrentPage }) {
               <div className="mobile-nav-items">
                 {navigationItems.map((item) => {
                   const Icon = item.icon
-                  const isActive = currentPage === item.href
+                  const isActive = location.pathname.startsWith(item.href)
                   return (
-                    <button
+                    <Link
                       key={item.name}
-                      onClick={() => {
-                        setCurrentPage(item.href)
-                        setMobileMenuOpen(false)
-                      }}
+                      to={item.href}
+                      onClick={() => setMobileMenuOpen(false)}
                       className={`mobile-nav-button ${isActive ? "mobile-nav-button-active" : ""}`}
                     >
                       <Icon className="mobile-nav-icon" />
                       <span>{item.name}</span>
-                    </button>
+                    </Link>
                   )
                 })}
               </div>
 
               {/* Profile actions */}
               <div className="mobile-profile-actions">
-                <button
-                  onClick={() => {
-                    setCurrentPage("profile")
-                    setMobileMenuOpen(false)
-                  }}
+                <Link
+                  to="/profile"
+                  onClick={() => setMobileMenuOpen(false)}
                   className="mobile-action-button"
                 >
                   <User className="mobile-action-icon" />
                   <span>Profile</span>
-                </button>
+                </Link>
                 <button className="mobile-action-button">
                   <LogOut className="mobile-action-icon" />
                   <span>Log out</span>

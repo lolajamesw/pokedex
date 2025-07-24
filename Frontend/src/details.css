@@ -1,0 +1,627 @@
+@import "tailwindcss";
+
+@theme {
+  /* Base color system */
+  --color-background: 255 255 255;
+  --color-foreground: 0 0 0;
+  --color-card: 255 255 255;
+  --color-card-foreground: 15 23 42;
+  --color-popover: 255 255 255;
+  --color-popover-foreground: 15 23 42;
+  --color-primary: 59 130 246;
+  --color-primary-foreground: 248 250 252;
+  --color-secondary: 241 245 249;
+  --color-secondary-foreground: 15 23 42;
+  --color-muted: 241 245 249;
+  --color-muted-foreground: 100 116 139;
+  --color-accent: 241 245 249;
+  --color-accent-foreground: 15 23 42;
+  --color-destructive: 239 68 68;
+  --color-destructive-foreground: 248 250 252;
+  --color-border: 226 232 240;
+  --color-input: 226 232 240;
+  --color-ring: 59 130 246;
+
+  /* Border radius */
+  --radius: 0.5rem;
+  --radius-lg: 0.5rem;
+  --radius-md: calc(0.5rem - 2px);
+  --radius-sm: calc(0.5rem - 4px);
+
+  /* Container sizes */
+  --container-2xl: 1400px;
+
+  /* Font families */
+  --font-sans: Inter, system-ui, -apple-system, sans-serif;
+
+  /* Spacing extensions */
+  --spacing-18: 4.5rem;
+  --spacing-88: 22rem;
+
+  /* Pokemon type colors */
+  --color-type-normal: 168 168 120;
+  --color-type-fire: 240 128 48;
+  --color-type-water: 104 144 240;
+  --color-type-electric: 248 208 48;
+  --color-type-grass: 120 200 80;
+  --color-type-ice: 152 216 216;
+  --color-type-fighting: 192 48 40;
+  --color-type-poison: 160 64 160;
+  --color-type-ground: 224 192 104;
+  --color-type-flying: 168 144 240;
+  --color-type-psychic: 248 88 136;
+  --color-type-bug: 168 184 32;
+  --color-type-rock: 184 160 56;
+  --color-type-ghost: 112 88 152;
+  --color-type-dragon: 112 56 248;
+  --color-type-dark: 112 88 72;
+  --color-type-steel: 184 184 208;
+  --color-type-fairy: 238 153 172;
+
+  
+  /* Stat colors */
+  --color-stat-excellent: 34 197 94;
+  --color-stat-high: 234 179 8;
+  --color-stat-medium: 249 115 22;
+  --color-stat-low: 239 68 68;
+
+  /* Animation definitions */
+  --animate-accordion-down: accordion-down 0.2s ease-out;
+  --animate-accordion-up: accordion-up 0.2s ease-out;
+  --animate-fade-in: fade-in 0.3s ease-out;
+  --animate-slide-in: slide-in 0.3s ease-out;
+}
+
+/* @media (prefers-color-scheme: light) {
+  @theme {
+    --color-background: 255 255 255;
+    --color-foreground: 0 0 0;
+    --color-card: 255 255 255;
+    --color-card-foreground: 0 0 0;
+    --color-popover: 15 23 42;
+    --color-popover-foreground: 248 250 252;
+    --color-primary: 99 102 241;
+    --color-primary-foreground: 15 23 42;
+    --color-secondary: 30 41 59;
+    --color-secondary-foreground: 248 250 252;
+    --color-muted: 244 244 245;
+    --color-muted-foreground: 113 113 121;
+    --color-accent: 30 41 59;
+    --color-accent-foreground: 248 250 252;
+    --color-destructive: 220 38 38;
+    --color-destructive-foreground: 248 250 252;
+    --color-border: 200 200 200;
+    --color-input: 30 41 59;
+    --color-ring: 99 102 241;
+  }
+} */
+
+/* Keyframe animations */
+@keyframes accordion-down {
+  from {
+    height: 0;
+  }
+  to {
+    height: var(--radix-accordion-content-height);
+  }
+}
+
+@keyframes accordion-up {
+  from {
+    height: var(--radix-accordion-content-height);
+  }
+  to {
+    height: 0;
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slide-in {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes pulse-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 5px rgb(var(--color-primary) / 0.5);
+  }
+  50% {
+    box-shadow: 0 0 20px rgb(var(--color-primary) / 0.8);
+  }
+}
+
+/* Base layer styles */
+@layer base {
+  * {
+    border-color: rgb(var(--color-border));
+  }
+
+  body {
+    background-color: rgb(var(--color-background));
+    color: rgb(var(--color-foreground));
+    font-family: var(--font-sans);
+  }
+
+  /* Ensure proper text colors */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    color: rgb(var(--color-foreground));
+  }
+
+  p {
+    color: rgb(var(--color-foreground));
+  }
+}
+
+/* Component layer styles */
+@layer components {
+  /* Card components */
+  .card {
+    @apply rounded-lg border bg-card text-card-foreground shadow-sm;
+    background-color: rgb(var(--color-card));
+    color: rgb(var(--color-card-foreground));
+    border-color: rgb(var(--color-border));
+  }
+
+  .card-header {
+    @apply flex flex-col space-y-1.5 p-6;
+  }
+
+  .card-title {
+    @apply text-2xl font-semibold leading-none tracking-tight;
+    color: rgb(var(--color-card-foreground));
+  }
+
+  .card-description {
+    @apply text-sm;
+    color: rgb(var(--color-muted-foreground));
+  }
+
+  .card-content {
+    @apply p-6 pt-0;
+  }
+
+  /* Badge components */
+  .badge {
+    @apply inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2;
+  }
+
+  .badge-default {
+    background-color: rgb(var(--color-primary));
+    color: rgb(var(--color-primary-foreground));
+    /* border-color: transparent; */
+  }
+
+  .badge-secondary {
+    background-color: rgb(var(--color-secondary));
+    color: rgb(var(--color-secondary-foreground));
+    /* border-color: transparent; */
+  }
+
+  .badge-outline {
+    color: rgb(var(--color-foreground));
+    border-color: rgb(var(--color-border)) !important;
+  }
+
+  .badge-type {
+    /* color: rgb(var(--color-foreground)); */
+    border-color: rgba(248, 250, 252, .33) !important;
+  }
+
+  .badge-tm {
+    color: rgb(var(--color-foreground));
+    /* background-color: #C0C0C0 !important; */
+    background: linear-gradient(
+      45deg,
+      #999 5%,
+      #eee 10%,
+      #ccc 30%,
+      #ddd 50%,
+      #ccc 70%,
+      #ddd 80%,
+      #999 95%
+  ) !important;
+  }
+
+  /* Tab components */
+  .tabs-list {
+    @apply inline-flex h-10 items-center justify-center rounded-md p-1;
+    background-color: rgb(var(--color-muted));
+    color: rgb(var(--color-muted-foreground));
+  }
+
+  .tabs-trigger {
+    @apply inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50;
+    color: rgb(var(--color-muted-foreground));
+  }
+
+  .tabs-trigger:hover {
+    background-color: rgb(var(--color-background) / 0.5);
+  }
+
+  .tabs-trigger[data-state="active"] {
+    background-color: rgb(var(--color-background));
+    color: rgb(var(--color-foreground));
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  }
+
+  .tabs-content {
+    @apply mt-2 ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2;
+  }
+
+  /* Container utility */
+  .container {
+    @apply mx-auto w-full px-4;
+  }
+
+  @media (min-width: 640px) {
+    .container {
+      @apply max-w-screen-sm;
+    }
+  }
+
+  @media (min-width: 768px) {
+    .container {
+      @apply max-w-screen-md;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .container {
+      @apply max-w-screen-lg;
+    }
+  }
+
+  @media (min-width: 1280px) {
+    .container {
+      @apply max-w-screen-xl;
+    }
+  }
+
+  @media (min-width: 1536px) {
+    .container {
+      max-width: var(--container-2xl);
+    }
+  }
+}
+
+/* Utilities layer */
+@layer utilities {
+  /* Pokemon-specific utilities */
+  .pokemon-card-hover {
+    transition: all 0.2s ease-in-out;
+  }
+
+  .pokemon-card-hover:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  .stat-bar {
+    transition: width 0.3s ease-in-out;
+  }
+
+  .evolution-connection-line {
+    background: linear-gradient(to bottom, transparent 0%, rgb(var(--color-border)) 50%, transparent 100%);
+  }
+
+  /* Pokemon type utilities */
+  .type-normal {
+    background-color: rgb(var(--color-type-normal));
+  }
+  .type-fire {
+    background-color: rgb(var(--color-type-fire));
+  }
+  .type-water {
+    background-color: rgb(var(--color-type-water));
+  }
+  .type-electric {
+    background-color: rgb(var(--color-type-electric));
+  }
+  .type-grass {
+    background-color: rgb(var(--color-type-grass));
+  }
+  .type-ice {
+    background-color: rgb(var(--color-type-ice));
+  }
+  .type-fighting {
+    background-color: rgb(var(--color-type-fighting));
+  }
+  .type-poison {
+    background-color: rgb(var(--color-type-poison));
+  }
+  .type-ground {
+    background-color: rgb(var(--color-type-ground));
+  }
+  .type-flying {
+    background-color: rgb(var(--color-type-flying));
+  }
+  .type-psychic {
+    background-color: rgb(var(--color-type-psychic));
+  }
+  .type-bug {
+    background-color: rgb(var(--color-type-bug));
+  }
+  .type-rock {
+    background-color: rgb(var(--color-type-rock));
+  }
+  .type-ghost {
+    background-color: rgb(var(--color-type-ghost));
+  }
+  .type-dragon {
+    background-color: rgb(var(--color-type-dragon));
+  }
+
+  /* Pokemon type gradient utilities */
+  .gradient-normal {
+    background: linear-gradient(to right, rgb(168 168 120), rgb(140 140 100));
+  }
+  .gradient-fire {
+    background: linear-gradient(to right, rgb(240 128 48), rgb(220 100 30));
+  }
+  .gradient-water {
+    background: linear-gradient(to right, rgb(104 144 240), rgb(80 120 220));
+  }
+  .gradient-electric {
+    background: linear-gradient(to right, rgb(248 208 48), rgb(230 190 30));
+  }
+  .gradient-grass {
+    background: linear-gradient(to right, rgb(120 200 80), rgb(100 180 60));
+  }
+  .gradient-ice {
+    background: linear-gradient(to right, rgb(152 216 216), rgb(130 200 200));
+  }
+  .gradient-fighting {
+    background: linear-gradient(to right, rgb(192 48 40), rgb(170 30 20));
+  }
+  .gradient-poison {
+    background: linear-gradient(to right, rgb(160 64 160), rgb(140 50 140));
+  }
+  .gradient-ground {
+    background: linear-gradient(to right, rgb(224 192 104), rgb(200 170 80));
+  }
+  .gradient-flying {
+    background: linear-gradient(to right, rgb(168 144 240), rgb(150 120 220));
+  }
+  .gradient-psychic {
+    background: linear-gradient(to right, rgb(248 88 136), rgb(230 70 120));
+  }
+  .gradient-bug {
+    background: linear-gradient(to right, rgb(168 184 32), rgb(150 160 20));
+  }
+  .gradient-rock {
+    background: linear-gradient(to right, rgb(184 160 56), rgb(160 140 40));
+  }
+  .gradient-ghost {
+    background: linear-gradient(to right, rgb(112 88 152), rgb(90 70 130));
+  }
+  .gradient-dragon {
+    background: linear-gradient(to right, rgb(112 56 248), rgb(90 40 220));
+  }
+  .gradient-dark {
+    background: linear-gradient(to right, rgb(112 88 72), rgb(90 70 50));
+  }
+  .gradient-steel {
+    background: linear-gradient(to right, rgb(184 184 208), rgb(160 160 180));
+  }
+  .gradient-fairy {
+    background: linear-gradient(to right, rgb(238 153 172), rgb(220 130 150));
+  }
+
+  /* Stat color utilities */
+  .stat-excellent {
+    background-color: rgb(var(--color-stat-excellent));
+  }
+  .stat-high {
+    background-color: rgb(var(--color-stat-high));
+  }
+  .stat-medium {
+    background-color: rgb(var(--color-stat-medium));
+  }
+  .stat-low {
+    background-color: rgb(var(--color-stat-low));
+  }
+
+  /* Animation utilities */
+  .animate-accordion-down {
+    animation: var(--animate-accordion-down);
+  }
+  .animate-accordion-up {
+    animation: var(--animate-accordion-up);
+  }
+  .animate-fade-in {
+    animation: var(--animate-fade-in);
+  }
+  .animate-slide-in {
+    animation: var(--animate-slide-in);
+  }
+  .animate-pulse-glow {
+    animation: pulse-glow 2s infinite;
+  }
+
+  /* Text color utilities */
+  .text-background {
+    color: rgb(var(--color-background));
+  }
+  .text-foreground {
+    color: rgb(var(--color-foreground));
+  }
+  .text-card {
+    color: rgb(var(--color-card));
+  }
+  .text-card-foreground {
+    color: rgb(var(--color-card-foreground));
+  }
+  .text-popover {
+    color: rgb(var(--color-popover));
+  }
+  .text-popover-foreground {
+    color: rgb(var(--color-popover-foreground));
+  }
+  .text-primary {
+    color: rgb(var(--color-primary));
+  }
+  .text-primary-foreground {
+    color: rgb(var(--color-primary-foreground));
+  }
+  .text-secondary {
+    color: rgb(var(--color-secondary));
+  }
+  .text-secondary-foreground {
+    color: rgb(var(--color-secondary-foreground));
+  }
+  .text-muted {
+    color: rgb(var(--color-muted));
+  }
+  .text-muted-foreground {
+    color: rgb(var(--color-muted-foreground));
+    text-align: left;
+  }
+  .text-accent {
+    color: rgb(var(--color-accent));
+  }
+  .text-accent-foreground {
+    color: rgb(var(--color-accent-foreground));
+  }
+  .text-destructive {
+    color: rgb(var(--color-destructive));
+  }
+  .text-destructive-foreground {
+    color: rgb(var(--color-destructive-foreground));
+  }
+
+  .underlined {
+    text-decoration: underline;
+  }
+
+  /* Background color utilities */
+  .bg-background {
+    background-color: rgb(var(--color-background));
+  }
+  .bg-foreground {
+    background-color: rgb(var(--color-foreground));
+  }
+  .bg-card {
+    background-color: rgb(var(--color-card));
+  }
+  .bg-card-foreground {
+    background-color: rgb(var(--color-card-foreground));
+  }
+  .bg-popover {
+    background-color: rgb(var(--color-popover));
+  }
+  .bg-popover-foreground {
+    background-color: rgb(var(--color-popover-foreground));
+  }
+  .bg-primary {
+    background-color: rgb(var(--color-primary));
+  }
+  .bg-primary-foreground {
+    background-color: rgb(var(--color-primary-foreground));
+  }
+  .bg-secondary {
+    background-color: rgb(var(--color-secondary));
+  }
+  .bg-secondary-foreground {
+    background-color: rgb(var(--color-secondary-foreground));
+  }
+  .bg-muted {
+    background-color: rgb(var(--color-muted));
+  }
+  .bg-muted-foreground {
+    background-color: rgb(var(--color-muted-foreground));
+  }
+  .bg-accent {
+    background-color: rgb(var(--color-accent));
+  }
+  .bg-accent-foreground {
+    background-color: rgb(var(--color-accent-foreground));
+  }
+  .bg-destructive {
+    background-color: rgb(var(--color-destructive));
+  }
+  .bg-destructive-foreground {
+    background-color: rgb(var(--color-destructive-foreground));
+  }
+
+  /* Border color utilities */
+  .border-border {
+    border-color: rgb(var(--color-border));
+  }
+  .border-input {
+    border-color: rgb(var(--color-input));
+  }
+
+  /* Ring color utilities */
+  .ring-ring {
+    --tw-ring-color: rgb(var(--color-ring));
+  }
+
+  /* Focus styles */
+  .focus-visible:focus-visible {
+    outline: 2px solid rgb(var(--color-ring));
+    outline-offset: 2px;
+  }
+
+  /* Selection styles */
+  ::selection {
+    background-color: rgb(var(--color-primary));
+    color: rgb(var(--color-primary-foreground));
+  }
+
+  /* Responsive grid adjustments */
+  @media (max-width: 640px) {
+    .evolution-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (max-width: 480px) {
+    .evolution-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  /* Custom scrollbar for move list */
+  .moves-container {
+    scrollbar-width: thin;
+    scrollbar-color: rgb(var(--color-muted)) rgb(var(--color-background));
+  }
+
+  .moves-container::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .moves-container::-webkit-scrollbar-track {
+    background: rgb(var(--color-background));
+    border-radius: 3px;
+  }
+
+  .moves-container::-webkit-scrollbar-thumb {
+    background: rgb(var(--color-muted));
+    border-radius: 3px;
+  }
+
+  .moves-container::-webkit-scrollbar-thumb:hover {
+    background: rgb(var(--color-muted-foreground));
+  }
+}
