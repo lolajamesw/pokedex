@@ -132,9 +132,10 @@
   border-color: #3b82f6;
 }
 
-.search-input::placeholder {
+/* .search-input::placeholder {
   color: #6b7280;
-}
+  transform: translateX(23px);
+} */
 
 .type-select {
   display: flex;
