@@ -145,8 +145,8 @@ module.exports = (app, db) => {
             const formatted = results.map((row) => ({
                 id: row.aID,
                 name: row.attack_name,
-                type: row.type,
-                category: row.category,
+                type: row.category,
+                category: row.type,
                 stats: {
                     power: row.power,
                     accuracy: row.accuracy, 
