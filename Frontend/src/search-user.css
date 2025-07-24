@@ -1,0 +1,42 @@
+.card-avatar {
+  width: 50px;
+  height: 50px;
+  background: #cfcfcf;
+  color: white;
+  font-size: 1.5rem;
+  font-weight: bold;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 1rem;
+}
+
+.card-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.card-name {
+  font-weight: 600;
+  font-size: 1.1rem;
+  text-decoration: none;
+}
+
+.card-name span {
+    color: #525252;
+    font-size: 0.7rem;
+    font-style: italic;
+}
+
+.card-id {
+    text-align: left;
+  font-size: 0.9rem;
+  color: #888;
+}
+
+.no-results {
+  text-align: center;
+  color: #999;
+  font-style: italic;
+}
