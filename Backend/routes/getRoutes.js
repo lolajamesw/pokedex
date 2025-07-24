@@ -719,8 +719,7 @@ WHERE
     (
     (defType1 IN (SELECT type1 FROM pokedex WHERE pid = ${opPID}) AND defType2 IN (SELECT type2 FROM pokedex WHERE pid = ${opPID})) OR
     (defType2 IN (SELECT type1 FROM pokedex WHERE pid = ${opPID}) AND defType1 IN (SELECT type2 FROM pokedex WHERE pid = ${opPID})) OR 
-    (defType1 IN (SELECT type1 FROM pokedex WHERE pid = ${opPID}) AND defType2 IS NULL) OR
-    (defType1 IN (SELECT type1 FROM pokedex WHERE pid = ${opPID}) AND defType2 = '')
+    (defType1 IN (SELECT type1 FROM pokedex WHERE pid = ${opPID} AND type2='') AND defType2 IS NULL)
     )
     
     AND
@@ -741,8 +740,7 @@ WHERE
 	(
     (defType1 IN (SELECT type1 FROM pokedex WHERE pid = ${opPID}) AND defType2 IN (SELECT type2 FROM pokedex WHERE pid = ${opPID})) OR
     (defType2 IN (SELECT type1 FROM pokedex WHERE pid = ${opPID}) AND defType1 IN (SELECT type2 FROM pokedex WHERE pid = ${opPID})) OR 
-    (defType1 IN (SELECT type1 FROM pokedex WHERE pid = ${opPID}) AND defType2 IS NULL) OR
-    (defType1 IN (SELECT type1 FROM pokedex WHERE pid = ${opPID}) AND defType2 = '')
+    (defType1 IN (SELECT type1 FROM pokedex WHERE pid = ${opPID} AND type2='') AND defType2 IS NULL)
     ) AND
     u.uid = mp.uid AND
     u.uid = ${user_id} AND
@@ -765,6 +763,8 @@ WHERE
                     level: row.level,
                     cp: 0, // Not sure what this is supposed to be
                     effectiveness_score: parseFloat(row.total_effect)*100,
+                    def1: row.defType1,
+                    def2: row.defType2,
                 }));
 
                 return res.json({
