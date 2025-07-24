@@ -219,7 +219,7 @@ export default function MyPokedex() {
   };
 
   return (
-    <div className=" bg-gradient-to-br from-orange-50 to-red-50">
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-red-50">
       <div className="pokedex-container">
         {bannerMessage && (
           <div className="banner">

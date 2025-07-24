@@ -303,4 +303,106 @@ module.exports = (app, db) => {
     }
     });
 
+    app.post("/listPokemon/", async (req, res) => {
+        const {iid, uid, desc} = req.body;
+        console.log("Incoming request to /listPokemon with:", req.body);
+
+        try {
+            const db = await mysqlPromise.createConnection({
+            host: process.env.DB_HOST,
+            port: process.env.DB_PORT,
+            user: process.env.DB_USER,
+            password: process.env.DB_PASSWORD,
+            database: process.env.DB_NAME
+            });
+
+            const [result] = await db.execute(
+            `INSERT INTO Listing (instanceID, sellerID, description, postedTime)
+            VALUES (?, ?, ?, NOW());`,
+            [iid, uid, desc]
+            );
+
+            const newListing = {
+                instanceID: result.instanceID,
+                sellerID: result.sellerID,
+                description: result.description
+            };
+
+            await db.end();
+            res.status(201).json({ listing: newListing });
+        } catch (err) {
+            console.error("Error creating listing:", err);
+
+            res.status(500).send("Server error while creating listing.");
+        }
+
+        });
+
+    app.post("/reply/", async (req, res) => {
+        const {listingID, instanceID, respondantID, message} = req.body;
+
+        try {
+            const db = await mysqlPromise.createConnection({
+            host: process.env.DB_HOST,
+            port: process.env.DB_PORT,
+            user: process.env.DB_USER,
+            password: process.env.DB_PASSWORD,
+            database: process.env.DB_NAME
+            });
+
+            const [result] = await db.execute(
+            `INSERT INTO Reply (listingID, instanceID, respondantID, message, sentTime)
+            VALUES (?, ?, ?, ?, NOW());`,
+            [listingID, instanceID, respondantID, message]
+            );
+
+            const newReply = {
+                listingID: result.listingID,
+                instanceID: result.instanceID,
+                respondantID: result.respondantID,
+                message: result.message
+            };
+
+            await db.end();
+            res.status(201).json({ reply: newReply });
+        } catch (err) {
+            console.error("Error creating reply:", err);
+
+            res.status(500).send("Server error while creating reply.");
+        }
+
+
+    });
+
+
+    app.post("/trade/", async (req, res) => {
+        const {replyID} = req.body;
+        console.log("Incoming request to /trade with replyID:", replyID);
+
+        const sql = `CALL doTrade(${replyID});`;
+
+        try {
+            console.log("connecting");
+            const db = await mysqlPromise.createConnection({
+            host: process.env.DB_HOST,
+            port: process.env.DB_PORT,
+            user: process.env.DB_USER,
+            password: process.env.DB_PASSWORD,
+            database: process.env.DB_NAME
+            });
+            const [result] = await db.execute(sql);
+
+            await db.end();
+
+
+            res.status(201).json({});
+        } catch (err) {
+            console.error("Error accepting reply:", err);
+
+            res.status(500).send("Server error while accepting reply.");
+        }
+
+
+    });
+
 }

@@ -14,6 +14,7 @@ DROP TABLE IF EXISTS Types;
 DROP TRIGGER IF EXISTS limit_attacks;
 DROP TRIGGER IF EXISTS max_6_onTeam;
 DROP TRIGGER IF EXISTS max_6_showcase;
+DROP PROCEDURE IF EXISTS doTrade;
 
 CREATE TABLE Types(type VARCHAR(10) NOT NULL PRIMARY KEY);
 
@@ -49,7 +50,7 @@ CREATE TABLE Pokedex (
     spDef INT NOT NULL,
     speed INT NOT NULL,
     legendary BIT NOT NULL,
-	description varchar(200),
+	description varchar(300),
     CHECK (HP >=0 AND atk >= 0 AND def >= 0 AND spAtk >= 0 AND spDef >= 0 AND speed >= 0)
 );
     
@@ -80,6 +81,7 @@ CREATE TABLE Attacks(
 	accuracy INT, 
 	PP INT, 
 	effect VARCHAR(100) NOT NULL,
+    tm BIT,
     CHECK (power >=0 AND accuracy >= 0 AND PP >= 0)
 );
 
@@ -100,20 +102,24 @@ CREATE TABLE Listing(
 	listingID INT AUTO_INCREMENT PRIMARY KEY,
     instanceID INT NOT NULL REFERENCES MyPokemon(instanceID),
     sellerID INT NOT NULL REFERENCES User(uID),
-    description VARCHAR(100)
+    postedTime DATETIME DEFAULT '2000-01-01',
+    description VARCHAR(100) DEFAULT NULL
 );
 
 CREATE TABLE Reply(
 	replyID INT AUTO_INCREMENT PRIMARY KEY,
     listingID INT NOT NULL REFERENCES Listing(listingID),
     instanceID INT NOT NULL REFERENCES MyPokemon(instanceID),
-    respondantID INT NOT NULL REFERENCES User(uID)
+    respondantID INT NOT NULL REFERENCES User(uID),
+    sentTime DATETIME DEFAULT '2000-01-01',
+    message VARCHAR(100) DEFAULT NULL
 );
 
 CREATE TABLE Trades(
 	tradeID INT AUTO_INCREMENT PRIMARY KEY,
 	listingID INT NOT NULL,
     replyID INT NOT NULL,
+    `time` DATETIME DEFAULT '2000-01-01',
     FOREIGN KEY (listingID) REFERENCES Listing(listingID),
     FOREIGN KEY (replyID) REFERENCES Reply(replyID)
 );
@@ -171,10 +177,9 @@ BEGIN
 	END IF;
 END //
 
-<<<<<<< Updated upstream
-=======
 -- stored procedure to trade pokemon. Uses a transaction to ensure data consistency during concurrent requests and system failures
 DROP PROCEDURE IF EXISTS doTrade;
+
 CREATE PROCEDURE doTrade(tradeID INT)
 BEGIN
 
@@ -242,5 +247,3 @@ BEGIN
 END//
 DELIMITER ;
 
-
->>>>>>> Stashed changes

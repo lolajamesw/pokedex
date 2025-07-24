@@ -149,7 +149,7 @@ export default function Pokedex() {
   const allTypes = Array.from(new Set(pokemonList.flatMap((p) => p.types))).sort()
 
   return (
-    <div className=" bg-gradient-to-br from-orange-50 to-red-50">
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-red-50">
       <div className="pokedex-container ">
         <div className="pokedex-header">
           <h1 className="pokedex-title">Pokédex</h1>
