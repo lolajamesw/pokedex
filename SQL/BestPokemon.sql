@@ -76,7 +76,7 @@ WHERE
 ORDER BY total_effect DESC, level DESC, atkType1, atkType2, defType1, defType2 limit 1
 )
 
-SELECT p.pid, p.name, mp.instanceID, mp.level, atkType1, atkType2, defType1, defType2, all_combos.total_effect 
+SELECT DISTINCT p.pid, p.name, mp.instanceID, mp.level, atkType1, atkType2, defType1, defType2, all_combos.total_effect 
 FROM all_combos, myPokemon mp, pokedex p, user u, best_values bv
 WHERE 
 	(
