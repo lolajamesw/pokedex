@@ -10,11 +10,17 @@ import Profile from './profile.js'
 import MyPokedex from './my-pokemon.js'
 import LoginPage from './login.js'
 import CreateAccountPage from './create-account.js'
+import Battle from './battle.js'
+import SearchUserPage from './search-user.js'
+import SearchProfile from './search-profiles.js'
+import config from './config.json'
 
 function MainApp() {
   const [currentPage, setCurrentPage] = useState("pokedex")
   const location = useLocation();
   const hideNavbar = location.pathname === "/login" || location.pathname === "/create-account";
+  
+  localStorage.setItem("server", config.server);
 
   return (
     <div>

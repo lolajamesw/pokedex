@@ -72,10 +72,10 @@ const PokemonDetail = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const overviewRes = await fetch(`http://localhost:8081/pokemon/${id}`);
+                const overviewRes = await fetch(`http://${localStorage.getItem("server")}/pokemon/${id}`);
                 const overviewData = await overviewRes.json();
 
-                const attackRes = await fetch(`http://localhost:8081/pokemon/attacks/${id}`);
+                const attackRes = await fetch(`http://${localStorage.getItem("server")}/pokemon/attacks/${id}`);
                 const attackData = await attackRes.json();
 
                 const combined: PokemonDetailType = {
@@ -85,7 +85,7 @@ const PokemonDetail = () => {
 
                 setPokemonDetail(combined);
 
-                const evolutionRes = await fetch(`http://localhost:8081/pokemon/evolutions/${id}`);
+                const evolutionRes = await fetch(`http://${localStorage.getItem("server")}/pokemon/evolutions/${id}`);
                 const evolutionData = await evolutionRes.json();
                 console.log("fetched evolution data");
                 setEvolutions(evolutionData);

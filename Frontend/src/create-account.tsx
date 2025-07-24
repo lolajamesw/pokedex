@@ -16,7 +16,7 @@ export default function CreateAccountPage() {
     }
 
     try {
-      const response = await fetch("http://localhost:8081/createAccount", {
+      const response = await fetch(`http://${localStorage.getItem("server")}/createAccount`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

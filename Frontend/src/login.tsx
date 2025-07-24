@@ -14,8 +14,10 @@ export default function LoginPage() {
       return;
     }
 
+    console.log(localStorage.getItem("server"));
+
     try {
-      const response = await fetch("http://localhost:8081/userLogin", {
+      const response = await fetch(`http://${localStorage.getItem("server")}/userLogin`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

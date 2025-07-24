@@ -66,29 +66,36 @@ export default function PokemonMarket() {
     message: "",
   })
 
-  async function getAvailablePokemon(){
-    fetch(`http://localhost:8081/availablePokemon/${localStorage.getItem("uID")}`)
+  async function getListablePokemon(){
+    fetch(`http://${localStorage.getItem("server")}/listablePokemon/${localStorage.getItem("uID")}`)
       .then((res) => res.json())
-      .then((data) => setAvailablePokemon(data))
-      .catch((error) => console.error("There was a problem getting the pokemon available for trade.", error));
+      .then((data) => setListablePokemon(data))
+      .catch((error) => console.error("There was a problem getting the pokemon available for listing.", error));
+  }
+
+  async function getReplyablePokemon(lid: number){
+    fetch(`http://${localStorage.getItem("server")}/replyablePokemon/uID=${localStorage.getItem("uID")}&listingID=${lid}`)
+      .then((res) => res.json())
+      .then((data) => setReplyablePokemon(data))
+      .catch((error) => console.error("There was a problem getting the pokemon available for listing.", error));
   }
 
   async function getMyListings() {
-    fetch(`http://localhost:8081/myListings/${localStorage.getItem("uID")}`)
+    fetch(`http://${localStorage.getItem("server")}/myListings/${localStorage.getItem("uID")}`)
         .then((res) => res.json())
         .then((data) => setUserListings(data))
         .catch((error) => console.error("There was a problem getting your listed pokemon", error));
   }
 
   async function getAvailableListings() {
-    fetch(`http://localhost:8081/availableListings/${localStorage.getItem("uID")}`)
+    fetch(`http://${localStorage.getItem("server")}/availableListings/${localStorage.getItem("uID")}`)
         .then((res)=>res.json())
         .then((data)=>setListings(data))
         .catch((err)=>console.error("Failed to fetch available listings"))
   }
 
   async function getReplies(listingID){
-    await fetch(`http://localhost:8081/replies/${listingID}`)
+    await fetch(`http://${localStorage.getItem("server")}/replies/${listingID}`)
       .then((res) => res.json())
       .then(async (data) => setReplies(data))
       .catch((error) => console.error("There was a problem getting the replies for this listing.", error));
@@ -122,7 +129,7 @@ export default function PokemonMarket() {
   const handleCreateListing = async () => {
     
     try {
-      const response = await fetch("http://localhost:8081/listPokemon", {
+      const response = await fetch(`http://${localStorage.getItem("server")}/listPokemon`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -163,7 +170,7 @@ export default function PokemonMarket() {
     if (!replyForm.pokemonId || !replyForm.message.trim()) return
 
     try {
-      const response = await fetch("http://localhost:8081/reply", {
+      const response = await fetch(`http://${localStorage.getItem("server")}/reply`, {
         method: "POST",
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify({
@@ -199,7 +206,7 @@ export default function PokemonMarket() {
     console.log("handling trade");
 
     try {
-      const response = await fetch("http://localhost:8081/trade", {
+      const response = await fetch(`http://${localStorage.getItem("server")}/trade`, {
         method: "POST",
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify({

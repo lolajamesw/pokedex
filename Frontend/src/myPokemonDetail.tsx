@@ -159,13 +159,13 @@ const MyPokeDetail = () => {
             try {
                 console.log("id:", id, "pID:",pID);
 
-                const overviewRes = await fetch(`http://localhost:8081/userPokemon/${id}`);
+                const overviewRes = await fetch(`http://${localStorage.getItem("server")}/userPokemon/${id}`);
                 const overviewData = await overviewRes.json();
 
-                const attackRes = await fetch(`http://localhost:8081/pokemon/attacks/${pID}`);
+                const attackRes = await fetch(`http://${localStorage.getItem("server")}/pokemon/attacks/${pID}`);
                 const attackData = await attackRes.json();
 
-                const knownRes = await fetch(`http://localhost:8081/pokemon/knownAttacks/${id}`)
+                const knownRes = await fetch(`http://${localStorage.getItem("server")}/pokemon/knownAttacks/${id}`)
                 const knownData = await knownRes.json();
 
                 const combined: PokemonDetailType = {
@@ -176,12 +176,12 @@ const MyPokeDetail = () => {
 
                 setPokemonDetail(combined);
 
-                const evolutionRes = await fetch(`http://localhost:8081/pokemon/evolutions/${pID}`);
+                const evolutionRes = await fetch(`http://${localStorage.getItem("server")}/pokemon/evolutions/${pID}`);
                 const evolutionData = await evolutionRes.json();
                 console.log("fetched evolution data");
                 setEvolutions(evolutionData);
 
-                const tradeRes = await fetch(`http://localhost:8081/pastTrades/${id}`);
+                const tradeRes = await fetch(`http://${localStorage.getItem("server")}/pastTrades/${id}`);
                 const tradeData = await tradeRes.json();
                 console.log("fetched trade data");
                 setTradeHistory(tradeData);
@@ -219,7 +219,7 @@ const MyPokeDetail = () => {
 
     const learnMove = async (moveToLearn: AttackDetailType) => {
       try {
-        const response = await fetch("http://localhost:8081/learnMove", {
+        const response = await fetch(`http://${localStorage.getItem("server")}/learnMove`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -229,13 +229,13 @@ const MyPokeDetail = () => {
         });
 
         if (response.ok) {
-          const overviewRes = await fetch(`http://localhost:8081/userPokemon/${id}`);
+          const overviewRes = await fetch(`http://${localStorage.getItem("server")}/userPokemon/${id}`);
           const overviewData = await overviewRes.json();
 
-          const attackRes = await fetch(`http://localhost:8081/pokemon/attacks/${pID}`);
+          const attackRes = await fetch(`http://${localStorage.getItem("server")}/pokemon/attacks/${pID}`);
           const attackData = await attackRes.json();
 
-          const knownRes = await fetch(`http://localhost:8081/pokemon/knownAttacks/${id}`)
+          const knownRes = await fetch(`http://${localStorage.getItem("server")}/pokemon/knownAttacks/${id}`)
           const knownData = await knownRes.json();
 
           const combined: PokemonDetailType = {
@@ -260,7 +260,7 @@ const MyPokeDetail = () => {
 
     const forgetMove = async (moveToForget: AttackDetailType) => {
       try {
-        const response = await fetch("http://localhost:8081/unlearnMove", {
+        const response = await fetch(`http://${localStorage.getItem("server")}/unlearnMove`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -270,13 +270,13 @@ const MyPokeDetail = () => {
         });
 
         if (response.ok) {
-          const overviewRes = await fetch(`http://localhost:8081/userPokemon/${id}`);
+          const overviewRes = await fetch(`http://${localStorage.getItem("server")}/userPokemon/${id}`);
           const overviewData = await overviewRes.json();
 
-          const attackRes = await fetch(`http://localhost:8081/pokemon/attacks/${pID}`);
+          const attackRes = await fetch(`http://${localStorage.getItem("server")}/pokemon/attacks/${pID}`);
           const attackData = await attackRes.json();
 
-          const knownRes = await fetch(`http://localhost:8081/pokemon/knownAttacks/${id}`)
+          const knownRes = await fetch(`http://${localStorage.getItem("server")}/pokemon/knownAttacks/${id}`)
           const knownData = await knownRes.json();
 
           const combined: PokemonDetailType = {
@@ -325,7 +325,7 @@ const MyPokeDetail = () => {
   const toggleFavorite = async () => {
     try {
       console.log("Marking Pokemon: ", pokemon.nickname);
-      const response = await fetch("http://localhost:8081/setFavourite", {
+      const response = await fetch(`http://${localStorage.getItem("server")}/setFavourite`, {
         method: "POST",
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify({instanceID: pokemon.id, user: localStorage.getItem("uID"), value:Number(!pokemon.favourite)}),
