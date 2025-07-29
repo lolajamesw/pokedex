@@ -25,6 +25,15 @@ INSERT INTO LearnableAttacks (pid, aid) VALUES
 (25, 1), -- Pikachu can learn Thunderbolt
 (26, 4); -- Raichu
 
+-- Evolutions 
+INSERT INTO Evolutions (evolvesFrom, evolvesInto) 
+VALUES
+(1,2),
+(2,3), 
+(25,26), 
+(133,134), 
+(133,135), 
+(133,136);
 
 -- A user with 8 pokemon: 6 on their team, 6 showcased, some overlap between them--
 INSERT INTO User (uid, Name, tradeCount, username, password) VALUES
@@ -70,14 +79,20 @@ INSERT INTO MyPokemon (instanceID, pid, uid, nickname, favourite, onteam, level,
 (15, 135, 7, 'Jasper', 0, 0, 11, 0),
 (16, 136, 7, 'Phillip', 0, 0, 2, 0);
 
-INSERT INTO Evolutions (evolvesFrom, evolvesInto) 
-VALUES
-(1,2),
-(2,3), 
-(25,26), 
-(133,134), 
-(133,135), 
-(133,136);
+-- Two new users with 3 Pokémon each for exemplar trade process
+INSERT INTO User (uid, Name, tradeCount, username, password) VALUES
+(8, 'Marco', 0, 'fireFang', 'M4rc0!Burns'),
+(9, 'Sierra', 0, 'crystalLeaf', 'S!3rr@2025');
+
+INSERT INTO MyPokemon (instanceID, pid, uid, nickname, favourite, onteam, level, showcase) VALUES
+(17, 136,   8, 'Ember',    1, 1, 10, 0),
+(18, 150,  8, 'Cinders',  0, 0, 8,  1),
+(19, 133,  8, 'Ashpaw',   0, 1, 13, 0),
+(20, 1, 9, 'Sprouty',  1, 0, 5,  0),
+(21, 2, 9, 'Bloomie',  0, 1, 9,  1),
+(22, 3, 9, 'Vinetta',  0, 0, 7,  0);
+
+
 
 INSERT INTO listing(listingID, instanceID, sellerID)
 VALUES
