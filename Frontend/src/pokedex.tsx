@@ -79,7 +79,7 @@ export default function Pokedex() {
   const [showCaughtOnly, setShowCaughtOnly] = useState(false)
   const [pokemonList, setPokemonList] = useState([])
   useEffect(() => {
-    fetch(`http://${localStorage.getItem("server")}/pokemon?uID=${localStorage.getItem("uID")}`)
+    fetch(`http://localhost:8081/pokemon?uID=${localStorage.getItem("uID")}`)
       .then((res) => res.json())
       .then((data) => setPokemonList(data))
       .catch((err) => console.error("Failed to fetch Pokémon:", err));

@@ -205,21 +205,21 @@ export default function Profile() {
   const [teamSummary, setTeamSummary] = useState<EffectType[]>([])
 
   useEffect(() => {
-    fetch(`http://${localStorage.getItem("server")}/user/${localStorage.getItem("uID")}`)
+    fetch("http://localhost:8081/user/" + localStorage.getItem("uID"))
       .then((res) => res.json())
       .then((data) => setUser(data))
       .catch((err) => console.error("Failed to fetch user: ", err));
   }, [])
 
   useEffect(() => {
-      fetch(`http://${localStorage.getItem("server")}/userPokemon?uID=${localStorage.getItem("uID")}`)
+      fetch(`http://localhost:8081/userPokemon?uID=${localStorage.getItem("uID")}`)
         .then((res) => res.json())
         .then((data) => setPokemonList(data))
         .catch((err) => console.error("Failed to fetch Pokémon:", err));
   }, [])
 
   useEffect(() => {
-    fetch(`http://${localStorage.getItem("server")}/teamSummary/${localStorage.getItem("uID")}`)
+    fetch(`http://localhost:8081/teamSummary/${localStorage.getItem("uID")}`)
       .then((res) => res.json())
       .then((data) => setTeamSummary(data))
       .catch((err) => console.error("Failed to fetch team summary:", err));
@@ -242,7 +242,7 @@ export default function Profile() {
   const handleSaveDisplayName = async () => {
     try {
       console.log("Updating user's name");
-      const response = await fetch(`http://${localStorage.getItem("server")}/updateUserDisplayName`, {
+      const response = await fetch("http://localhost:8081/updateUserDisplayName", {
         method: "POST",
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify({uID: localStorage.getItem("uID"), name: editedDisplayName})
@@ -264,7 +264,7 @@ export default function Profile() {
     // Call setShowcased to selected pokemon
     try {
       console.log("Marking Pokemon: ", selectedPokemon.map((p)=>(p.nickname)));
-      const response = await fetch(`http://${localStorage.getItem("server")}/setShowcased`, {
+      const response = await fetch("http://localhost:8081/setShowcased", {
         method: "POST",
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify({instanceIDs: selectedPokemon.map((p)=>(p.id)), user: localStorage.getItem("uID")}),
@@ -285,7 +285,7 @@ export default function Profile() {
     // Call setShowcased to selected pokemon
     try {
       console.log("Marking Pokemon: ", selectedPokemon.map((p)=>(p.nickname)));
-      const response = await fetch(`http://${localStorage.getItem("server")}/setTeam`, {
+      const response = await fetch("http://localhost:8081/setTeam", {
         method: "POST",
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify({instanceIDs: selectedPokemon.map((p)=>(p.id)), user: localStorage.getItem("uID")}),
@@ -293,7 +293,7 @@ export default function Profile() {
 
       setMyTeam(selectedPokemon);
 
-      const teamSum = await fetch(`http://${localStorage.getItem("server")}/teamSummary/${localStorage.getItem("uID")}`);
+      const teamSum = await fetch(`http://localhost:8081/teamSummary/${localStorage.getItem("uID")}`);
       const teamSumData = await teamSum.json();
       setTeamSummary(teamSumData);
 

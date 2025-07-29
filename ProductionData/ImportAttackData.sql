@@ -79,8 +79,6 @@ UPDATE attacks
 SET tm = 1
 WHERE attack_name IN (SELECT move_name AS attack_name FROM tm_list);
 
-DROP TABLE tm_list;
-
 
 -- display results
 SELECT * FROM attacks;

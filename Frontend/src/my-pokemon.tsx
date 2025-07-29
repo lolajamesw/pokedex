@@ -106,7 +106,7 @@ export default function MyPokedex() {
   const [newLevel, setNewLevel] = useState("");
   const [bannerMessage, setBannerMessage] = useState("");
   useEffect(() => {
-    fetch(`http://${localStorage.getItem("server")}/userPokemon?uID=${localStorage.getItem("uID")}`)
+    fetch(`http://localhost:8081/userPokemon?uID=${localStorage.getItem("uID")}`)
       .then((res) => res.json())
       .then((data) => setPokemonList(data))
       .catch((err) => console.error("Failed to fetch Pokémon:", err));
@@ -181,7 +181,7 @@ export default function MyPokedex() {
     }
 
     try {
-      const response = await fetch(`http://${localStorage.getItem("server")}/addPokemon`, {
+      const response = await fetch("http://localhost:8081/addPokemon", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -204,7 +204,7 @@ export default function MyPokedex() {
         setNewNickname("");
         setNewLevel("");
 
-        const updated = await fetch(`http://${localStorage.getItem("server")}/userPokemon?uID=${localStorage.getItem("uID")}`).then((r) => r.json());
+        const updated = await fetch(`http://localhost:8081/userPokemon?uID=${localStorage.getItem("uID")}`).then((r) => r.json());
         setPokemonList(updated);
       } else {
         const errMsg = await response.text();

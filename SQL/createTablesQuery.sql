@@ -103,7 +103,7 @@ CREATE TABLE Listing(
     instanceID INT NOT NULL REFERENCES MyPokemon(instanceID),
     sellerID INT NOT NULL REFERENCES User(uID),
     postedTime DATETIME DEFAULT '2000-01-01',
-    description VARCHAR(100) DEFAULT NULL
+    description VARCHAR(100)
 );
 
 CREATE TABLE Reply(
@@ -112,7 +112,7 @@ CREATE TABLE Reply(
     instanceID INT NOT NULL REFERENCES MyPokemon(instanceID),
     respondantID INT NOT NULL REFERENCES User(uID),
     sentTime DATETIME DEFAULT '2000-01-01',
-    message VARCHAR(100) DEFAULT NULL
+    message CHAR(100) NOT NULL
 );
 
 CREATE TABLE Trades(
@@ -181,7 +181,6 @@ BEGIN
 END //
 
 -- stored procedure to trade pokemon. Uses a transaction to ensure data consistency during concurrent requests and system failures
-DROP PROCEDURE IF EXISTS doTrade;
 DELIMITER //
 CREATE PROCEDURE doTrade(tradeID INT)
 BEGIN
@@ -189,37 +188,21 @@ BEGIN
 	DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
 		ROLLBACK;
-		RESIGNAL;
 	END;
     
     START TRANSACTION;
 		DROP TABLE IF EXISTS tradeGoingThrough;
 
-		CREATE TABLE tradeGoingThrough as (
+		CREATE TEMPORARY TABLE tradeGoingThrough as (
 		SELECT l.listingID, r.replyID, l.instanceID as forSalePokemon, l.sellerID AS seller, r.instanceID AS replyPokemon, r.respondantID as replyer
 		FROM reply r, listing l
 		WHERE r.listingID = l.listingID AND r.replyID = tradeID);
         
-		-- delete conflicting active replies and listings
-		DELETE FROM Reply
-        WHERE instanceID IN (
-			(SELECT forSalePokemon AS instanceID FROM tradeGoingThrough) 
-            UNION 
-            (SELECT replyPokemon AS instanceID FROM tradeGoingThrough)
-		) AND replyID NOT IN (
-			(SELECT replyID FROM tradeGoingThrough)
-            UNION
-            (SELECT replyID FROM trades)
-		);
-		DELETE FROM Listing
-        WHERE instanceID IN (
-			(SELECT forSalePokemon AS instanceID FROM tradeGoingThrough) 
-            UNION 
-            (SELECT replyPokemon AS instanceID FROM tradeGoingThrough)
-		) AND listingID NOT IN (
-			(SELECT listingID FROM tradeGoingThrough)
-            UNION
-            (SELECT listingID FROM trades)
+        -- Nullify other replies with replyPokemon
+        DELETE FROM Reply WHERE (
+			instanceID IN (SELECT replyPokemon FROM tradeGoingThrough) 
+            AND respondantID IN (SELECT replyer FROM tradeGoingThrough) 
+            AND replyID NOT IN (SELECT replyID FROM tradeGoingThrough)
 		);
 
 		-- actually swap ownership
@@ -229,7 +212,7 @@ BEGIN
         
         -- reset pokemonInstance bit values
         UPDATE myPokemon 
-        SET favourite=0, onteam=0, showcase=0, dateAdded=NOW()
+        SET favourite=0, onteam=0, showcased=0
         WHERE instanceID IN (SELECT forSalePokemon FROM tradeGoingThrough) OR instanceID IN (SELECT replyPokemon FROM tradeGoingThrough);
 
 		-- increment each users trade count
@@ -245,7 +228,7 @@ BEGIN
 		INSERT INTO trades (listingID, replyID, time)
 		SELECT listingID, replyID, NOW() FROM tradeGoingThrough;
 
-		DROP TABLE tradeGoingThrough;
+		drop TABLE tradeGoingThrough;
     COMMIT;
 END//
 DELIMITER ;

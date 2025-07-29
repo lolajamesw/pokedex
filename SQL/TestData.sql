@@ -39,15 +39,15 @@ VALUES
 INSERT INTO User (uid, Name, tradeCount, username, password) VALUES
 (4, 'Cynthia', 5, 'championcyn', 'Garchomp142*');
 
-INSERT INTO MyPokemon (instanceID, pid, uid, nickname, favourite, onteam, level, showcase) VALUES
-(1, 150, 4, 'CloneGod', 0, 1, 70, 1),  -- On team + Showcased
-(2, 3, 4, 'Bulky', 1, 1, 42, 1),     -- On team + Showcased
-(3, 25, 4, 'Zaps', 0, 1, 35, 0),      -- On team
-(4, 26, 4, 'Zoomer', 0, 1, 55, 1),    -- On team + Showcased
-(5, 1, 4, 'Leafy', 0, 1, 14, 0),     -- On team
-(6, 2, 4, 'Evolver', 0, 1, 25, 1),   -- On team + Showcased
-(7, 1, 4, 'Seedling', 0, 0, 9, 1),   -- Not on team, but Showcased
-(8, 3, 4, 'Tanky', 0, 0, 40, 1);     -- Not on team, but Showcased
+INSERT INTO MyPokemon (pid, uid, nickname, favourite, onteam, level, showcase) VALUES
+(150, 4, 'CloneGod', 0, 1, 70, 1),  -- On team + Showcased
+(3, 4, 'Bulky', 1, 1, 42, 1),     -- On team + Showcased
+(25, 4, 'Zaps', 0, 1, 35, 0),      -- On team
+(26, 4, 'Zoomer', 0, 1, 55, 1),    -- On team + Showcased
+(1, 4, 'Leafy', 0, 1, 14, 0),     -- On team
+(2, 4, 'Evolver', 0, 1, 25, 1),   -- On team + Showcased
+(1, 4, 'Seedling', 0, 0, 9, 1),   -- Not on team, but Showcased
+(3, 4, 'Tanky', 0, 0, 40, 1);     -- Not on team, but Showcased
 
 INSERT INTO CurrentAttacks (instanceID, aID) VALUES
 (1, 7), (1,24), (1,53);
@@ -56,19 +56,19 @@ INSERT INTO CurrentAttacks (instanceID, aID) VALUES
 INSERT INTO User (uid, Name, tradeCount, username, password) VALUES
 (5, 'Gary Oak', 2, 'rivalgary', 'Eeveelutions21*');
 
-INSERT INTO MyPokemon (instanceID, pid, uid, nickname, favourite, onteam, level, showcase) VALUES
-(9, 25, 5, 'Sparkles', 1, 0, 18, 0),  -- Favourite
-(10, 2, 5, 'IvyBoy', 0, 1, 25, 0);    -- On team
+INSERT INTO MyPokemon (pid, uid, nickname, favourite, onteam, level, showcase) VALUES
+(25, 5, 'Sparkles', 1, 0, 18, 0),  -- Favourite
+(2, 5, 'IvyBoy', 0, 1, 25, 0);    -- On team
 
 
 -- User with 3 pokemon --
 INSERT INTO User (uid, Name, tradeCount, username, password) VALUES
 (6, 'Erika', 1, 'flowerqueen', 'Bellsprout13*');
 
-INSERT INTO MyPokemon (instanceID, pid, uid, nickname, favourite, onteam, level, showcase) VALUES
-(11, 1, 6, 'Sprouter', 0, 1, 15, 0),
-(12, 2, 6, 'Bloomy', 0, 0, 25, 0),
-(13, 3, 6, 'VineBoss', 0, 1, 45, 1);
+INSERT INTO MyPokemon (pid, uid, nickname, favourite, onteam, level, showcase) VALUES
+(1, 6, 'Sprouter', 0, 1, 15, 0),
+(2, 6, 'Bloomy', 0, 0, 25, 0),
+(3, 6, 'VineBoss', 0, 1, 45, 1);
 
 -- A fourth user with 3 pokemon, to facilitate trades testing --
 INSERT INTO User (uid, Name, tradeCount, username, password) VALUES
