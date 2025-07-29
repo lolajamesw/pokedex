@@ -1,0 +1,183 @@
++-----------+-----+----------+-----+------------+----------+----------+-------+-----------------+------------+
+| listingID | uID | username | pID | name       | type1    | type2    | level | description     | replyCount |
++-----------+-----+----------+-----+------------+----------+----------+-------+-----------------+------------+
+|         5 |  18 | User18   |  20 | Raticate   | Normal   |          |    18 | description35   |          3 |
+|        17 |  32 | User32   |  38 | Ninetales  | Fire     |          |    32 | description119  |          4 |
+|        23 |  37 | User37   |  44 | Gloom      | Grass    | Poison   |    37 | description161  |          2 |
+|        39 |  48 | User48   |  56 | Mankey     | Fighting |          |    48 | description273  |          4 |
+|        44 |  51 | User51   |  58 | Growlithe  | Fire     |          |    51 | description308  |          5 |
+|        51 |  55 | User55   |  60 | Poliwag    | Water    |          |    55 | description357  |          3 |
+|        77 |  67 | User67   |  77 | Ponyta     | Fire     |          |    67 | description539  |          6 |
+|       114 |  81 | User81   |  98 | Krabby     | Water    |          |    81 | description798  |          4 |
+|       122 |  84 | User84   |  97 | Hypno      | Psychic  |          |    84 | description854  |          4 |
+|       147 |  92 | User92   | 108 | Lickitung  | Normal   |          |    92 | description1029 |          6 |
+|       161 |  96 | User96   | 118 | Goldeen    | Water    |          |    96 | description1127 |          2 |
+|       165 |  98 | User98   | 100 | Voltorb    | Electric |          |    98 | description1155 |          4 |
+|       177 |  41 | User41   |  18 | Pidgeot    | Normal   | Flying   |    16 | description27   |          6 |
+|       183 |  73 | User73   |  33 | Nidorino   | Poison   |          |    28 | description90   |          4 |
+|       189 |  94 | User94   |  44 | Gloom      | Grass    | Poison   |    36 | description153  |          4 |
+|       203 |  50 | User50   |  58 | Growlithe  | Fire     |          |    50 | description297  |          5 |
+|       218 |  62 | User62   |  70 | Weepinbell | Grass    | Poison   |    62 | description459  |          2 |
+|       227 |  68 | User68   |  72 | Tentacool  | Water    | Poison   |    68 | description549  |          5 |
+|       230 |  70 | User70   |  76 | Golem      | Rock     | Ground   |    70 | description585  |          5 |
+|       244 |  78 | User78   |  84 | Doduo      | Normal   | Flying   |    78 | description729  |          5 |
+|       248 |  80 | User80   |  93 | Haunter    | Ghost    | Poison   |    80 | description774  |          3 |
+|       258 |  85 | User85   |  96 | Drowzee    | Psychic  |          |    85 | description873  |          4 |
+|       261 |  87 | User87   |  92 | Gastly     | Ghost    | Poison   |    87 | description909  |          4 |
+|       274 |  93 | User93   | 101 | Electrode  | Electric |          |    93 | description1044 |          4 |
+|       279 |  95 | User95   | 111 | Rhyhorn    | Ground   | Rock     |    95 | description1098 |          3 |
+|       292 |  11 | User11   |  11 | Metapod    | Bug      |          |    11 | description11   |          3 |
+|       295 |  63 | User63   |  23 | Ekans      | Poison   |          |    20 | description44   |          2 |
+|       299 |  31 | User31   |  35 | Clefairy   | Fairy    |          |    31 | description110  |          2 |
+|       306 |  42 | User42   |  50 | Diglett    | Ground   |          |    42 | description209  |          5 |
+|       315 |  54 | User54   |  56 | Mankey     | Fighting |          |    54 | description341  |          1 |
+|       321 |  60 | User60   |  68 | Machamp    | Fighting |          |    60 | description429  |          2 |
+|       322 |  89 | User89   |  65 | Alakazam   | Psychic  |          |    61 | description440  |          5 |
+|       332 |  70 | User70   |  74 | Geodude    | Rock     | Ground   |    70 | description583  |          5 |
+|       333 |  71 | User71   |  80 | Slowbro    | Water    | Psychic  |    71 | description605  |          1 |
+|       336 |  74 | User74   |  74 | Geodude    | Rock     | Ground   |    74 | description649  |          1 |
+|       344 |  66 | User66   |  85 | Dodrio     | Normal   | Flying   |    79 | description748  |          3 |
+|       348 |  82 | User82   |  95 | Onix       | Rock     | Ground   |    82 | description814  |          3 |
+|       350 |  44 | User44   |  98 | Krabby     | Water    |          |    83 | description836  |          4 |
+|       360 |  90 | User90   | 100 | Voltorb    | Electric |          |    90 | description979  |          2 |
+|       363 |  92 | User92   | 113 | Chansey    | Normal   |          |    92 | description1034 |          4 |
+|       367 |  95 | User95   | 113 | Chansey    | Normal   |          |    95 | description1100 |          2 |
+|       371 |  97 | User97   | 112 | Rhydon     | Ground   | Rock     |    97 | description1144 |          3 |
+|       373 |  99 | User99   |  99 | Kingler    | Water    |          |    99 | description1177 |          2 |
+|       377 |  12 | User12   |  12 | Butterfree | Bug      | Flying   |    12 | description13   |          3 |
+|       378 |  16 | User16   |  17 | Pidgeotto  | Normal   | Flying   |    16 | description26   |          4 |
+|       384 |  34 | User34   |  35 | Clefairy   | Fairy    |          |    34 | description130  |          2 |
+|       386 |  38 | User38   |  44 | Gloom      | Grass    | Poison   |    38 | description169  |          3 |
+|       393 |  83 | User83   |  62 | Poliwrath  | Water    | Fighting |    51 | description312  |          3 |
+|       395 |  53 | User53   |  65 | Alakazam   | Psychic  |          |    53 | description338  |          4 |
+|       396 |  56 | User56   |  68 | Machamp    | Fighting |          |    56 | description377  |          3 |
+|       400 |  61 | User61   |  67 | Machoke    | Fighting |          |    61 | description442  |          1 |
+|       403 |  65 | User65   |  75 | Graveler   | Rock     | Ground   |    65 | description507  |          1 |
+|       407 |  71 | User71   |  73 | Tentacruel | Water    | Poison   |    71 | description598  |          1 |
+|       411 |  74 | User74   |  88 | Grimer     | Poison   |          |    74 | description663  |          2 |
+|       414 |  78 | User78   |  96 | Drowzee    | Psychic  |          |    78 | description741  |          2 |
+|       415 |  79 | User79   |  91 | Cloyster   | Water    | Ice      |    79 | description754  |          3 |
+|       421 |  84 | User84   |  88 | Grimer     | Poison   |          |    84 | description845  |          1 |
+|       422 |  85 | User85   |  94 | Gengar     | Ghost    | Poison   |    85 | description871  |          1 |
+|       423 |  86 | User86   |  87 | Dewgong    | Water    | Ice      |    86 | description884  |          2 |
+|       425 |  87 | User87   | 106 | Hitmonlee  | Fighting |          |    87 | description923  |          2 |
+|       430 |  92 | User92   |  93 | Haunter    | Ghost    | Poison   |    92 | description1014 |          3 |
+|       432 |  93 | User93   |  97 | Hypno      | Psychic  |          |    93 | description1040 |          0 |
+|       436 |  96 | User96   | 109 | Koffing    | Poison   |          |    96 | description1118 |          1 |
+|       438 |  98 | User98   | 102 | Exeggcute  | Grass    | Psychic  |    98 | description1157 |          1 |
+|       439 |  99 | User99   | 118 | Goldeen    | Water    |          |    99 | description1196 |          3 |
+|       442 |  31 | User31   |  14 | Kakuna     | Bug      | Poison   |    12 | description15   |          3 |
+|       443 |  43 | User43   |  18 | Pidgeot    | Normal   | Flying   |    17 | description30   |          3 |
+|       445 |  67 | User67   |  28 | Sandslash  | Ground   |          |    26 | description75   |          1 |
+|       447 |  77 | User77   |  41 | Zubat      | Poison   | Flying   |    36 | description150  |          1 |
+|       449 |  47 | User47   |  48 | Venonat    | Bug      | Poison   |    47 | description255  |          2 |
+|       452 |  54 | User54   |  60 | Poliwag    | Water    |          |    54 | description345  |          2 |
+|       453 |  56 | User56   |  66 | Machop     | Fighting |          |    56 | description375  |          1 |
+|       458 |  68 | User68   |  78 | Rapidash   | Fire     |          |    68 | description555  |          3 |
+|       459 |  95 | User95   |  77 | Ponyta     | Fire     |          |    69 | description570  |          1 |
+|       461 |  72 | User72   |  74 | Geodude    | Rock     | Ground   |    72 | description615  |          1 |
+|       465 |  79 | User79   |  87 | Dewgong    | Water    | Ice      |    79 | description750  |          2 |
+|       466 |  81 | User81   |  95 | Onix       | Rock     | Ground   |    81 | description795  |          2 |
+|       472 |  91 | User91   | 105 | Marowak    | Ground   |          |    91 | description1005 |          0 |
+|       473 |  92 | User92   |  99 | Kingler    | Water    |          |    92 | description1020 |          0 |
+|       476 |  96 | User96   | 101 | Electrode  | Electric |          |    96 | description1110 |          1 |
+|       477 |  97 | User97   | 108 | Lickitung  | Normal   |          |    97 | description1140 |          3 |
+|       478 |  99 | User99   | 107 | Hitmonchan | Fighting |          |    99 | description1185 |          3 |
+|       481 |  18 | User18   |  19 | Rattata    | Normal   |          |    18 | description34   |          0 |
+|       483 |  25 | User25   |  26 | Raichu     | Electric |          |    25 | description68   |          1 |
+|       484 |  28 | User28   |  28 | Sandslash  | Ground   |          |    28 | description85   |          1 |
+|       486 |  34 | User34   |  41 | Zubat      | Poison   | Flying   |    34 | description136  |          1 |
+|       487 |  38 | User38   |  45 | Vileplume  | Grass    | Poison   |    38 | description170  |          0 |
+|       489 |  48 | User48   |  55 | Golduck    | Water    |          |    48 | description272  |          1 |
+|       490 |  50 | User50   |  50 | Diglett    | Ground   |          |    50 | description289  |          1 |
+|       491 |  52 | User52   |  62 | Poliwrath  | Water    | Fighting |    52 | description323  |          1 |
+|       492 |  97 | User97   |  55 | Golduck    | Water    |          |    54 | description340  |          2 |
+|       495 |  60 | User60   |  64 | Kadabra    | Psychic  |          |    60 | description425  |          1 |
+|       496 |  64 | User64   |  76 | Golem      | Rock     | Ground   |    64 | description493  |          0 |
+|       497 |  66 | User66   |  80 | Slowbro    | Water    | Psychic  |    66 | description527  |          0 |
+|       498 |  83 | User83   |  82 | Magneton   | Electric | Steel    |    67 | description544  |          0 |
+|       499 |  69 | User69   |  85 | Dodrio     | Normal   | Flying   |    69 | description578  |          0 |
+|       500 |  72 | User72   |  88 | Grimer     | Poison   |          |    72 | description629  |          2 |
+|       501 |  73 | User73   |  88 | Grimer     | Poison   |          |    73 | description646  |          2 |
+|       502 |  92 | User92   |  88 | Grimer     | Poison   |          |    75 | description680  |          2 |
+|       505 |  81 | User81   |  82 | Magneton   | Electric | Steel    |    81 | description782  |          0 |
+|       506 |  81 | User81   |  99 | Kingler    | Water    |          |    81 | description799  |          0 |
+|       507 |  34 | User34   |  97 | Hypno      | Psychic  |          |    82 | description816  |          0 |
+|       509 |  85 | User85   |  90 | Shellder   | Water    |          |    85 | description867  |          1 |
+|       511 |  90 | User90   |  90 | Shellder   | Water    |          |    90 | description969  |          2 |
+|       512 |  90 | User90   | 107 | Hitmonchan | Fighting |          |    90 | description986  |          2 |
+|       513 |  91 | User91   | 103 | Exeggutor  | Grass    | Psychic  |    91 | description1003 |          1 |
+|       514 |  93 | User93   |  94 | Gengar     | Ghost    | Poison   |    93 | description1037 |          1 |
+|       515 |  93 | User93   | 111 | Rhyhorn    | Ground   | Rock     |    93 | description1054 |          0 |
+|       516 |  95 | User95   | 101 | Electrode  | Electric |          |    95 | description1088 |          1 |
+|       518 |  98 | User98   | 101 | Electrode  | Electric |          |    98 | description1156 |          1 |
+|       519 |  98 | User98   | 118 | Goldeen    | Water    |          |    98 | description1173 |          1 |
+|       521 |  14 | User14   |  14 | Kakuna     | Bug      | Poison   |    14 | description19   |          0 |
+|       522 |  19 | User19   |  20 | Raticate   | Normal   |          |    19 | description38   |          1 |
+|       523 |  58 | User58   |  24 | Arbok      | Poison   |          |    23 | description57   |          1 |
+|       524 |  82 | User82   |  29 | Nidoran♀   | Poison   |          |    26 | description76   |          1 |
+|       525 |  29 | User29   |  32 | Nidoran♂   | Poison   |          |    29 | description95   |          0 |
+|       526 |  82 | User82   |  33 | Nidorino   | Poison   |          |    32 | description114  |          0 |
+|       527 |  57 | User57   |  43 | Oddish     | Grass    | Poison   |    36 | description152  |          0 |
+|       528 |  59 | User59   |  49 | Venomoth   | Bug      | Poison   |    40 | description190  |          0 |
+|       529 |  99 | User99   |  51 | Dugtrio    | Ground   |          |    44 | description228  |          0 |
+|       530 |  51 | User51   |  54 | Psyduck    | Water    |          |    51 | description304  |          1 |
+|       531 |  55 | User55   |  64 | Kadabra    | Psychic  |          |    55 | description361  |          1 |
+|       532 |  53 | User53   |  58 | Growlithe  | Fire     |          |    57 | description380  |          1 |
+|       534 |  80 | User80   |  67 | Machoke    | Fighting |          |    62 | description456  |          0 |
+|       535 |  63 | User63   |  72 | Tentacool  | Water    | Poison   |    63 | description475  |          0 |
+|       536 |  68 | User68   |  74 | Geodude    | Rock     | Ground   |    68 | description551  |          0 |
+|       537 |  70 | User70   |  80 | Slowbro    | Water    | Psychic  |    70 | description589  |          0 |
+|       539 |  76 | User76   |  94 | Gengar     | Ghost    | Poison   |    76 | description703  |          0 |
+|       540 |  77 | User77   |  95 | Onix       | Rock     | Ground   |    77 | description722  |          1 |
+|       541 |  74 | User74   |  97 | Hypno      | Psychic  |          |    79 | description760  |          1 |
+|       543 |  82 | User82   |  98 | Krabby     | Water    |          |    82 | description817  |          0 |
+|       544 |  85 | User85   |  97 | Hypno      | Psychic  |          |    85 | description874  |          0 |
+|       545 |  86 | User86   |  96 | Drowzee    | Psychic  |          |    86 | description893  |          0 |
+|       546 |  46 | User46   |  95 | Onix       | Rock     | Ground   |    87 | description912  |          0 |
+|       548 |  91 | User91   | 107 | Hitmonchan | Fighting |          |    91 | description1007 |          1 |
+|       549 |  95 | User95   |  96 | Drowzee    | Psychic  |          |    95 | description1083 |          1 |
+|       550 |  95 | User95   | 115 | Kangaskhan | Normal   |          |    95 | description1102 |          1 |
+|       551 |  96 | User96   | 112 | Rhydon     | Ground   | Rock     |    96 | description1121 |          1 |
+|       552 |  98 | User98   | 104 | Cubone     | Ground   |          |    98 | description1159 |          0 |
+|       553 |  99 | User99   | 100 | Voltorb    | Electric |          |    99 | description1178 |          0 |
+|       554 | 100 | User100  | 115 | Kangaskhan | Normal   |          |   100 | description1216 |          0 |
+|       555 |  27 | User27   |  28 | Sandslash  | Ground   |          |    27 | Jigglypuff      |          0 |
++-----------+-----+----------+-----+------------+----------+----------+-------+-----------------+------------+
++------------+-------------+------------+----------+--------+-------+
+| instanceID | nickname    | name       | type1    | type2  | level |
++------------+-------------+------------+----------+--------+-------+
+|          7 | Nickname18  | Blastoise  | Water    |        |     9 |
+|        173 | Nickname79  | Wigglytuff | Normal   | Fairy  |    39 |
+|        177 | Nickname83  | Gloom      | Grass    | Poison |    39 |
+|        178 | Nickname84  | Vileplume  | Grass    | Poison |    39 |
+|        179 | Nickname85  | Paras      | Bug      | Grass  |    39 |
+|        266 | Nickname97  | Venomoth   | Bug      | Poison |    48 |
+|        594 | Nickname155 | Dodrio     | Normal   | Flying |    70 |
+|        639 | Nickname154 | Magnemite  | Electric | Steel  |    73 |
+|        942 | Nickname193 | Marowak    | Ground   |        |    88 |
++------------+-------------+------------+----------+--------+-------+
++-----------+-----+----------+-----+-----------+----------+-------+-------+-----------------+------------+
+| listingID | uID | username | pID | name      | type1    | type2 | level | description     | replyCount |
++-----------+-----+----------+-----+-----------+----------+-------+-------+-----------------+------------+
+|       161 |  96 | User96   | 118 | Goldeen   | Water    |       |    96 | description1127 |          2 |
+|       436 |  96 | User96   | 109 | Koffing   | Poison   |       |    96 | description1118 |          1 |
+|       476 |  96 | User96   | 101 | Electrode | Electric |       |    96 | description1110 |          1 |
+|       551 |  96 | User96   | 112 | Rhydon    | Ground   | Rock  |    96 | description1121 |          1 |
++-----------+-----+----------+-----+-----------+----------+-------+-------+-----------------+------------+
++------------+-----+------------+--------+--------+-------+-------------+-----+----------------+-------------+---------------------+---------+
+| instanceID | pID | species    | type1  | type2  | level | nickname    | uid | respondantName | message     | sentTime            | replyID |
++------------+-----+------------+--------+--------+-------+-------------+-----+----------------+-------------+---------------------+---------+
+|        516 |  69 | Bellsprout | Grass  | Poison |    66 | Nickname135 |  66 | Name66         | message516  | 2000-01-01 00:00:00 |     537 |
+|       1030 | 109 | Koffing    | Poison |        |    92 | Nickname201 |  92 | Name92         | message1030 | 2000-01-01 00:00:00 |     920 |
+|         30 |  18 | Pidgeot    | Normal | Flying |    17 | Nickname35  |  43 | Name43         | message30   | 2000-01-01 00:00:00 |     963 |
+|       1190 | 112 | Rhydon     | Ground | Rock   |    99 | Nickname211 |  12 | Name12         | message1190 | 2000-01-01 00:00:00 |    1332 |
+|        488 |  71 | Victreebel | Grass  | Poison |    64 | Nickname135 |  46 | Name46         | message488  | 2000-01-01 00:00:00 |    1397 |
+|        252 |  55 | Golduck    | Water  |        |    46 | Nickname101 |  47 | Name47         | message252  | 2000-01-01 00:00:00 |    1517 |
++------------+-----+------------+--------+--------+-------+-------------+-----+----------------+-------------+---------------------+---------+
++-----------+---------+----------------+--------+--------------+---------+
+| listingID | replyID | forSalePokemon | seller | replyPokemon | replyer |
++-----------+---------+----------------+--------+--------------+---------+
+|        77 |    1397 |            539 |     67 |          488 |      46 |
++-----------+---------+----------------+--------+--------------+---------+
+

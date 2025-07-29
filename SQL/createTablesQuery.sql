@@ -124,6 +124,9 @@ CREATE TABLE Trades(
     FOREIGN KEY (replyID) REFERENCES Reply(replyID)
 );
 
+CREATE INDEX reply_listing_index ON Reply(listingID);
+CREATE INDEX listing_seller_index ON Listing(sellerID);
+
 DELIMITER //
 
 CREATE TRIGGER limit_attacks
