@@ -365,3 +365,9 @@
   margin-right: 0.5rem;
   color: #555;
 }
+
+.profile-dropdown-info {
+  display: flex;
+  flex-direction: column;
+  margin-left: 15px;
+}

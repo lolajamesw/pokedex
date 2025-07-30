@@ -13,7 +13,7 @@ export default function SearchUserPage() {
         return;
       }
 
-      fetch(`http://${localStorage.getItem("server")}/searchUser?query=${encodeURIComponent(query)}`)
+      fetch(`http://localhost:8081/searchUser?query=${encodeURIComponent(query)}`)
         .then((res) => res.json())
         .then((data) => setResults(data))
         .catch((err) => {
@@ -36,7 +36,7 @@ export default function SearchUserPage() {
         placeholder="Search by username or uID"
         value={query}
         onChange={(e) => setQuery(e.target.value)}
-        className="search-input"
+        className="search-input searching"
       />
       <div className="card-results">
         {Array.isArray(results) && results.length === 0 && query.trim() !== "" && (

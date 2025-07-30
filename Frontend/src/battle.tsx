@@ -41,7 +41,7 @@ export default function PokemonCounterPage() {
     setError("")
 
     try {
-      const response = await fetch(`http://${localStorage.getItem("server")}/opponent/${pokemonName.trim().toLowerCase()}/${localStorage.getItem("uID")}`)
+      const response = await fetch(`http://localhost:8081/opponent/${pokemonName.trim().toLowerCase()}/${localStorage.getItem("uID")}`)
       if (!response.ok) {
         throw new Error("Failed to find counters")
       }
@@ -97,7 +97,7 @@ export default function PokemonCounterPage() {
             <CardDescription>Enter a Pokemon name to find the best counters from your collection</CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSubmit} className="flex gap-4">
+            <form onSubmit={handleSubmit} className="flex gap-4 items-center">
               <Input
                 type="text"
                 placeholder="Enter Pokemon name (e.g., Pikachu)"

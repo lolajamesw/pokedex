@@ -1,3 +1,4 @@
+const mysqlPromise = require('mysql2/promise');
 
 module.exports = (app, db) => {
     
@@ -144,8 +145,8 @@ module.exports = (app, db) => {
             const formatted = results.map((row) => ({
                 id: row.aID,
                 name: row.attack_name,
-                type: row.type,
-                category: row.category,
+                type: row.category,
+                category: row.type,
                 stats: {
                     power: row.power,
                     accuracy: row.accuracy, 
@@ -389,60 +390,60 @@ module.exports = (app, db) => {
     });
 
 
-app.get('/userPokemon', (req, res) => {
-  const uID = req.query.uID;
-  console.log("Incoming request to /userPokemon with uID:", uID);
+    app.get('/userPokemon', (req, res) => {
+    const uID = req.query.uID;
+    console.log("Incoming request to /userPokemon with uID:", uID);
 
-  const sql = `
-    SELECT
-      mp.instanceID AS id,
-      p.pID AS number,
-      p.name,
-      p.type1,
-      p.type2,
-      p.hp,
-      p.atk,
-      p.def,
-      p.spAtk,
-      p.spDef,
-      p.speed,
-      mp.level,
-      mp.nickname,
-      mp.showcase,
-      mp.onteam
-    FROM MyPokemon mp
-    JOIN Pokedex p ON mp.pID = p.pID
-    WHERE mp.uID = ?
-  `;
+    const sql = `
+        SELECT
+        mp.instanceID AS id,
+        p.pID AS number,
+        p.name,
+        p.type1,
+        p.type2,
+        p.hp,
+        p.atk,
+        p.def,
+        p.spAtk,
+        p.spDef,
+        p.speed,
+        mp.level,
+        mp.nickname,
+        mp.showcase,
+        mp.onteam
+        FROM MyPokemon mp
+        JOIN Pokedex p ON mp.pID = p.pID
+        WHERE mp.uID = ?
+    `;
 
-  db.query(sql, [uID], (err, results) => {
-    if (err) {
-      console.error("Error fetching user's Pokémon data:", err);
-      return res.status(500).json({ error: "Database error" });
-    }
+    db.query(sql, [uID], (err, results) => {
+        if (err) {
+        console.error("Error fetching user's Pokémon data:", err);
+        return res.status(500).json({ error: "Database error" });
+        }
 
-    const formatted = results.map((row) => ({
-      id: row.id,
-      number: row.number,
-      name: row.name,
-      types: row.type2 ? [row.type1, row.type2] : [row.type1],
-      stats: {
-        hp: row.hp,
-        attack: row.atk,
-        defense: row.def,
-        spAttack: row.spAtk,
-        spDefense: row.spDef,
-        speed: row.speed,
-      },
-      level: row.level,
-      nickname: row.nickname,
-      showcase: row.showcase[0]===1,
-      onTeam: row.onteam[0]===1
-    }));
+        const formatted = results.map((row) => ({
+            id: row.id,
+            number: row.number,
+            name: row.name,
+            types: row.type2 ? [row.type1, row.type2] : [row.type1],
+            stats: {
+                hp: row.hp,
+                attack: row.atk,
+                defense: row.def,
+                spAttack: row.spAtk,
+                spDefense: row.spDef,
+                speed: row.speed,
+            },
+            level: row.level,
+            nickname: row.nickname,
+            showcase: row.showcase[0]===1,
+            onTeam: row.onteam[0]===1
+            }));
 
-    return res.json(formatted);
-  });
-});
+            return res.json(formatted);
+        });
+    });
 
     app.get('/availableListings/:uID', (req, res) => {
         const uID = req.params.uID;
@@ -612,7 +613,10 @@ app.get('/userPokemon', (req, res) => {
             pokedex.type2,
             myPokemon.level
         FROM myPokemon JOIN pokedex ON myPokemon.pid = pokedex.pid
-        WHERE uid = ${uID} AND myPokemon.instanceID NOT IN (SELECT instanceID from listing);
+        WHERE uid = ${uID} AND myPokemon.instanceID NOT IN (
+            SELECT instanceID from listing WHERE listingID NOT IN (
+                SELECT listingID FROM Trades
+        ));
         `;
 
         db.query(sql, (err, results) => {
@@ -635,6 +639,181 @@ app.get('/userPokemon', (req, res) => {
 
     });
 
+    app.get("/opponent/:name/:uID", (req, res) => {
+        const opPokemon = req.params.name;
+        const user_id = req.params.uID;
+        console.log("Incoming request to /opponent with pokemon:", opPokemon);
+        db.query(`SELECT pID FROM Pokedex WHERE name='${opPokemon}' LIMIT 1`, (err, results) => {
+            if (err) {
+            console.error("Error fetching Pokémon pID:", err);
+            return res.status(500).json({ error: "Database error" });
+            }
+
+            const opPID = results[0]?.pID;
+            const sql = `
+-- find the best pokemon to fight given an oponent pokemon
+-- if multiple pokemon considered to be equally as good (level and type effectiveness) will return all of them
+-- let the opponent pokemon be ${opPID}, current user id is {user_id}
+
+WITH FX AS (
+    SELECT type1, type2,
+        CASE 
+            WHEN double_strength = 1 THEN 2
+            WHEN half_strength = 1 THEN 0.5
+            ELSE 0
+        END AS effect
+    FROM TypeFX
+),
+full AS (
+    SELECT * FROM FX
+    UNION
+    -- Fill in missing pairs with neutral effectiveness
+    SELECT t1.type AS type1, t2.type AS type2, 1 AS effect
+    FROM Types t1, Types t2
+    WHERE NOT EXISTS (
+        SELECT 1 FROM TypeFX tf
+        WHERE tf.type1 = t1.type AND tf.type2 = t2.type
+    )
+),
+-- All attacker combinations: (A1, A2) where A2 may be NULL
+attacker_types AS (
+    SELECT t1.type AS atkType1, NULL AS atkType2 FROM Types t1
+    UNION
+    SELECT t1.type AS atkType1, t2.type AS atkType2
+    FROM Types t1, Types t2
+    WHERE t1.type < t2.type  -- avoid dupes like (Fire, Water) and (Water, Fire)
+),
+-- All defender combinations: (D1, D2) where D2 may be NULL
+defender_types AS (
+    SELECT t1.type AS defType1, NULL AS defType2 FROM Types t1
+    UNION
+    SELECT t1.type AS defType1, t2.type AS defType2
+    FROM Types t1, Types t2
+    WHERE t1.type < t2.type
+),
+-- Combine and calculate total effect
+all_combos AS (
+    SELECT 
+        atk.atkType1, atk.atkType2,
+        def.defType1, def.defType2,
+        COALESCE(f1.effect, 1) * COALESCE(f2.effect, 1) *
+        COALESCE(f3.effect, 1) * COALESCE(f4.effect, 1) AS total_effect
+    FROM attacker_types atk
+    CROSS JOIN defender_types def
+    LEFT JOIN full f1 ON f1.type1 = atk.atkType1 AND f1.type2 = def.defType1
+    LEFT JOIN full f2 ON f2.type1 = atk.atkType1 AND f2.type2 = def.defType2
+    LEFT JOIN full f3 ON f3.type1 = atk.atkType2 AND f3.type2 = def.defType1
+    LEFT JOIN full f4 ON f4.type1 = atk.atkType2 AND f4.type2 = def.defType2
+),
+
+best_values AS (
+SELECT level, total_effect 
+FROM all_combos, myPokemon mp, pokedex p, user u
+WHERE 
+	(
+    (p.type1 = atkType1 AND p.type2 = atkType2) OR 
+    (p.type1 = atkType2 AND p.type2 = atkType1) OR 
+    (p.type2 NOT IN (SELECT * FROM TYPES) AND atkType2 IS NULL AND p.type1 = atkType1) 
+    ) AND
+    mp.pid = p.pid AND
+    (
+    (defType1 IN (SELECT type1 FROM pokedex WHERE pid = ${opPID}) AND defType2 IN (SELECT type2 FROM pokedex WHERE pid = ${opPID})) OR
+    (defType2 IN (SELECT type1 FROM pokedex WHERE pid = ${opPID}) AND defType1 IN (SELECT type2 FROM pokedex WHERE pid = ${opPID})) OR 
+    (defType1 IN (SELECT type1 FROM pokedex WHERE pid = ${opPID} AND type2='') AND defType2 IS NULL)
+    )
+    
+    AND
+    u.uid = mp.uid AND
+    u.uid = ${user_id}
+ORDER BY total_effect DESC, level DESC, atkType1, atkType2, defType1, defType2 limit 1
+)
+
+SELECT DISTINCT p.pid, p.name, mp.instanceID, mp.level, atkType1, atkType2, defType1, defType2, all_combos.total_effect 
+FROM all_combos, myPokemon mp, pokedex p, user u, best_values bv
+WHERE 
+	(
+    (p.type1 = atkType1 AND p.type2 = atkType2) OR 
+    (p.type1 = atkType2 AND p.type2 = atkType1) OR 
+    (p.type2 NOT IN (SELECT * FROM TYPES) AND atkType2 IS NULL AND p.type1 = atkType1) 
+    ) AND
+    mp.pid = p.pid AND
+	(
+    (defType1 IN (SELECT type1 FROM pokedex WHERE pid = ${opPID}) AND defType2 IN (SELECT type2 FROM pokedex WHERE pid = ${opPID})) OR
+    (defType2 IN (SELECT type1 FROM pokedex WHERE pid = ${opPID}) AND defType1 IN (SELECT type2 FROM pokedex WHERE pid = ${opPID})) OR 
+    (defType1 IN (SELECT type1 FROM pokedex WHERE pid = ${opPID} AND type2='') AND defType2 IS NULL)
+    ) AND
+    u.uid = mp.uid AND
+    u.uid = ${user_id} AND
+    all_combos.total_effect = bv.total_effect AND
+    mp.level = bv.level
+;
+            `;
+            db.query(sql, (err, results) => {
+                if (err) {
+                console.error("Error fetching user's Pokémon data:", err);
+                return res.status(500).json({ error: "Database error" });
+                }
+
+                const formatted = results.map((row) => ({
+                    id: row.pid,
+                    instance: row.instanceID,
+                    name: row.name,
+                    type1: row.atkType1,
+                    type2: row.atkType2,
+                    level: row.level,
+                    cp: 0, // Not sure what this is supposed to be
+                    effectiveness_score: parseFloat(row.total_effect)*100,
+                    def1: row.defType1,
+                    def2: row.defType2,
+                }));
+
+                return res.json({
+                    targetPokemon: opPokemon,
+                    targetPID: opPID,
+                    counters: formatted,
+                });
+            });
+        });
+
+        
+    });
+
+    app.get('/replyablePokemon/uID=:user&listingID=:lid', (req, res) => {
+        const uID = req.params.user;
+        const listingID = req.params.lid;
+        console.log("Incoming request to /replyablePokemon with uID:", uID, "and listingID:", listingID);
+
+        const sql = `
+        SELECT 
+            myPokemon.instanceID,
+            myPokemon.nickname,
+            pokedex.name,
+            pokedex.type1,
+            pokedex.type2,
+            myPokemon.level
+        FROM myPokemon JOIN pokedex ON myPokemon.pid = pokedex.pid
+        WHERE uid = ${uID} AND myPokemon.instanceID NOT IN (SELECT instanceID FROM Reply WHERE listingID = ${listingID});
+        `;
+
+        db.query(sql, (err, results) => {
+            if (err) {
+                console.error("Error fetching user's available Pokémon:", err);
+                return res.status(500).json({ error: "Database error" });
+            }
+
+            const formatted = results.map((row) => ({
+                id: row.instanceID,
+                nickname: row.nickname,
+                name: row.name,
+                type: row.type2 ? `${row.type1}/${row.type2}` : row.type1,
+                level: row.level,
+                image: `https://www.pokemon.com/static-assets/content-assets/cms2/img/pokedex/detail/${row.instanceID.toString().padStart(3, "0")}.png`
+            }));
+
+            return res.json(formatted);
+        });
+
+    });
 
     app.get('/pastTrades/:instanceID', (req, res) => {
         const instanceID = req.params.instanceID;
@@ -650,13 +829,17 @@ app.get('/userPokemon', (req, res) => {
         });
 
         const sql = `
-            SELECT t.time, fromU.username fromUser, toU.username toUser, l.description,
+            SELECT t.time, fromU.username as fromUser, toU.username as toUser, l.description, 
+            CASE 
+                WHEN toMP.instanceID=${instanceID} THEN TRUE
+                ELSE FALSE
+            END as isTo,
 
-            fromP.name fromName, fromMP.nickname fromNickname, 
-            fromMP.level fromLevel, fromP.type1 fromType1, fromP.type2 fromType2,
+            fromP.name as fromName, fromMP.nickname as fromNickname, 
+            fromMP.level as fromLevel, fromP.type1 as fromType1, fromP.type2 as fromType2,
 
-            toP.name toName, toMP.nickname toNickname, 
-            toMP.level toLevel, toP.type1 toType1, toP.type2 toType2 
+            toP.name as toName, toMP.nickname as toNickname, 
+            toMP.level as toLevel, toP.type1 as toType1, toP.type2 as toType2 
 
             FROM Trades t 
                 JOIN Listing l ON t.listingID=l.listingID
@@ -677,29 +860,75 @@ app.get('/userPokemon', (req, res) => {
             return res.status(500).json({ error: "Database error" });
             }
             console.log(username);
-            const formatted = results.map((row, index) => ({
-                id: index,
-                date: row.time,
-                fromTrainer: row.fromUser === username ? 'You' : row.fromUser,
-                toTrainer: row.toUser === username ? 'You' : row.toUser,
-                tradedAway: {
-                    pokemon: row.toName,
-                    nickname: row.toNickname,
-                    level: row.toLevel,
-                    types: row.toType2 ? [row.toType1, row.toType2] : [row.toType1],
-                },
-                tradedFor: {
-                    pokemon: row.fromName,
-                    nickname: row.fromNickname,
-                    level: row.fromLevel,
-                    types: row.fromType2 ? [row.fromType1, row.fromType2] : [row.fromType1],
-                },
-                notes: row.description,
-
+            const formatted = results.map((row, index) => (
+                row.isTo ? {
+                    id: index,
+                    date: row.time,
+                    fromTrainer: row.toUser === username ? 'You' : row.toUser,
+                    toTrainer: row.fromUser === username ? 'You' : row.fromUser,
+                    tradedAway: {
+                        pokemon: row.fromName,
+                        nickname: row.fromNickname,
+                        level: row.fromLevel,
+                        types: row.fromType2 ? [row.fromType1, row.fromType2] : [row.fromType1],
+                    },
+                    tradedFor: {
+                        pokemon: row.toName,
+                        nickname: row.toNickname,
+                        level: row.toLevel,
+                        types: row.toType2 ? [row.toType1, row.toType2] : [row.toType1],
+                    },
+                    notes: row.description,
+                } : {
+                    id: index,
+                    date: row.time,
+                    fromTrainer: row.fromUser === username ? 'You' : row.fromUser,
+                    toTrainer: row.toUser === username ? 'You' : row.toUser,
+                    tradedAway: {
+                        pokemon: row.toName,
+                        nickname: row.toNickname,
+                        level: row.toLevel,
+                        types: row.toType2 ? [row.toType1, row.toType2] : [row.toType1],
+                    },
+                    tradedFor: {
+                        pokemon: row.fromName,
+                        nickname: row.fromNickname,
+                        level: row.fromLevel,
+                        types: row.fromType2 ? [row.fromType1, row.fromType2] : [row.fromType1],
+                    },
+                    notes: row.description,
             }));
 
             return res.json(formatted);
         });
+    });
+    app.get("/searchUser", async (req, res) => {
+    const { query } = req.query;
+
+    if (!query) {
+        return res.status(400).json({ error: "No user found" });
+    }
+
+    try {
+        const db = await mysqlPromise.createConnection({
+            host: process.env.DB_HOST,
+            port: process.env.DB_PORT,
+            user: process.env.DB_USER,
+            password: process.env.DB_PASSWORD,
+            database: process.env.DB_NAME
+        });
+
+        const isNumeric = /^\d+$/.test(query);
+        const [results] = isNumeric
+        ? await db.execute("SELECT uID, name, username FROM User WHERE uID = ?", [query])
+        : await db.execute("SELECT uID, name, username FROM User WHERE username LIKE ?", [`%${query}%`]);
+
+        await db.end();
+        res.json(results);
+    } catch (err) {
+        console.error("Search error:", err);
+        res.status(500).json({ error: "Server error while searching" });
+    }
     });
 
 

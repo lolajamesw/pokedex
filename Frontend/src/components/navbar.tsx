@@ -2,13 +2,15 @@
 
 import { useState, useRef, useEffect } from "react"
 import { useLocation, Link, useNavigate } from "react-router-dom"
-import { Menu, User, LogOut, BookOpen, ShoppingCart } from "lucide-react"
+import { Menu, User, LogOut, BookOpen, ShoppingCart, Sword } from "lucide-react"
 import "./navbar.css"
 
 const navigationItems = [
   { name: "Pokédex", href: "/pokedex", icon: BookOpen },
   { name: "My Pokémon", href: "/my-pokemon", icon: User },
   { name: "Market", href: "/market", icon: ShoppingCart },
+  { name: "Battle", href: "/battle", icon: Sword},
+  { name: "Search User", href: "/search-user", icon: User }
 ]
 
 export default function Navbar({ currentPage, setCurrentPage }) {
@@ -69,7 +71,7 @@ export default function Navbar({ currentPage, setCurrentPage }) {
           <div className="desktop-profile">
             <button onClick={() => setShowProfileDropdown(!showProfileDropdown)} className="profile-button">
               <div className="avatar">
-                <div className="avatar-fallback">T</div>
+                <div className="avatar-fallback">{user.displayName.charAt(0)}</div>
               </div>
             </button>
             {showProfileDropdown && (

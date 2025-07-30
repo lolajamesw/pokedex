@@ -70,18 +70,18 @@ export default function CreateAccountPage() {
           />
         </div>
         <div className="input-group">
-          <label>Password</label>
+          <label>Password (8+ characters)</label>
           <input 
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)} 
-            placeholder="Choose a password" 
+            placeholder="e.g. Pa$$word101" 
             required 
           />
         </div>
         <button type="submit">Create Account</button>
       </form>
-      <p>
+      <p className='create-account'>
         <Link to="/login">Already have an account? Login here</Link>
       </p>
     </div>

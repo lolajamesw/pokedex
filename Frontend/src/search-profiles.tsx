@@ -111,14 +111,14 @@ export default function SearchProfile() {
   const [teamSummary, setTeamSummary] = useState<EffectType[]>([])
 
   useEffect(() => {
-    fetch(`http://${localStorage.getItem("server")}/user/${effectiveUID}`)
+    fetch(`http://localhost:8081/user/${effectiveUID}`)
       .then((res) => res.json())
       .then((data) => setUser(data))
       .catch((err) => console.error("Failed to fetch user: ", err));
   }, [effectiveUID])
 
   useEffect(() => {
-      fetch(`http://${localStorage.getItem("server")}/userPokemon?uID=${effectiveUID}`)
+      fetch(`http://localhost:8081/userPokemon?uID=${effectiveUID}`)
         .then((res) => res.json())
         .then((data) => setPokemonList(data))
         .catch((err) => console.error("Failed to fetch Pokémon:", err));
@@ -135,7 +135,7 @@ export default function SearchProfile() {
   }, [pokemonList]);
 
   useEffect(() => {
-    fetch(`http://${localStorage.getItem("server")}/teamSummary/${effectiveUID}`)
+    fetch(`http://localhost:8081/teamSummary/${effectiveUID}`)
       .then((res) => res.json())
       .then((data) => setTeamSummary(data))
       .catch((err) => console.error("Failed to fetch team summary:", err));
