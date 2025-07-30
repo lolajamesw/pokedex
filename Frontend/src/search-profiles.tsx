@@ -34,6 +34,13 @@ type PokemonStatType = {
     speed: number
 }
 
+type EffectType = {
+  type: string,
+  atkAvg: number,
+  defAvg: number
+}
+
+
 function PokemonLink({ pokemon, isSelected, onSelect, showSelectButton }) {
   return (
     <div className={`showcase-card ${isSelected ? "showcase-card-selected" : ""}`}>

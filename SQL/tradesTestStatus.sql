@@ -13,14 +13,16 @@ SELECT
 	listingID,
     nickname AS pokemon,
     user.name AS seller
-FROM listing JOIN myPokemon ON listing.instanceID = myPokemon.instanceID JOIN user ON listing.sellerID = user.uid;
+FROM listing JOIN myPokemon ON listing.instanceID = myPokemon.instanceID 
+    JOIN user ON listing.sellerID = user.uid;
 
 SELECT
 	replyID,
     listingID,
     nickname AS pokemon,
     user.name AS respondant
-FROM reply JOIN myPokemon ON reply.instanceID = myPokemon.instanceId JOIN user ON reply.respondantID = user.uid;
+FROM reply JOIN myPokemon ON reply.instanceID = myPokemon.instanceId 
+    JOIN user ON reply.respondantID = user.uid;
 
 SELECT 
 	user.name,

@@ -487,7 +487,7 @@ module.exports = (app, db) => {
                     image: `https://www.pokemon.com/static-assets/content-assets/cms2/img/pokedex/detail/${row.pID.toString().padStart(3, "0")}.png`
                 },
                 description: row.description,
-                replyCount: row.replyCount
+                replies: []
             }));
 
             return res.json(formatted);
@@ -598,9 +598,9 @@ module.exports = (app, db) => {
     });
 
 
-    app.get('/listablePokemon/:uID', (req, res) => {
+    app.get('/availablePokemon/:uID', (req, res) => {
         const uID = req.params.uID;
-        console.log("Incoming request to /listablePokemon with uID:", uID);
+        console.log("Incoming request to /availablePokemon with uID:", uID);
 
         const sql = `
         SELECT 
