@@ -1,5 +1,5 @@
 -- Fancy Feature 3: Market and trades
---listable pokemon
+-- listable pokemon
 SELECT 
     myPokemon.instanceID,
     myPokemon.nickname,
@@ -14,7 +14,7 @@ WHERE uid = 8 AND myPokemon.instanceID NOT IN (
 ));
 -- create listing
 INSERT INTO Listing (instanceID, sellerID, description, postedTime)
-      VALUES (19, 8, ‘Looking for a level 5 Bulbasaur’, NOW());
+      VALUES (19, 8, 'Looking for a level 5 Bulbasaur', NOW());
 
 -- browse public listings
 SELECT 
@@ -49,7 +49,7 @@ FROM myPokemon JOIN pokedex ON myPokemon.pid = pokedex.pid
 WHERE uid = 9 AND myPokemon.instanceID NOT IN (SELECT instanceID FROM Reply WHERE listingID = 7);
 -- send reply
 INSERT INTO Reply (listingID, instanceID, respondantID, message, sentTime)
-VALUES (7, 20, 9, ‘’, NOW());
+VALUES (7, 20, 9, '', NOW());
 
 -- my listings
 SELECT 
