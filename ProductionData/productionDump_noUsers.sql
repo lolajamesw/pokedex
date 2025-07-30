@@ -184,7 +184,8 @@ CREATE TABLE `listing` (
   `sellerID` int NOT NULL,
   `postedTime` datetime DEFAULT '2000-01-01 00:00:00',
   `description` varchar(100) DEFAULT NULL,
-  PRIMARY KEY (`listingID`)
+  PRIMARY KEY (`listingID`),
+  KEY `listing_seller_index` (`sellerID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -331,7 +332,8 @@ CREATE TABLE `reply` (
   `respondantID` int NOT NULL,
   `sentTime` datetime DEFAULT '2000-01-01 00:00:00',
   `message` varchar(100) DEFAULT NULL,
-  PRIMARY KEY (`replyID`)
+  PRIMARY KEY (`replyID`),
+  KEY `reply_listing_index` (`listingID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -342,6 +344,28 @@ CREATE TABLE `reply` (
 LOCK TABLES `reply` WRITE;
 /*!40000 ALTER TABLE `reply` DISABLE KEYS */;
 /*!40000 ALTER TABLE `reply` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `tm_list`
+--
+
+DROP TABLE IF EXISTS `tm_list`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `tm_list` (
+  `move_name` char(25) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `tm_list`
+--
+
+LOCK TABLES `tm_list` WRITE;
+/*!40000 ALTER TABLE `tm_list` DISABLE KEYS */;
+INSERT INTO `tm_list` VALUES ('Mega Punch'),('Razor Wind'),('Swords Dance'),('Whirlwind'),('Mega Kick'),('Toxic'),('Horn Drill'),('Body Slam'),('Take Down'),('Double-Edge'),('BubbleBeam'),('Water Gun'),('Ice Beam'),('Blizzard'),('Hyper Beam'),('Pay Day'),('Submission'),('Counter'),('Seismic Toss'),('Rage'),('Mega Drain'),('SolarBeam'),('Dragon Rage'),('Thunderbolt'),('Thunder'),('Earthquake'),('Fissure'),('Dig'),('Psychic'),('Teleport'),('Mimic'),('Double Team'),('Reflect'),('Bide'),('Metronome'),('Selfdestruct'),('Egg Bomb'),('Fire Blast'),('Swift'),('Skull Bash'),('Softboiled'),('Dream Eater'),('Sky Attack'),('Rest'),('Thunder Wave'),('Psywave'),('Explosion'),('Rock Slide'),('Tri Attack'),('Substitute'),('DynamicPunch'),('Headbutt'),('Curse'),('Rollout'),('Roar'),('Toxic'),('Zap Cannon'),('Rock Smash'),('Psych Up'),('Hidden Power'),('Sunny Day'),('Sweet Scent'),('Snore'),('Blizzard'),('Hyper Beam'),('Icy Wind'),('Protect'),('Rain Dance'),('Giga Drain'),('Endure'),('Frustration'),('SolarBeam'),('Iron Tail'),('DragonBreath'),('Thunder'),('Earthquake'),('Return'),('Dig'),('Psychic'),('Shadow Ball'),('Mud-Slap'),('Double Team'),('Ice Punch'),('Swagger'),('Sleep Talk'),('Sludge Bomb'),('Sandstorm'),('Fire Blast'),('Swift'),('Defense Curl'),('ThunderPunch'),('Dream Eater'),('Detect'),('Rest'),('Attract'),('Thief'),('Steel Wing'),('Fire Punch'),('Fury Cutter'),('Nightmare'),('Focus Punch'),('Dragon Claw'),('Water Pulse'),('Calm Mind'),('Roar'),('Toxic'),('Hail'),('Bulk Up'),('Bullet Seed'),('Hidden Power'),('Sunny Day'),('Taunt'),('Ice Beam'),('Blizzard'),('Hyper Beam'),('Light Screen'),('Protect'),('Rain Dance'),('Giga Drain'),('Safeguard'),('Frustration'),('SolarBeam'),('Iron Tail'),('Thunderbolt'),('Thunder'),('Earthquake'),('Return'),('Dig'),('Psychic'),('Shadow Ball'),('Brick Break'),('Double Team'),('Reflect'),('Shock Wave'),('Flamethrower'),('Sludge Bomb'),('Sandstorm'),('Fire Blast'),('Rock Tomb'),('Aerial Ace'),('Torment'),('Facade'),('Secret Power'),('Rest'),('Attract'),('Thief'),('Steel Wing'),('Skill Swap'),('Snatch'),('Overheat'),('Focus Punch'),('Dragon Claw'),('Water Pulse'),('Calm Mind'),('Roar'),('Toxic'),('Hail'),('Bulk Up'),('Bullet Seed'),('Hidden Power'),('Sunny Day'),('Taunt'),('Ice Beam'),('Blizzard'),('Hyper Beam'),('Light Screen'),('Protect'),('Rain Dance'),('Giga Drain'),('Safeguard'),('Frustration'),('SolarBeam'),('Iron Tail'),('Thunderbolt'),('Thunder'),('Earthquake'),('Return'),('Dig'),('Psychic'),('Shadow Ball'),('Brick Break'),('Double Team'),('Reflect'),('Shock Wave'),('Flamethrower'),('Sludge Bomb'),('Sandstorm'),('Fire Blast'),('Rock Tomb'),('Aerial Ace'),('Torment'),('Facade'),('Secret Power'),('Rest'),('Attract'),('Thief'),('Steel Wing'),('Skill Swap'),('Snatch'),('Overheat'),('Roost'),('Focus Blast'),('Energy Ball'),('False Swipe'),('Brine'),('Fling'),('Charge Beam'),('Endure'),('Dragon Pulse'),('Drain Punch'),('Will-O-Wisp'),('Silver Wind'),('Embargo'),('Explosion'),('Shadow Claw'),('Payback'),('Recycle'),('Giga Impact'),('Rock Polish'),('Flash'),('Stone Edge'),('Avalanche'),('Thunder Wave'),('Gyro Ball'),('Swords Dance'),('Stealth Rock'),('Psych Up'),('Captivate'),('Dark Pulse'),('Rock Slide'),('X-Scissor'),('Sleep Talk'),('Natural Gift'),('Poison Jab'),('Dream Eater'),('Grass Knot'),('Swagger'),('Pluck'),('U-turn'),('Substitute'),('Flash Cannon'),('Trick Room'),('Hone Claws'),('Dragon Claw'),('Psyshock'),('Calm Mind'),('Roar'),('Toxic'),('Hail'),('Bulk Up'),('Venoshock'),('Hidden Power'),('Sunny Day'),('Taunt'),('Ice Beam'),('Blizzard'),('Hyper Beam'),('Light Screen'),('Protect'),('Rain Dance'),('Telekinesis'),('Safeguard'),('Frustration'),('SolarBeam'),('Smack Down'),('Thunderbolt'),('Thunder'),('Earthquake'),('Return'),('Dig'),('Psychic'),('Shadow Ball'),('Brick Break'),('Double Team'),('Reflect'),('Sludge Wave'),('Flamethrower'),('Sludge Bomb'),('Sandstorm'),('Fire Blast'),('Rock Tomb'),('Aerial Ace'),('Torment'),('Facade'),('Flame Charge'),('Rest'),('Attract'),('Thief'),('Low Sweep'),('Round'),('Echoed Voice'),('Overheat'),('Ally Switch'),('Focus Blast'),('Energy Ball'),('False Swipe'),('Scald'),('Fling'),('Charge Beam'),('Sky Drop'),('Incinerate'),('Quash'),('Will-O-Wisp'),('Acrobatics'),('Embargo'),('Explosion'),('Shadow Claw'),('Payback'),('Retaliate'),('Giga Impact'),('Rock Polish'),('Flash'),('Stone Edge'),('Volt Switch'),('Thunder Wave'),('Gyro Ball'),('Swords Dance'),('Struggle Bug'),('Psych Up'),('Bulldoze'),('Frost Breath'),('Rock Slide'),('X-Scissor'),('Dragon Tail'),('Work Up'),('Poison Jab'),('Dream Eater'),('Grass Knot'),('Swagger'),('Pluck'),('U-turn'),('Substitute'),('Flash Cannon'),('Trick Room'),('Wild Charge'),('Rock Smash'),('Snarl'),('Hone Claws'),('Dragon Claw'),('Psyshock'),('Calm Mind'),('Roar'),('Toxic'),('Hail'),('Bulk Up'),('Venoshock'),('Hidden Power'),('Sunny Day'),('Taunt'),('Ice Beam'),('Blizzard'),('Hyper Beam'),('Light Screen'),('Protect'),('Rain Dance'),('Roost'),('Safeguard'),('Frustration'),('Solar Beam'),('Smack Down'),('Thunderbolt'),('Thunder'),('Earthquake'),('Return'),('Dig'),('Psychic'),('Shadow Ball'),('Brick Break'),('Double Team'),('Reflect'),('Sludge Wave'),('Flamethrower'),('Sludge Bomb'),('Sandstorm'),('Fire Blast'),('Rock Tomb'),('Aerial Ace'),('Torment'),('Facade'),('Flame Charge'),('Rest'),('Attract'),('Thief'),('Low Sweep'),('Round'),('Echoed Voice'),('Overheat'),('Steel Wing'),('Focus Blast'),('Energy Ball'),('False Swipe'),('Scald'),('Fling'),('Charge Beam'),('Sky Drop'),('Incinerate'),('Quash'),('Will-O-Wisp'),('Acrobatics'),('Embargo'),('Explosion'),('Shadow Claw'),('Payback'),('Retaliate'),('Giga Impact'),('Rock Polish'),('Flash'),('Stone Edge'),('Volt Switch'),('Thunder Wave'),('Gyro Ball'),('Swords Dance'),('Struggle Bug'),('Psych Up'),('Bulldoze'),('Frost Breath'),('Rock Slide'),('X-Scissor'),('Dragon Tail'),('Infestation'),('Poison Jab'),('Dream Eater'),('Grass Knot'),('Swagger'),('Sleep Talk'),('U-turn'),('Substitute'),('Flash Cannon'),('Trick Room'),('Wild Charge'),('Rock Smash'),('Secret Power'),('Snarl'),('Nature Power'),('Dark Pulse'),('Power-Up Punch'),('Dazzling Gleam'),('Confide'),('Work Up'),('Dragon Claw'),('Psyshock'),('Calm Mind'),('Roar'),('Toxic'),('Hail'),('Bulk Up'),('Venoshock'),('Hidden Power'),('Sunny Day'),('Taunt'),('Ice Beam'),('Blizzard'),('Hyper Beam'),('Light Screen'),('Protect'),('Rain Dance'),('Roost'),('Safeguard'),('Frustration'),('Solar Beam'),('Smack Down'),('Thunderbolt'),('Thunder'),('Earthquake'),('Return'),('Leech Life'),('Psychic'),('Shadow Ball'),('Brick Break'),('Double Team'),('Reflect'),('Sludge Wave'),('Flamethrower'),('Sludge Bomb'),('Sandstorm'),('Fire Blast'),('Rock Tomb'),('Aerial Ace'),('Torment'),('Facade'),('Flame Charge'),('Rest'),('Attract'),('Thief'),('Low Sweep'),('Round'),('Echoed Voice'),('Overheat'),('Steel Wing'),('Focus Blast'),('Energy Ball'),('False Swipe'),('Scald'),('Fling'),('Charge Beam'),('Sky Drop'),('Brutal Swing'),('Quash'),('Will-O-Wisp'),('Acrobatics'),('Embargo'),('Explosion'),('Shadow Claw'),('Payback'),('Smart Strike'),('Giga Impact'),('Rock Polish'),('Aurora Veil'),('Stone Edge'),('Volt Switch'),('Thunder Wave'),('Gyro Ball'),('Swords Dance'),('Fly'),('Psych Up'),('Bulldoze'),('Frost Breath'),('Rock Slide'),('X-Scissor'),('Dragon Tail'),('Infestation'),('Poison Jab'),('Dream Eater'),('Grass Knot'),('Swagger'),('Sleep Talk'),('U-turn'),('Substitute'),('Flash Cannon'),('Trick Room'),('Wild Charge'),('Surf'),('Snarl'),('Nature Power'),('Dark Pulse'),('Waterfall'),('Dazzling Gleam'),('Confide'),('Headbutt'),('Taunt'),('Helping Hand'),('Teleport'),('Rest'),('Light Screen'),('Protect'),('Substitute'),('Reflect'),('Dig'),('Will-O-Wisp'),('Facade'),('Brick Break'),('Fly'),('Seismic Toss'),('Thunder Wave'),('Dragon Tail'),('U-turn'),('Iron Tail'),('Dark Pulse'),('Foul Play'),('Rock Slide'),('Thunder Punch'),('X-Scissor'),('Waterfall'),('Poison Jab'),('Toxic'),('Tri Attack'),('Scald'),('Bulk Up'),('Fire Punch'),('Dazzling Gleam'),('Calm Mind'),('Dragon Pulse'),('Ice Punch'),('Thunderbolt'),('Flamethrower'),('Thunder'),('Outrage'),('Psychic'),('Earthquake'),('Self-Destruct'),('Shadow Ball'),('Play Rough'),('Solar Beam'),('Fire Blast'),('Surf'),('Hyper Beam'),('Superpower'),('Roost'),('Blizzard'),('Sludge Bomb'),('Mega Drain'),('Flash Cannon'),('Ice Beam'),('Stealth Rock'),('Pay Day'),('Drill Run'),('Dream Eater'),('Megahorn'),('');
+/*!40000 ALTER TABLE `tm_list` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -452,6 +476,28 @@ LOCK TABLES `user` WRITE;
 /*!40000 ALTER TABLE `user` DISABLE KEYS */;
 /*!40000 ALTER TABLE `user` ENABLE KEYS */;
 UNLOCK TABLES;
+
+--
+-- Temporary view structure for view `users_pokedex`
+--
+
+DROP TABLE IF EXISTS `users_pokedex`;
+/*!50001 DROP VIEW IF EXISTS `users_pokedex`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `users_pokedex` AS SELECT 
+ 1 AS `pid`,
+ 1 AS `Name`,
+ 1 AS `type1`,
+ 1 AS `type2`,
+ 1 AS `HP`,
+ 1 AS `Atk`,
+ 1 AS `Def`,
+ 1 AS `SpAtk`,
+ 1 AS `SpDef`,
+ 1 AS `Speed`,
+ 1 AS `caught_count`*/;
+SET character_set_client = @saved_cs_client;
 
 --
 -- Dumping events for database 'pokedex'
@@ -612,6 +658,24 @@ DELIMITER ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
+
+--
+-- Final view structure for view `users_pokedex`
+--
+
+/*!50001 DROP VIEW IF EXISTS `users_pokedex`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = cp850 */;
+/*!50001 SET character_set_results     = cp850 */;
+/*!50001 SET collation_connection      = cp850_general_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `users_pokedex` AS select `p`.`pID` AS `pid`,`p`.`name` AS `Name`,`p`.`type1` AS `type1`,`p`.`type2` AS `type2`,`p`.`hp` AS `HP`,`p`.`atk` AS `Atk`,`p`.`def` AS `Def`,`p`.`spAtk` AS `SpAtk`,`p`.`spDef` AS `SpDef`,`p`.`speed` AS `Speed`,count(`mp`.`instanceID`) AS `caught_count` from (`pokedex` `p` left join `mypokemon` `mp` on(((`p`.`pID` = `mp`.`pID`) and (`mp`.`uID` = 4)))) group by `p`.`pID`,`p`.`name`,`p`.`type1`,`p`.`type2`,`p`.`hp`,`p`.`atk`,`p`.`def`,`p`.`spAtk`,`p`.`spDef`,`p`.`speed` order by `p`.`pID` */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -622,4 +686,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-07-24  0:30:42
+-- Dump completed on 2025-07-29 20:16:13
