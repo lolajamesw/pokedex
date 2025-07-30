@@ -1,7 +1,7 @@
 # Pokedex
 
 ## test-sample
-The file test-sample/productionDump.sql is a MySQL dump file for our sample database. To create and load this database,
+The file test-sample/sampleDump.sql is a MySQL dump file for our sample database. To create and load this database,
 1. downlad the dump file or clone this repo
 2. Open MySQL Workbench
 3. Go to Server > Data Import > Import From Disk
