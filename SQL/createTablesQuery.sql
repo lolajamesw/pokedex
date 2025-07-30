@@ -124,6 +124,9 @@ CREATE TABLE Trades(
     FOREIGN KEY (replyID) REFERENCES Reply(replyID)
 );
 
+CREATE INDEX reply_listing_index ON Reply(listingID);
+CREATE INDEX listing_seller_index ON Listing(sellerID);
+
 DELIMITER //
 
 CREATE TRIGGER limit_attacks
@@ -178,8 +181,13 @@ BEGIN
 END //
 
 -- stored procedure to trade pokemon. Uses a transaction to ensure data consistency during concurrent requests and system failures
+<<<<<<< HEAD
 DROP PROCEDURE IF EXISTS doTrade;
 
+=======
+-- DROP PROCEDURE IF EXISTS doTrade;
+-- DELIMITER //
+>>>>>>> 871e6fb08144d57df053388908819479102bd2d3
 CREATE PROCEDURE doTrade(tradeID INT)
 BEGIN
 

@@ -72,30 +72,6 @@ LOCK TABLES `currentattacks` WRITE;
 /*!40000 ALTER TABLE `currentattacks` DISABLE KEYS */;
 /*!40000 ALTER TABLE `currentattacks` ENABLE KEYS */;
 UNLOCK TABLES;
-/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
-/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
-/*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = utf8mb4 */ ;
-/*!50003 SET character_set_results = utf8mb4 */ ;
-/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
-/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
-DELIMITER ;;
-/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `limit_attacks` BEFORE INSERT ON `currentattacks` FOR EACH ROW BEGIN
-	DECLARE atkCount INT;
-    SELECT COUNT(DISTINCT(instanceID)) INTO atkCount
-    FROM CurrentAttacks;
-    
-    IF atkCount >= 4 THEN 
-		SIGNAL SQLSTATE '45000'
-		SET MESSAGE_TEXT = 'Pokemon cannot learn more than 4 moves';
-    END IF;
-END */;;
-DELIMITER ;
-/*!50003 SET sql_mode              = @saved_sql_mode */ ;
-/*!50003 SET character_set_client  = @saved_cs_client */ ;
-/*!50003 SET character_set_results = @saved_cs_results */ ;
-/*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
 -- Table structure for table `evolutions`
@@ -184,8 +160,7 @@ CREATE TABLE `listing` (
   `sellerID` int NOT NULL,
   `postedTime` datetime DEFAULT '2000-01-01 00:00:00',
   `description` varchar(100) DEFAULT NULL,
-  PRIMARY KEY (`listingID`),
-  KEY `listing_seller_index` (`sellerID`)
+  PRIMARY KEY (`listingID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -228,60 +203,6 @@ LOCK TABLES `mypokemon` WRITE;
 /*!40000 ALTER TABLE `mypokemon` DISABLE KEYS */;
 /*!40000 ALTER TABLE `mypokemon` ENABLE KEYS */;
 UNLOCK TABLES;
-/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
-/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
-/*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = utf8mb4 */ ;
-/*!50003 SET character_set_results = utf8mb4 */ ;
-/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
-/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
-DELIMITER ;;
-/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `max_6_showcase` BEFORE UPDATE ON `mypokemon` FOR EACH ROW BEGIN
-	DECLARE numShowcased INT;
-	IF OLD.showcase = 0 AND NEW.showcase = 1 THEN
-		SELECT COUNT(instanceID) INTO numShowcased 
-			FROM MyPokemon 
-			WHERE uid = OLD.uid AND showcase = 1;
-
-		IF numShowcased >= 6 THEN
-			SIGNAL SQLSTATE '45000'
-			SET MESSAGE_TEXT = 'A user cannot showcase more than 6 pokemon at a time';
-		END IF;
-	END IF;
-END */;;
-DELIMITER ;
-/*!50003 SET sql_mode              = @saved_sql_mode */ ;
-/*!50003 SET character_set_client  = @saved_cs_client */ ;
-/*!50003 SET character_set_results = @saved_cs_results */ ;
-/*!50003 SET collation_connection  = @saved_col_connection */ ;
-/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
-/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
-/*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = utf8mb4 */ ;
-/*!50003 SET character_set_results = utf8mb4 */ ;
-/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
-/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
-DELIMITER ;;
-/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `max_6_onTeam` BEFORE UPDATE ON `mypokemon` FOR EACH ROW BEGIN
-	DECLARE numTeam INT;
-    IF OLD.onTeam = 0 AND NEW.onTeam = 1 THEN
-		SELECT COUNT(instanceID) INTO numTeam 
-			FROM MyPokemon 
-			WHERE uid = OLD.uid AND onTeam = 1;
-			
-		IF numTeam >= 6 AND NEW.onTeam = 1 THEN
-			SIGNAL SQLSTATE '45000'
-			SET MESSAGE_TEXT = 'The maximum team size is 6.';
-		END IF;
-	END IF;
-END */;;
-DELIMITER ;
-/*!50003 SET sql_mode              = @saved_sql_mode */ ;
-/*!50003 SET character_set_client  = @saved_cs_client */ ;
-/*!50003 SET character_set_results = @saved_cs_results */ ;
-/*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
 -- Table structure for table `pokedex`
@@ -331,9 +252,8 @@ CREATE TABLE `reply` (
   `instanceID` int NOT NULL,
   `respondantID` int NOT NULL,
   `sentTime` datetime DEFAULT '2000-01-01 00:00:00',
-  `message` varchar(100) DEFAULT NULL,
-  PRIMARY KEY (`replyID`),
-  KEY `reply_listing_index` (`listingID`)
+  `message` char(100) NOT NULL,
+  PRIMARY KEY (`replyID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -478,28 +398,6 @@ LOCK TABLES `user` WRITE;
 UNLOCK TABLES;
 
 --
--- Temporary view structure for view `users_pokedex`
---
-
-DROP TABLE IF EXISTS `users_pokedex`;
-/*!50001 DROP VIEW IF EXISTS `users_pokedex`*/;
-SET @saved_cs_client     = @@character_set_client;
-/*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `users_pokedex` AS SELECT 
- 1 AS `pid`,
- 1 AS `Name`,
- 1 AS `type1`,
- 1 AS `type2`,
- 1 AS `HP`,
- 1 AS `Atk`,
- 1 AS `Def`,
- 1 AS `SpAtk`,
- 1 AS `SpDef`,
- 1 AS `Speed`,
- 1 AS `caught_count`*/;
-SET character_set_client = @saved_cs_client;
-
---
 -- Dumping events for database 'pokedex'
 --
 
@@ -522,38 +420,15 @@ BEGIN
 	DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
 		ROLLBACK;
-		RESIGNAL;
 	END;
     
     START TRANSACTION;
 		DROP TABLE IF EXISTS tradeGoingThrough;
 
-		CREATE TABLE tradeGoingThrough as (
+		CREATE TEMPORARY TABLE tradeGoingThrough as (
 		SELECT l.listingID, r.replyID, l.instanceID as forSalePokemon, l.sellerID AS seller, r.instanceID AS replyPokemon, r.respondantID as replyer
 		FROM reply r, listing l
 		WHERE r.listingID = l.listingID AND r.replyID = tradeID);
-        
-		-- delete conflicting active replies and listings
-		DELETE FROM Reply
-        WHERE instanceID IN (
-			(SELECT forSalePokemon AS instanceID FROM tradeGoingThrough) 
-            UNION 
-            (SELECT replyPokemon AS instanceID FROM tradeGoingThrough)
-		) AND replyID NOT IN (
-			(SELECT replyID FROM tradeGoingThrough)
-            UNION
-            (SELECT replyID FROM trades)
-		);
-		DELETE FROM Listing
-        WHERE instanceID IN (
-			(SELECT forSalePokemon AS instanceID FROM tradeGoingThrough) 
-            UNION 
-            (SELECT replyPokemon AS instanceID FROM tradeGoingThrough)
-		) AND listingID NOT IN (
-			(SELECT listingID FROM tradeGoingThrough)
-            UNION
-            (SELECT listingID FROM trades)
-		);
 
 		-- actually swap ownership
 		UPDATE mypokemon seller, mypokemon replyer, tradeGoingThrough
@@ -562,7 +437,7 @@ BEGIN
         
         -- reset pokemonInstance bit values
         UPDATE myPokemon 
-        SET favourite=0, onteam=0, showcase=0, dateAdded=NOW()
+        SET favourite=0, onteam=0, showcased=0
         WHERE instanceID IN (SELECT forSalePokemon FROM tradeGoingThrough) OR instanceID IN (SELECT replyPokemon FROM tradeGoingThrough);
 
 		-- increment each users trade count
@@ -578,7 +453,7 @@ BEGIN
 		INSERT INTO trades (listingID, replyID, time)
 		SELECT listingID, replyID, NOW() FROM tradeGoingThrough;
 
-		DROP TABLE tradeGoingThrough;
+		drop TABLE tradeGoingThrough;
     COMMIT;
 END ;;
 DELIMITER ;
@@ -613,69 +488,6 @@ DELIMITER ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
-/*!50003 DROP PROCEDURE IF EXISTS `tradeStatus` */;
-/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
-/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
-/*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = utf8mb4 */ ;
-/*!50003 SET character_set_results = utf8mb4 */ ;
-/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
-/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
-DELIMITER ;;
-CREATE DEFINER=`root`@`localhost` PROCEDURE `tradeStatus`()
-BEGIN
-
-SELECT 
-    tradeID,
-    listingID,
-    replyID
-FROM trades;
-
-SELECT
-	listingID,
-    nickname AS pokemon,
-    user.name AS seller
-FROM listing JOIN myPokemon ON listing.instanceID = myPokemon.instanceID JOIN user ON listing.sellerID = user.uid;
-
-SELECT
-	replyID,
-    listingID,
-    nickname AS pokemon,
-    user.name AS respondant
-FROM reply JOIN myPokemon ON reply.instanceID = myPokemon.instanceId JOIN user ON reply.respondantID = user.uid;
-
-SELECT 
-	user.name,
-    nickname AS pokemon
-FROM myPokemon JOIN user ON user.uid = myPokemon.uid
-ORDER BY user.uid;
-
-
-END ;;
-DELIMITER ;
-/*!50003 SET sql_mode              = @saved_sql_mode */ ;
-/*!50003 SET character_set_client  = @saved_cs_client */ ;
-/*!50003 SET character_set_results = @saved_cs_results */ ;
-/*!50003 SET collation_connection  = @saved_col_connection */ ;
-
---
--- Final view structure for view `users_pokedex`
---
-
-/*!50001 DROP VIEW IF EXISTS `users_pokedex`*/;
-/*!50001 SET @saved_cs_client          = @@character_set_client */;
-/*!50001 SET @saved_cs_results         = @@character_set_results */;
-/*!50001 SET @saved_col_connection     = @@collation_connection */;
-/*!50001 SET character_set_client      = cp850 */;
-/*!50001 SET character_set_results     = cp850 */;
-/*!50001 SET collation_connection      = cp850_general_ci */;
-/*!50001 CREATE ALGORITHM=UNDEFINED */
-/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
-/*!50001 VIEW `users_pokedex` AS select `p`.`pID` AS `pid`,`p`.`name` AS `Name`,`p`.`type1` AS `type1`,`p`.`type2` AS `type2`,`p`.`hp` AS `HP`,`p`.`atk` AS `Atk`,`p`.`def` AS `Def`,`p`.`spAtk` AS `SpAtk`,`p`.`spDef` AS `SpDef`,`p`.`speed` AS `Speed`,count(`mp`.`instanceID`) AS `caught_count` from (`pokedex` `p` left join `mypokemon` `mp` on(((`p`.`pID` = `mp`.`pID`) and (`mp`.`uID` = 4)))) group by `p`.`pID`,`p`.`name`,`p`.`type1`,`p`.`type2`,`p`.`hp`,`p`.`atk`,`p`.`def`,`p`.`spAtk`,`p`.`spDef`,`p`.`speed` order by `p`.`pID` */;
-/*!50001 SET character_set_client      = @saved_cs_client */;
-/*!50001 SET character_set_results     = @saved_cs_results */;
-/*!50001 SET collation_connection      = @saved_col_connection */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -686,4 +498,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-07-29 20:16:13
+-- Dump completed on 2025-07-22 15:38:11

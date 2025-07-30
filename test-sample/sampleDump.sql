@@ -185,7 +185,8 @@ CREATE TABLE `listing` (
   `sellerID` int NOT NULL,
   `postedTime` datetime DEFAULT '2000-01-01 00:00:00',
   `description` varchar(100) DEFAULT NULL,
-  PRIMARY KEY (`listingID`)
+  PRIMARY KEY (`listingID`),
+  KEY `listing_seller_index` (`sellerID`)
 ) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -218,7 +219,7 @@ CREATE TABLE `mypokemon` (
   `dateAdded` datetime DEFAULT '2000-01-01 00:00:00',
   PRIMARY KEY (`instanceID`),
   CONSTRAINT `mypokemon_chk_1` CHECK ((`level` > 0))
-) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=23 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -227,7 +228,7 @@ CREATE TABLE `mypokemon` (
 
 LOCK TABLES `mypokemon` WRITE;
 /*!40000 ALTER TABLE `mypokemon` DISABLE KEYS */;
-INSERT INTO `mypokemon` VALUES (150,4,1,'CloneGod',70,_binary '\0',_binary '',_binary '','2000-01-01 00:00:00'),(3,4,2,'Bulky',42,_binary '',_binary '',_binary '','2000-01-01 00:00:00'),(25,4,3,'Zaps',35,_binary '\0',_binary '',_binary '\0','2000-01-01 00:00:00'),(26,4,4,'Zoomer',55,_binary '\0',_binary '',_binary '','2000-01-01 00:00:00'),(1,4,5,'Leafy',14,_binary '\0',_binary '',_binary '\0','2000-01-01 00:00:00'),(2,4,6,'Evolver',25,_binary '\0',_binary '',_binary '','2000-01-01 00:00:00'),(1,4,7,'Seedling',9,_binary '\0',_binary '\0',_binary '','2000-01-01 00:00:00'),(3,4,8,'Tanky',40,_binary '\0',_binary '\0',_binary '','2000-01-01 00:00:00'),(25,5,9,'Sparkles',18,_binary '',_binary '\0',_binary '\0','2000-01-01 00:00:00'),(2,5,10,'IvyBoy',25,_binary '\0',_binary '',_binary '\0','2000-01-01 00:00:00'),(1,6,11,'Sprouter',15,_binary '\0',_binary '',_binary '\0','2000-01-01 00:00:00'),(2,6,12,'Bloomy',25,_binary '\0',_binary '\0',_binary '\0','2000-01-01 00:00:00'),(3,6,13,'VineBoss',45,_binary '\0',_binary '',_binary '','2000-01-01 00:00:00'),(134,7,14,'Squirt',9,_binary '\0',_binary '\0',_binary '\0','2000-01-01 00:00:00'),(135,7,15,'Jasper',11,_binary '\0',_binary '\0',_binary '\0','2000-01-01 00:00:00'),(136,7,16,'Phillip',2,_binary '\0',_binary '\0',_binary '\0','2000-01-01 00:00:00');
+INSERT INTO `mypokemon` VALUES (150,4,1,'CloneGod',70,_binary '\0',_binary '',_binary '','2000-01-01 00:00:00'),(3,4,2,'Bulky',42,_binary '',_binary '',_binary '','2000-01-01 00:00:00'),(25,4,3,'Zaps',35,_binary '\0',_binary '',_binary '\0','2000-01-01 00:00:00'),(26,4,4,'Zoomer',55,_binary '\0',_binary '',_binary '','2000-01-01 00:00:00'),(1,4,5,'Leafy',14,_binary '\0',_binary '',_binary '\0','2000-01-01 00:00:00'),(2,4,6,'Evolver',25,_binary '\0',_binary '',_binary '','2000-01-01 00:00:00'),(1,4,7,'Seedling',9,_binary '\0',_binary '\0',_binary '','2000-01-01 00:00:00'),(3,4,8,'Tanky',40,_binary '\0',_binary '\0',_binary '','2000-01-01 00:00:00'),(25,5,9,'Sparkles',18,_binary '',_binary '\0',_binary '\0','2000-01-01 00:00:00'),(2,5,10,'IvyBoy',25,_binary '\0',_binary '',_binary '\0','2000-01-01 00:00:00'),(1,6,11,'Sprouter',15,_binary '\0',_binary '',_binary '\0','2000-01-01 00:00:00'),(2,6,12,'Bloomy',25,_binary '\0',_binary '\0',_binary '\0','2000-01-01 00:00:00'),(3,6,13,'VineBoss',45,_binary '\0',_binary '',_binary '','2000-01-01 00:00:00'),(134,7,14,'Squirt',9,_binary '\0',_binary '\0',_binary '\0','2000-01-01 00:00:00'),(135,7,15,'Jasper',11,_binary '\0',_binary '\0',_binary '\0','2000-01-01 00:00:00'),(136,7,16,'Phillip',2,_binary '\0',_binary '\0',_binary '\0','2000-01-01 00:00:00'),(136,8,17,'Ember',10,_binary '',_binary '',_binary '\0','2000-01-01 00:00:00'),(150,8,18,'Cinders',8,_binary '\0',_binary '\0',_binary '','2000-01-01 00:00:00'),(133,8,19,'Ashpaw',13,_binary '\0',_binary '',_binary '\0','2000-01-01 00:00:00'),(1,9,20,'Sprouty',5,_binary '',_binary '\0',_binary '\0','2000-01-01 00:00:00'),(2,9,21,'Bloomie',9,_binary '\0',_binary '',_binary '','2000-01-01 00:00:00'),(3,9,22,'Vinetta',7,_binary '\0',_binary '\0',_binary '\0','2000-01-01 00:00:00');
 /*!40000 ALTER TABLE `mypokemon` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
@@ -334,7 +335,8 @@ CREATE TABLE `reply` (
   `respondantID` int NOT NULL,
   `sentTime` datetime DEFAULT '2000-01-01 00:00:00',
   `message` varchar(100) DEFAULT NULL,
-  PRIMARY KEY (`replyID`)
+  PRIMARY KEY (`replyID`),
+  KEY `reply_listing_index` (`listingID`)
 ) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -346,6 +348,28 @@ LOCK TABLES `reply` WRITE;
 /*!40000 ALTER TABLE `reply` DISABLE KEYS */;
 INSERT INTO `reply` VALUES (1,1,1,4,'2000-01-01 00:00:00',NULL),(2,2,2,4,'2000-01-01 00:00:00',NULL),(3,2,15,7,'2000-01-01 00:00:00',NULL),(4,3,4,4,'2000-01-01 00:00:00',NULL),(5,4,10,5,'2000-01-01 00:00:00',NULL),(6,5,9,5,'2000-01-01 00:00:00',NULL),(7,6,6,4,'2000-01-01 00:00:00',NULL),(8,6,4,4,'2000-01-01 00:00:00',NULL);
 /*!40000 ALTER TABLE `reply` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `tm_list`
+--
+
+DROP TABLE IF EXISTS `tm_list`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `tm_list` (
+  `move_name` char(25) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `tm_list`
+--
+
+LOCK TABLES `tm_list` WRITE;
+/*!40000 ALTER TABLE `tm_list` DISABLE KEYS */;
+INSERT INTO `tm_list` VALUES ('Mega Punch'),('Razor Wind'),('Swords Dance'),('Whirlwind'),('Mega Kick'),('Toxic'),('Horn Drill'),('Body Slam'),('Take Down'),('Double-Edge'),('BubbleBeam'),('Water Gun'),('Ice Beam'),('Blizzard'),('Hyper Beam'),('Pay Day'),('Submission'),('Counter'),('Seismic Toss'),('Rage'),('Mega Drain'),('SolarBeam'),('Dragon Rage'),('Thunderbolt'),('Thunder'),('Earthquake'),('Fissure'),('Dig'),('Psychic'),('Teleport'),('Mimic'),('Double Team'),('Reflect'),('Bide'),('Metronome'),('Selfdestruct'),('Egg Bomb'),('Fire Blast'),('Swift'),('Skull Bash'),('Softboiled'),('Dream Eater'),('Sky Attack'),('Rest'),('Thunder Wave'),('Psywave'),('Explosion'),('Rock Slide'),('Tri Attack'),('Substitute'),('DynamicPunch'),('Headbutt'),('Curse'),('Rollout'),('Roar'),('Toxic'),('Zap Cannon'),('Rock Smash'),('Psych Up'),('Hidden Power'),('Sunny Day'),('Sweet Scent'),('Snore'),('Blizzard'),('Hyper Beam'),('Icy Wind'),('Protect'),('Rain Dance'),('Giga Drain'),('Endure'),('Frustration'),('SolarBeam'),('Iron Tail'),('DragonBreath'),('Thunder'),('Earthquake'),('Return'),('Dig'),('Psychic'),('Shadow Ball'),('Mud-Slap'),('Double Team'),('Ice Punch'),('Swagger'),('Sleep Talk'),('Sludge Bomb'),('Sandstorm'),('Fire Blast'),('Swift'),('Defense Curl'),('ThunderPunch'),('Dream Eater'),('Detect'),('Rest'),('Attract'),('Thief'),('Steel Wing'),('Fire Punch'),('Fury Cutter'),('Nightmare'),('Focus Punch'),('Dragon Claw'),('Water Pulse'),('Calm Mind'),('Roar'),('Toxic'),('Hail'),('Bulk Up'),('Bullet Seed'),('Hidden Power'),('Sunny Day'),('Taunt'),('Ice Beam'),('Blizzard'),('Hyper Beam'),('Light Screen'),('Protect'),('Rain Dance'),('Giga Drain'),('Safeguard'),('Frustration'),('SolarBeam'),('Iron Tail'),('Thunderbolt'),('Thunder'),('Earthquake'),('Return'),('Dig'),('Psychic'),('Shadow Ball'),('Brick Break'),('Double Team'),('Reflect'),('Shock Wave'),('Flamethrower'),('Sludge Bomb'),('Sandstorm'),('Fire Blast'),('Rock Tomb'),('Aerial Ace'),('Torment'),('Facade'),('Secret Power'),('Rest'),('Attract'),('Thief'),('Steel Wing'),('Skill Swap'),('Snatch'),('Overheat'),('Focus Punch'),('Dragon Claw'),('Water Pulse'),('Calm Mind'),('Roar'),('Toxic'),('Hail'),('Bulk Up'),('Bullet Seed'),('Hidden Power'),('Sunny Day'),('Taunt'),('Ice Beam'),('Blizzard'),('Hyper Beam'),('Light Screen'),('Protect'),('Rain Dance'),('Giga Drain'),('Safeguard'),('Frustration'),('SolarBeam'),('Iron Tail'),('Thunderbolt'),('Thunder'),('Earthquake'),('Return'),('Dig'),('Psychic'),('Shadow Ball'),('Brick Break'),('Double Team'),('Reflect'),('Shock Wave'),('Flamethrower'),('Sludge Bomb'),('Sandstorm'),('Fire Blast'),('Rock Tomb'),('Aerial Ace'),('Torment'),('Facade'),('Secret Power'),('Rest'),('Attract'),('Thief'),('Steel Wing'),('Skill Swap'),('Snatch'),('Overheat'),('Roost'),('Focus Blast'),('Energy Ball'),('False Swipe'),('Brine'),('Fling'),('Charge Beam'),('Endure'),('Dragon Pulse'),('Drain Punch'),('Will-O-Wisp'),('Silver Wind'),('Embargo'),('Explosion'),('Shadow Claw'),('Payback'),('Recycle'),('Giga Impact'),('Rock Polish'),('Flash'),('Stone Edge'),('Avalanche'),('Thunder Wave'),('Gyro Ball'),('Swords Dance'),('Stealth Rock'),('Psych Up'),('Captivate'),('Dark Pulse'),('Rock Slide'),('X-Scissor'),('Sleep Talk'),('Natural Gift'),('Poison Jab'),('Dream Eater'),('Grass Knot'),('Swagger'),('Pluck'),('U-turn'),('Substitute'),('Flash Cannon'),('Trick Room'),('Hone Claws'),('Dragon Claw'),('Psyshock'),('Calm Mind'),('Roar'),('Toxic'),('Hail'),('Bulk Up'),('Venoshock'),('Hidden Power'),('Sunny Day'),('Taunt'),('Ice Beam'),('Blizzard'),('Hyper Beam'),('Light Screen'),('Protect'),('Rain Dance'),('Telekinesis'),('Safeguard'),('Frustration'),('SolarBeam'),('Smack Down'),('Thunderbolt'),('Thunder'),('Earthquake'),('Return'),('Dig'),('Psychic'),('Shadow Ball'),('Brick Break'),('Double Team'),('Reflect'),('Sludge Wave'),('Flamethrower'),('Sludge Bomb'),('Sandstorm'),('Fire Blast'),('Rock Tomb'),('Aerial Ace'),('Torment'),('Facade'),('Flame Charge'),('Rest'),('Attract'),('Thief'),('Low Sweep'),('Round'),('Echoed Voice'),('Overheat'),('Ally Switch'),('Focus Blast'),('Energy Ball'),('False Swipe'),('Scald'),('Fling'),('Charge Beam'),('Sky Drop'),('Incinerate'),('Quash'),('Will-O-Wisp'),('Acrobatics'),('Embargo'),('Explosion'),('Shadow Claw'),('Payback'),('Retaliate'),('Giga Impact'),('Rock Polish'),('Flash'),('Stone Edge'),('Volt Switch'),('Thunder Wave'),('Gyro Ball'),('Swords Dance'),('Struggle Bug'),('Psych Up'),('Bulldoze'),('Frost Breath'),('Rock Slide'),('X-Scissor'),('Dragon Tail'),('Work Up'),('Poison Jab'),('Dream Eater'),('Grass Knot'),('Swagger'),('Pluck'),('U-turn'),('Substitute'),('Flash Cannon'),('Trick Room'),('Wild Charge'),('Rock Smash'),('Snarl'),('Hone Claws'),('Dragon Claw'),('Psyshock'),('Calm Mind'),('Roar'),('Toxic'),('Hail'),('Bulk Up'),('Venoshock'),('Hidden Power'),('Sunny Day'),('Taunt'),('Ice Beam'),('Blizzard'),('Hyper Beam'),('Light Screen'),('Protect'),('Rain Dance'),('Roost'),('Safeguard'),('Frustration'),('Solar Beam'),('Smack Down'),('Thunderbolt'),('Thunder'),('Earthquake'),('Return'),('Dig'),('Psychic'),('Shadow Ball'),('Brick Break'),('Double Team'),('Reflect'),('Sludge Wave'),('Flamethrower'),('Sludge Bomb'),('Sandstorm'),('Fire Blast'),('Rock Tomb'),('Aerial Ace'),('Torment'),('Facade'),('Flame Charge'),('Rest'),('Attract'),('Thief'),('Low Sweep'),('Round'),('Echoed Voice'),('Overheat'),('Steel Wing'),('Focus Blast'),('Energy Ball'),('False Swipe'),('Scald'),('Fling'),('Charge Beam'),('Sky Drop'),('Incinerate'),('Quash'),('Will-O-Wisp'),('Acrobatics'),('Embargo'),('Explosion'),('Shadow Claw'),('Payback'),('Retaliate'),('Giga Impact'),('Rock Polish'),('Flash'),('Stone Edge'),('Volt Switch'),('Thunder Wave'),('Gyro Ball'),('Swords Dance'),('Struggle Bug'),('Psych Up'),('Bulldoze'),('Frost Breath'),('Rock Slide'),('X-Scissor'),('Dragon Tail'),('Infestation'),('Poison Jab'),('Dream Eater'),('Grass Knot'),('Swagger'),('Sleep Talk'),('U-turn'),('Substitute'),('Flash Cannon'),('Trick Room'),('Wild Charge'),('Rock Smash'),('Secret Power'),('Snarl'),('Nature Power'),('Dark Pulse'),('Power-Up Punch'),('Dazzling Gleam'),('Confide'),('Work Up'),('Dragon Claw'),('Psyshock'),('Calm Mind'),('Roar'),('Toxic'),('Hail'),('Bulk Up'),('Venoshock'),('Hidden Power'),('Sunny Day'),('Taunt'),('Ice Beam'),('Blizzard'),('Hyper Beam'),('Light Screen'),('Protect'),('Rain Dance'),('Roost'),('Safeguard'),('Frustration'),('Solar Beam'),('Smack Down'),('Thunderbolt'),('Thunder'),('Earthquake'),('Return'),('Leech Life'),('Psychic'),('Shadow Ball'),('Brick Break'),('Double Team'),('Reflect'),('Sludge Wave'),('Flamethrower'),('Sludge Bomb'),('Sandstorm'),('Fire Blast'),('Rock Tomb'),('Aerial Ace'),('Torment'),('Facade'),('Flame Charge'),('Rest'),('Attract'),('Thief'),('Low Sweep'),('Round'),('Echoed Voice'),('Overheat'),('Steel Wing'),('Focus Blast'),('Energy Ball'),('False Swipe'),('Scald'),('Fling'),('Charge Beam'),('Sky Drop'),('Brutal Swing'),('Quash'),('Will-O-Wisp'),('Acrobatics'),('Embargo'),('Explosion'),('Shadow Claw'),('Payback'),('Smart Strike'),('Giga Impact'),('Rock Polish'),('Aurora Veil'),('Stone Edge'),('Volt Switch'),('Thunder Wave'),('Gyro Ball'),('Swords Dance'),('Fly'),('Psych Up'),('Bulldoze'),('Frost Breath'),('Rock Slide'),('X-Scissor'),('Dragon Tail'),('Infestation'),('Poison Jab'),('Dream Eater'),('Grass Knot'),('Swagger'),('Sleep Talk'),('U-turn'),('Substitute'),('Flash Cannon'),('Trick Room'),('Wild Charge'),('Surf'),('Snarl'),('Nature Power'),('Dark Pulse'),('Waterfall'),('Dazzling Gleam'),('Confide'),('Headbutt'),('Taunt'),('Helping Hand'),('Teleport'),('Rest'),('Light Screen'),('Protect'),('Substitute'),('Reflect'),('Dig'),('Will-O-Wisp'),('Facade'),('Brick Break'),('Fly'),('Seismic Toss'),('Thunder Wave'),('Dragon Tail'),('U-turn'),('Iron Tail'),('Dark Pulse'),('Foul Play'),('Rock Slide'),('Thunder Punch'),('X-Scissor'),('Waterfall'),('Poison Jab'),('Toxic'),('Tri Attack'),('Scald'),('Bulk Up'),('Fire Punch'),('Dazzling Gleam'),('Calm Mind'),('Dragon Pulse'),('Ice Punch'),('Thunderbolt'),('Flamethrower'),('Thunder'),('Outrage'),('Psychic'),('Earthquake'),('Self-Destruct'),('Shadow Ball'),('Play Rough'),('Solar Beam'),('Fire Blast'),('Surf'),('Hyper Beam'),('Superpower'),('Roost'),('Blizzard'),('Sludge Bomb'),('Mega Drain'),('Flash Cannon'),('Ice Beam'),('Stealth Rock'),('Pay Day'),('Drill Run'),('Dream Eater'),('Megahorn'),('');
+/*!40000 ALTER TABLE `tm_list` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -401,7 +425,6 @@ CREATE TABLE `typefx` (
 
 LOCK TABLES `typefx` WRITE;
 /*!40000 ALTER TABLE `typefx` DISABLE KEYS */;
-INSERT INTO `typefx` VALUES ('Bug','Dark',_binary '',_binary '\0',_binary '\0'),('Bug','Fairy',_binary '\0',_binary '',_binary '\0'),('Bug','Fighting',_binary '\0',_binary '',_binary '\0'),('Bug','Fire',_binary '\0',_binary '',_binary '\0'),('Bug','Flying',_binary '\0',_binary '',_binary '\0'),('Bug','Ghost',_binary '\0',_binary '',_binary '\0'),('Bug','Grass',_binary '',_binary '\0',_binary '\0'),('Bug','Poison',_binary '\0',_binary '',_binary '\0'),('Bug','Psychic',_binary '',_binary '\0',_binary '\0'),('Bug','Steel',_binary '\0',_binary '',_binary '\0'),('Dark','Dark',_binary '\0',_binary '',_binary '\0'),('Dark','Fairy',_binary '\0',_binary '',_binary '\0'),('Dark','Fighting',_binary '\0',_binary '',_binary '\0'),('Dark','Ghost',_binary '',_binary '\0',_binary '\0'),('Dark','Psychic',_binary '',_binary '\0',_binary '\0'),('Dragon','Dragon',_binary '',_binary '\0',_binary '\0'),('Dragon','Fairy',_binary '\0',_binary '\0',_binary ''),('Dragon','Steel',_binary '\0',_binary '',_binary '\0'),('Electric','Dragon',_binary '\0',_binary '',_binary '\0'),('Electric','Electric',_binary '\0',_binary '',_binary '\0'),('Electric','Flying',_binary '',_binary '\0',_binary '\0'),('Electric','Grass',_binary '\0',_binary '',_binary '\0'),('Electric','Ground',_binary '\0',_binary '\0',_binary ''),('Electric','Water',_binary '',_binary '\0',_binary '\0'),('Fairy','Dark',_binary '',_binary '\0',_binary '\0'),('Fairy','Dragon',_binary '',_binary '\0',_binary '\0'),('Fairy','Fighting',_binary '',_binary '\0',_binary '\0'),('Fairy','Fire',_binary '\0',_binary '',_binary '\0'),('Fairy','Poison',_binary '\0',_binary '',_binary '\0'),('Fairy','Steel',_binary '\0',_binary '',_binary '\0'),('Fighting','Bug',_binary '\0',_binary '',_binary '\0'),('Fighting','Dark',_binary '',_binary '\0',_binary '\0'),('Fighting','Fairy',_binary '\0',_binary '',_binary '\0'),('Fighting','Flying',_binary '\0',_binary '',_binary '\0'),('Fighting','Ghost',_binary '\0',_binary '\0',_binary ''),('Fighting','Ice',_binary '',_binary '\0',_binary '\0'),('Fighting','Normal',_binary '',_binary '\0',_binary '\0'),('Fighting','Poison',_binary '\0',_binary '',_binary '\0'),('Fighting','Psychic',_binary '\0',_binary '',_binary '\0'),('Fighting','Rock',_binary '',_binary '\0',_binary '\0'),('Fighting','Steel',_binary '',_binary '\0',_binary '\0'),('Fire','Bug',_binary '',_binary '\0',_binary '\0'),('Fire','Dragon',_binary '\0',_binary '',_binary '\0'),('Fire','Fire',_binary '\0',_binary '',_binary '\0'),('Fire','Grass',_binary '',_binary '\0',_binary '\0'),('Fire','Ice',_binary '',_binary '\0',_binary '\0'),('Fire','Rock',_binary '\0',_binary '',_binary '\0'),('Fire','Steel',_binary '',_binary '\0',_binary '\0'),('Fire','Water',_binary '\0',_binary '',_binary '\0'),('Flying','Bug',_binary '',_binary '\0',_binary '\0'),('Flying','Electric',_binary '\0',_binary '',_binary '\0'),('Flying','Fighting',_binary '',_binary '\0',_binary '\0'),('Flying','Grass',_binary '',_binary '\0',_binary '\0'),('Flying','Rock',_binary '\0',_binary '',_binary '\0'),('Flying','Steel',_binary '\0',_binary '',_binary '\0'),('Ghost','Dark',_binary '\0',_binary '',_binary '\0'),('Ghost','Ghost',_binary '',_binary '\0',_binary '\0'),('Ghost','Normal',_binary '\0',_binary '\0',_binary ''),('Ghost','Psychic',_binary '\0',_binary '\0',_binary ''),('Grass','Bug',_binary '\0',_binary '',_binary '\0'),('Grass','Dragon',_binary '\0',_binary '',_binary '\0'),('Grass','Fire',_binary '\0',_binary '',_binary '\0'),('Grass','Flying',_binary '\0',_binary '',_binary '\0'),('Grass','Grass',_binary '\0',_binary '',_binary '\0'),('Grass','Ground',_binary '',_binary '\0',_binary '\0'),('Grass','Poison',_binary '\0',_binary '',_binary '\0'),('Grass','Rock',_binary '',_binary '\0',_binary '\0'),('Grass','Steel',_binary '\0',_binary '',_binary '\0'),('Grass','Water',_binary '',_binary '\0',_binary '\0'),('Ground','Bug',_binary '\0',_binary '',_binary '\0'),('Ground','Electric',_binary '',_binary '\0',_binary '\0'),('Ground','Fire',_binary '',_binary '\0',_binary '\0'),('Ground','Flying',_binary '\0',_binary '\0',_binary ''),('Ground','Grass',_binary '\0',_binary '',_binary '\0'),('Ground','Poison',_binary '',_binary '\0',_binary '\0'),('Ground','Rock',_binary '',_binary '\0',_binary '\0'),('Ground','Steel',_binary '',_binary '\0',_binary '\0'),('Ice','Dragon',_binary '',_binary '\0',_binary '\0'),('Ice','Flying',_binary '',_binary '\0',_binary '\0'),('Ice','Grass',_binary '',_binary '\0',_binary '\0'),('Ice','Ground',_binary '',_binary '\0',_binary '\0'),('Ice','Ice',_binary '\0',_binary '',_binary '\0'),('Ice','Steel',_binary '\0',_binary '',_binary '\0'),('Ice','Water',_binary '\0',_binary '',_binary '\0'),('Normal','Ghost',_binary '\0',_binary '\0',_binary ''),('Normal','Rock',_binary '\0',_binary '',_binary '\0'),('Normal','Steel',_binary '\0',_binary '',_binary '\0'),('Poison','Fairy',_binary '',_binary '\0',_binary '\0'),('Poison','Ghost',_binary '\0',_binary '',_binary '\0'),('Poison','Grass',_binary '',_binary '\0',_binary '\0'),('Poison','Ground',_binary '\0',_binary '',_binary '\0'),('Poison','Poison',_binary '\0',_binary '',_binary '\0'),('Poison','Rock',_binary '\0',_binary '',_binary '\0'),('Poison','Steel',_binary '\0',_binary '\0',_binary ''),('Psychic','Dark',_binary '\0',_binary '\0',_binary ''),('Psychic','Fighting',_binary '',_binary '\0',_binary '\0'),('Psychic','Poison',_binary '',_binary '\0',_binary '\0'),('Psychic','Psychic',_binary '\0',_binary '',_binary '\0'),('Psychic','Steel',_binary '\0',_binary '',_binary '\0'),('Rock','Bug',_binary '',_binary '\0',_binary '\0'),('Rock','Fighting',_binary '\0',_binary '',_binary '\0'),('Rock','Fire',_binary '',_binary '\0',_binary '\0'),('Rock','Flying',_binary '',_binary '\0',_binary '\0'),('Rock','Ground',_binary '\0',_binary '',_binary '\0'),('Rock','Ice',_binary '',_binary '\0',_binary '\0'),('Rock','Steel',_binary '\0',_binary '',_binary '\0'),('Steel','Fairy',_binary '',_binary '\0',_binary '\0'),('Steel','Fire',_binary '\0',_binary '',_binary '\0'),('Steel','Ice',_binary '',_binary '\0',_binary '\0'),('Steel','Psychic',_binary '\0',_binary '',_binary '\0'),('Steel','Rock',_binary '',_binary '\0',_binary '\0'),('Steel','Steel',_binary '\0',_binary '',_binary '\0'),('Steel','Water',_binary '\0',_binary '',_binary '\0'),('Water','Dragon',_binary '\0',_binary '',_binary '\0'),('Water','Fire',_binary '',_binary '\0',_binary '\0'),('Water','Grass',_binary '\0',_binary '',_binary '\0'),('Water','Ground',_binary '',_binary '\0',_binary '\0'),('Water','Rock',_binary '',_binary '\0',_binary '\0'),('Water','Water',_binary '\0',_binary '',_binary '\0');
 /*!40000 ALTER TABLE `typefx` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -424,7 +447,6 @@ CREATE TABLE `types` (
 
 LOCK TABLES `types` WRITE;
 /*!40000 ALTER TABLE `types` DISABLE KEYS */;
-INSERT INTO `types` VALUES ('Bug'),('Dark'),('Dragon'),('Electric'),('Fairy'),('Fighting'),('Fire'),('Flying'),('Ghost'),('Grass'),('Ground'),('Ice'),('Normal'),('Poison'),('Psychic'),('Rock'),('Steel'),('Water');
 /*!40000 ALTER TABLE `types` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -445,7 +467,7 @@ CREATE TABLE `user` (
   UNIQUE KEY `username` (`username`),
   UNIQUE KEY `password` (`password`),
   CONSTRAINT `user_chk_1` CHECK (((length(`password`) > 7) and regexp_like(`password`,_utf8mb4'[0-9]') and regexp_like(`password`,_utf8mb4'[a-z]') and regexp_like(`password`,_utf8mb4'[A-Z]') and regexp_like(`password`,_utf8mb4'[^a-zA-Z0-9]')))
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -454,9 +476,31 @@ CREATE TABLE `user` (
 
 LOCK TABLES `user` WRITE;
 /*!40000 ALTER TABLE `user` DISABLE KEYS */;
-INSERT INTO `user` VALUES (4,'Cynthia',5,'championcyn','Garchomp142*'),(5,'Gary Oak',2,'rivalgary','Eeveelutions21*'),(6,'Erika',1,'flowerqueen','Bellsprout13*'),(7,'Felicity',0,'sugarAndSpice','Pa$$word15');
+INSERT INTO `user` VALUES (4,'Cynthia',5,'championcyn','Garchomp142*'),(5,'Gary Oak',2,'rivalgary','Eeveelutions21*'),(6,'Erika',1,'flowerqueen','Bellsprout13*'),(7,'Felicity',0,'sugarAndSpice','Pa$$word15'),(8,'Marco',0,'fireFang','M4rc0!Burns'),(9,'Sierra',0,'crystalLeaf','S!3rr@2025');
 /*!40000 ALTER TABLE `user` ENABLE KEYS */;
 UNLOCK TABLES;
+
+--
+-- Temporary view structure for view `users_pokedex`
+--
+
+DROP TABLE IF EXISTS `users_pokedex`;
+/*!50001 DROP VIEW IF EXISTS `users_pokedex`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `users_pokedex` AS SELECT 
+ 1 AS `pid`,
+ 1 AS `Name`,
+ 1 AS `type1`,
+ 1 AS `type2`,
+ 1 AS `HP`,
+ 1 AS `Atk`,
+ 1 AS `Def`,
+ 1 AS `SpAtk`,
+ 1 AS `SpDef`,
+ 1 AS `Speed`,
+ 1 AS `caught_count`*/;
+SET character_set_client = @saved_cs_client;
 
 --
 -- Dumping events for database 'pokedex'
@@ -617,6 +661,24 @@ DELIMITER ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
+
+--
+-- Final view structure for view `users_pokedex`
+--
+
+/*!50001 DROP VIEW IF EXISTS `users_pokedex`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = cp850 */;
+/*!50001 SET character_set_results     = cp850 */;
+/*!50001 SET collation_connection      = cp850_general_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `users_pokedex` AS select `p`.`pID` AS `pid`,`p`.`name` AS `Name`,`p`.`type1` AS `type1`,`p`.`type2` AS `type2`,`p`.`hp` AS `HP`,`p`.`atk` AS `Atk`,`p`.`def` AS `Def`,`p`.`spAtk` AS `SpAtk`,`p`.`spDef` AS `SpDef`,`p`.`speed` AS `Speed`,count(`mp`.`instanceID`) AS `caught_count` from (`pokedex` `p` left join `mypokemon` `mp` on(((`p`.`pID` = `mp`.`pID`) and (`mp`.`uID` = 4)))) group by `p`.`pID`,`p`.`name`,`p`.`type1`,`p`.`type2`,`p`.`hp`,`p`.`atk`,`p`.`def`,`p`.`spAtk`,`p`.`spDef`,`p`.`speed` order by `p`.`pID` */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -627,4 +689,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-07-24  0:38:08
+-- Dump completed on 2025-07-29 21:58:35

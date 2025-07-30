@@ -44,29 +44,29 @@ DROP TRIGGER insertPokedex;
 DROP TABLE tempPokedex;
 
 
--- make sure no pIDs are skipped
-DROP TABLE IF EXISTS numbers;
-DROP PROCEDURE IF EXISTS populateNumbers;
-CREATE TABLE numbers (num INT PRIMARY KEY);
-DELIMITER $$
-CREATE PROCEDURE populateNumbers(min INT, max INT)
-BEGIN
-    DECLARE i INT;
-    SET i = min;
-    numLoop: LOOP 
-        INSERT INTO numbers(num) VALUES (i);
-        IF i = max THEN
-            LEAVE numLoop;
-        END IF;
-        SET i = i + 1;
-    END LOOP numLoop;
-END$$
-DELIMITER ;
+-- -- make sure no pIDs are skipped
+-- DROP TABLE IF EXISTS numbers;
+-- DROP PROCEDURE IF EXISTS populateNumbers;
+-- CREATE TABLE numbers (num INT PRIMARY KEY);
+-- DELIMITER $$
+-- CREATE PROCEDURE populateNumbers(min INT, max INT)
+-- BEGIN
+--     DECLARE i INT;
+--     SET i = min;
+--     numLoop: LOOP 
+--         INSERT INTO numbers(num) VALUES (i);
+--         IF i = max THEN
+--             LEAVE numLoop;
+--         END IF;
+--         SET i = i + 1;
+--     END LOOP numLoop;
+-- END$$
+-- DELIMITER ;
 
-CALL populateNumbers(1, 721);
-SELECT * FROM numbers WHERE num NOT IN (SELECT pid FROM pokedex);
+-- CALL populateNumbers(1, 721);
+-- SELECT * FROM numbers WHERE num NOT IN (SELECT pid FROM pokedex);
 
-DROP TABLE numbers;
+-- DROP TABLE numbers;
 
 
 
