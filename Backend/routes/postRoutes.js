@@ -45,6 +45,34 @@ module.exports = (app, db) => {
         }
     });
 
+    app.post("/dropPokemon", async (req, res) => {
+        const { pID } = req.body;
+
+        console.log("Incoming request to /dropPokemon with:", req.body);
+
+        try {
+            const dbPromise = await mysqlPromise.createConnection({
+                host: process.env.DB_HOST,
+                port: process.env.DB_PORT,
+                user: process.env.DB_USER,
+                password: process.env.DB_PASSWORD,
+                database: process.env.DB_NAME
+            });
+
+            await dbPromise.query(
+            `DELETE FROM MyPokemon WHERE instanceID=?`,
+            [instanceID]
+            );
+
+            console.log("delete successful.");
+            await dbPromise.end();
+            res.send("Pokémon forgotten successfully.");
+        } catch (err) {
+            console.error("Error adding Pokémon:", err);
+            res.status(500).send("Server error adding Pokémon.");
+        }
+    });
+
     app.post("/unlearnMove", async (req, res) => {
         const { instanceID, aID } = req.body;
 
