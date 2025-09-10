@@ -118,6 +118,9 @@
 
 .cancel-button {
   background: #f2f2f2;
+  width: 90px;
+  height: 46px;
+  transform: translateY(9px)
 }
 
 .cancel-button:hover {

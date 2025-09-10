@@ -97,7 +97,7 @@ export default function PokemonCounterPage() {
             <CardDescription>Enter a Pokemon name to find the best counters from your collection</CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSubmit} className="flex gap-4">
+            <form onSubmit={handleSubmit} className="flex gap-4 items-center">
               <Input
                 type="text"
                 placeholder="Enter Pokemon name (e.g., Pikachu)"

@@ -175,8 +175,8 @@ module.exports = (app, db) => {
             const formatted = results.map((row) => ({
                 id: row.aID,
                 name: row.attack_name,
-                type: row.type,
-                category: row.category,
+                type: row.category,
+                category: row.type,
                 stats: {
                     power: row.power,
                     accuracy: row.accuracy, 
@@ -297,78 +297,76 @@ module.exports = (app, db) => {
                 WHEN double_strength=1 THEN 2
                 WHEN half_strength=1 THEN 0.5
                 ELSE 0
-                END
+            END
         ) as effect FROM TypeFX
         ), full as (
         SELECT * FROM FX
-            UNION
-            SELECT t1.type as type1, t2.type as type2, 1 as effect
-            FROM Types t1, Types t2
-            WHERE t1.type!=t2.type AND t2.type NOT IN (
-            SELECT type2 FROM typeFX t WHERE t.type1=t1.type
+        UNION
+        SELECT t1.type as type1, t2.type as type2, 1 as effect
+        FROM Types t1, Types t2
+        WHERE t1.type!=t2.type AND t2.type NOT IN (
+        SELECT type2 FROM typeFX t WHERE t.type1=t1.type
         )
         ), crossed1 as (
-        SELECT t1.type1 typeA, t2.type1 typeB, t1.type2, 
-            (t1.effect*t2.effect) as effect
-            FROM full t1, full t2 WHERE t1.type1!=t2.type1 AND t1.type2=t2.type2
+        SELECT t1.type1 typeA, t2.type1 typeB, t1.type2,   
+        (t1.effect*t2.effect) as effect
+        FROM full t1, full t2 WHERE t1.type1!=t2.type1 AND t1.type2=t2.type2
         ), crossed2 as (
         SELECT t1.type1, t1.type2 as typeA, t2.type2 as typeB, 
-            (t1.effect*t2.effect) as effect
-            FROM full t1, full t2 WHERE t1.type1=t2.type1 AND t1.type2!=t2.type2
+        (t1.effect*t2.effect) as effect
+        FROM full t1, full t2 WHERE t1.type1=t2.type1 AND t1.type2!=t2.type2
         )
 
-        SELECT atk.type 
-        , SUM(atk.effect)/(SELECT COUNT(*) FROM MyPokemon WHERE uID=${uID} AND onteam=1) as atkSum
-        , SUM(def.effect)/(SELECT COUNT(*) FROM MyPokemon WHERE uID=${uID} AND onteam=1) as defSum FROM (
-        SELECT type1 type, effect*(
-            SELECT COUNT(*) from Pokedex p WHERE pID IN (
-            SELECT pID FROM MyPokemon WHERE uID=${uID} AND onteam=1
+        SELECT atk.type, atkSum, defSum FROM (
+        SELECT type, SUM(effect)/(SELECT COUNT(*) FROM MyPokemon WHERE uID=95 AND onteam=1) as defSum FROM (
+            SELECT type1 type, effect*(
+                SELECT COUNT(*) from Pokedex p WHERE pID IN (
+                    SELECT pID FROM MyPokemon WHERE uID=95 AND onteam=1
                 )
                 AND p.type1=typeA AND p.type2=typeB
-        ) as effect
+            ) as effect
             FROM crossed2 WHERE typeA IN (
-            SELECT p.type1 from Pokedex p WHERE pID IN (
-            SELECT pID FROM MyPokemon WHERE uID=${uID} AND onteam=1
-                )
-                AND p.type2=typeB
-        ) UNION
+                SELECT p.type1 from Pokedex p WHERE pID IN (
+                SELECT pID FROM MyPokemon WHERE uID=95 AND onteam=1
+            )
+            AND p.type2=typeB
+            ) UNION ALL
             SELECT type1 type, effect*(
-            SELECT COUNT(*) from Pokedex p WHERE pID IN (
-            SELECT pID FROM MyPokemon WHERE uID=${uID} AND onteam=1
+        SELECT COUNT(*) from Pokedex p WHERE pID IN (
+                    SELECT pID FROM MyPokemon WHERE uID=95 AND onteam=1
                 )
                 AND p.type1=full.type2 AND p.type2=""
-        ) FROM full WHERE type2 IN (
-            SELECT p.type1 FROM Pokedex p WHERE pID IN (
-            SELECT pID FROM MyPokemon WHERE uID=${uID} AND onteam=1
-                )
-                AND p.type2=""
-        )
-        ) as def, (
-        SELECT type2 as type, effect*(
-            SELECT COUNT(*) from Pokedex p WHERE pID IN (
-            SELECT pID FROM MyPokemon WHERE uID=${uID} AND onteam=1
+            ) as effect FROM full WHERE type2 IN (
+                SELECT p.type1 FROM Pokedex p WHERE pID IN (
+                SELECT pID FROM MyPokemon WHERE uID=95 AND onteam=1
+            )AND p.type2="") 
+        )as subDef GROUP BY type
+        ) as def, (SELECT type, SUM(effect)/(SELECT COUNT(*) FROM MyPokemon WHERE uID=95 AND onteam=1) 
+            as atkSum FROM (
+                SELECT type2 as type, effect*(
+                    SELECT COUNT(*) from Pokedex p WHERE pID IN (
+                    SELECT pID FROM MyPokemon WHERE uID=95 AND onteam=1
                 )
                 AND p.type1=typeA AND p.type2=typeB
-        ) as effect
+            ) as effect
             FROM crossed1 WHERE typeA IN (
-            SELECT type1 from Pokedex p WHERE pID IN (
-            SELECT pID FROM MyPokemon WHERE uID=${uID} AND onteam=1
-                )
-                AND p.type2=typeB
-        ) UNION
-            SELECT type2 type, effect*(
-            SELECT COUNT(*) from Pokedex p WHERE pID IN (
-            SELECT pID FROM MyPokemon WHERE uID=${uID} AND onteam=1
-                )
-                AND p.type1=full.type1 AND p.type2=""
+        SELECT type1 from Pokedex p WHERE pID IN (
+                SELECT pID FROM MyPokemon WHERE uID=95 AND onteam=1
+            )
+            AND p.type2=typeB
+        ) UNION ALL
+        SELECT type2 type, effect*(
+        SELECT COUNT(*) from Pokedex p WHERE pID IN (
+                SELECT pID FROM MyPokemon WHERE uID=95 AND onteam=1
+        )
+        AND p.type1=full.type1 AND p.type2=""
         ) as effect FROM full WHERE type1 IN (
             SELECT type1 FROM Pokedex p WHERE pID IN (
-            SELECT pID FROM MyPokemon WHERE uID=${uID} AND onteam=1
-                )
-                AND p.type2=""
+                SELECT pID FROM MyPokemon WHERE uID=95 AND onteam=1
         )
-        ) as atk WHERE def.type=atk.type
-        GROUP BY atk.type;
+            AND p.type2=""
+        )) as subAtk GROUP BY type
+        ) as atk WHERE def.type=atk.type;
     `;
 
     db.query(sql, (err, results) => {
@@ -489,7 +487,7 @@ module.exports = (app, db) => {
                     image: `https://www.pokemon.com/static-assets/content-assets/cms2/img/pokedex/detail/${row.pID.toString().padStart(3, "0")}.png`
                 },
                 description: row.description,
-                replyCount: row.replyCount
+                replies: []
             }));
 
             return res.json(formatted);
@@ -600,9 +598,9 @@ module.exports = (app, db) => {
     });
 
 
-    app.get('/listablePokemon/:uID', (req, res) => {
+    app.get('/availablePokemon/:uID', (req, res) => {
         const uID = req.params.uID;
-        console.log("Incoming request to /listablePokemon with uID:", uID);
+        console.log("Incoming request to /availablePokemon with uID:", uID);
 
         const sql = `
         SELECT 
@@ -651,96 +649,102 @@ module.exports = (app, db) => {
 
             const opPID = results[0]?.pID;
             const sql = `
-                WITH FX AS (
-                    SELECT type1, type2,
-                        CASE 
-                            WHEN double_strength = 1 THEN 2
-                            WHEN half_strength = 1 THEN 0.5
-                            ELSE 0
-                        END AS effect
-                    FROM TypeFX
-                ),
-                full AS (
-                    SELECT * FROM FX
-                    UNION
-                    -- Fill in missing pairs with neutral effectiveness
-                    SELECT t1.type AS type1, t2.type AS type2, 1 AS effect
-                    FROM Types t1, Types t2
-                    WHERE NOT EXISTS (
-                        SELECT 1 FROM TypeFX tf
-                        WHERE tf.type1 = t1.type AND tf.type2 = t2.type
-                    )
-                ),
-                -- All attacker combinations: (A1, A2) where A2 may be NULL
-                attacker_types AS (
-                    SELECT t1.type AS atkType1, NULL AS atkType2 FROM Types t1
-                    UNION
-                    SELECT t1.type AS atkType1, t2.type AS atkType2
-                    FROM Types t1, Types t2
-                    WHERE t1.type < t2.type  -- avoid dupes like (Fire, Water) and (Water, Fire)
-                ),
-                -- All defender combinations: (D1, D2) where D2 may be NULL
-                defender_types AS (
-                    SELECT t1.type AS defType1, NULL AS defType2 FROM Types t1
-                    UNION
-                    SELECT t1.type AS defType1, t2.type AS defType2
-                    FROM Types t1, Types t2
-                    WHERE t1.type < t2.type
-                ),
-                -- Combine and calculate total effect
-                all_combos AS (
-                    SELECT 
-                        atk.atkType1, atk.atkType2,
-                        def.defType1, def.defType2,
-                        COALESCE(f1.effect, 1) * COALESCE(f2.effect, 1) *
-                        COALESCE(f3.effect, 1) * COALESCE(f4.effect, 1) AS total_effect
-                    FROM attacker_types atk
-                    CROSS JOIN defender_types def
-                    LEFT JOIN full f1 ON f1.type1 = atk.atkType1 AND f1.type2 = def.defType1
-                    LEFT JOIN full f2 ON f2.type1 = atk.atkType1 AND f2.type2 = def.defType2
-                    LEFT JOIN full f3 ON f3.type1 = atk.atkType2 AND f3.type2 = def.defType1
-                    LEFT JOIN full f4 ON f4.type1 = atk.atkType2 AND f4.type2 = def.defType2
-                ),
+-- find the best pokemon to fight given an oponent pokemon
+-- if multiple pokemon considered to be equally as good (level and type effectiveness) will return all of them
+-- let the opponent pokemon be ${opPID}, current user id is {user_id}
 
-                best_values AS (
-                SELECT level, total_effect 
-                FROM all_combos, myPokemon mp, pokedex p, user u
-                WHERE 
-                    (
-                    (p.type1 = atkType1 AND p.type2 = atkType2) OR 
-                    (p.type1 = atkType2 AND p.type2 = atkType1) OR 
-                    (p.type2 NOT IN (SELECT * FROM TYPES) AND atkType2 IS NULL AND p.type1 = atkType1) 
-                    ) AND
-                    mp.pid = p.pid AND
-                    defType1 IN (SELECT type1 FROM pokedex WHERE pid = ${opPID}) AND
-                    (
-                        defType2 = (SELECT type2 FROM pokedex WHERE pid = ${opPID})
-                        OR (defType2 IS NULL AND NULLIF((SELECT type2 FROM pokedex WHERE pid = ${opPID}), '') IS NULL)
-                    ) AND
-                    u.uid = mp.uid AND
-                    u.uid = ${user_id}
-                ORDER BY total_effect DESC, level DESC, atkType1, atkType2, defType1, defType2 limit 1
-                )
+WITH FX AS (
+    SELECT type1, type2,
+        CASE 
+            WHEN double_strength = 1 THEN 2
+            WHEN half_strength = 1 THEN 0.5
+            ELSE 0
+        END AS effect
+    FROM TypeFX
+),
+full AS (
+    SELECT * FROM FX
+    UNION
+    -- Fill in missing pairs with neutral effectiveness
+    SELECT t1.type AS type1, t2.type AS type2, 1 AS effect
+    FROM Types t1, Types t2
+    WHERE NOT EXISTS (
+        SELECT 1 FROM TypeFX tf
+        WHERE tf.type1 = t1.type AND tf.type2 = t2.type
+    )
+),
+-- All attacker combinations: (A1, A2) where A2 may be NULL
+attacker_types AS (
+    SELECT t1.type AS atkType1, NULL AS atkType2 FROM Types t1
+    UNION
+    SELECT t1.type AS atkType1, t2.type AS atkType2
+    FROM Types t1, Types t2
+    WHERE t1.type < t2.type  -- avoid dupes like (Fire, Water) and (Water, Fire)
+),
+-- All defender combinations: (D1, D2) where D2 may be NULL
+defender_types AS (
+    SELECT t1.type AS defType1, NULL AS defType2 FROM Types t1
+    UNION
+    SELECT t1.type AS defType1, t2.type AS defType2
+    FROM Types t1, Types t2
+    WHERE t1.type < t2.type
+),
+-- Combine and calculate total effect
+all_combos AS (
+    SELECT 
+        atk.atkType1, atk.atkType2,
+        def.defType1, def.defType2,
+        COALESCE(f1.effect, 1) * COALESCE(f2.effect, 1) *
+        COALESCE(f3.effect, 1) * COALESCE(f4.effect, 1) AS total_effect
+    FROM attacker_types atk
+    CROSS JOIN defender_types def
+    LEFT JOIN full f1 ON f1.type1 = atk.atkType1 AND f1.type2 = def.defType1
+    LEFT JOIN full f2 ON f2.type1 = atk.atkType1 AND f2.type2 = def.defType2
+    LEFT JOIN full f3 ON f3.type1 = atk.atkType2 AND f3.type2 = def.defType1
+    LEFT JOIN full f4 ON f4.type1 = atk.atkType2 AND f4.type2 = def.defType2
+),
 
-                SELECT p.pid, p.name, mp.instanceID, mp.level, atkType1, atkType2, defType1, defType2, all_combos.total_effect 
-                FROM all_combos, myPokemon mp, pokedex p, user u, best_values bv
-                WHERE 
-                    (
-                    (p.type1 = atkType1 AND p.type2 = atkType2) OR 
-                    (p.type1 = atkType2 AND p.type2 = atkType1) OR 
-                    (p.type2 NOT IN (SELECT * FROM TYPES) AND atkType2 IS NULL AND p.type1 = atkType1) 
-                    ) AND
-                    mp.pid = p.pid AND
-                    defType1 IN (SELECT type1 FROM pokedex WHERE pid = ${opPID}) AND
-                    (
-                        defType2 = (SELECT type2 FROM pokedex WHERE pid = ${opPID})
-                        OR (defType2 IS NULL AND NULLIF((SELECT type2 FROM pokedex WHERE pid = ${opPID}), '') IS NULL)
-                    ) AND
-                    u.uid = mp.uid AND
-                    u.uid = ${user_id} AND
-                    all_combos.total_effect = bv.total_effect AND
-                    mp.level = bv.level
-                ;
+best_values AS (
+SELECT level, total_effect 
+FROM all_combos, myPokemon mp, pokedex p, user u
+WHERE 
+	(
+    (p.type1 = atkType1 AND p.type2 = atkType2) OR 
+    (p.type1 = atkType2 AND p.type2 = atkType1) OR 
+    (p.type2 NOT IN (SELECT * FROM TYPES) AND atkType2 IS NULL AND p.type1 = atkType1) 
+    ) AND
+    mp.pid = p.pid AND
+    (
+    (defType1 IN (SELECT type1 FROM pokedex WHERE pid = ${opPID}) AND defType2 IN (SELECT type2 FROM pokedex WHERE pid = ${opPID})) OR
+    (defType2 IN (SELECT type1 FROM pokedex WHERE pid = ${opPID}) AND defType1 IN (SELECT type2 FROM pokedex WHERE pid = ${opPID})) OR 
+    (defType1 IN (SELECT type1 FROM pokedex WHERE pid = ${opPID} AND type2='') AND defType2 IS NULL)
+    )
+    
+    AND
+    u.uid = mp.uid AND
+    u.uid = ${user_id}
+ORDER BY total_effect DESC, level DESC, atkType1, atkType2, defType1, defType2 limit 1
+)
+
+SELECT DISTINCT p.pid, p.name, mp.instanceID, mp.level, atkType1, atkType2, defType1, defType2, all_combos.total_effect 
+FROM all_combos, myPokemon mp, pokedex p, user u, best_values bv
+WHERE 
+	(
+    (p.type1 = atkType1 AND p.type2 = atkType2) OR 
+    (p.type1 = atkType2 AND p.type2 = atkType1) OR 
+    (p.type2 NOT IN (SELECT * FROM TYPES) AND atkType2 IS NULL AND p.type1 = atkType1) 
+    ) AND
+    mp.pid = p.pid AND
+	(
+    (defType1 IN (SELECT type1 FROM pokedex WHERE pid = ${opPID}) AND defType2 IN (SELECT type2 FROM pokedex WHERE pid = ${opPID})) OR
+    (defType2 IN (SELECT type1 FROM pokedex WHERE pid = ${opPID}) AND defType1 IN (SELECT type2 FROM pokedex WHERE pid = ${opPID})) OR 
+    (defType1 IN (SELECT type1 FROM pokedex WHERE pid = ${opPID} AND type2='') AND defType2 IS NULL)
+    ) AND
+    u.uid = mp.uid AND
+    u.uid = ${user_id} AND
+    all_combos.total_effect = bv.total_effect AND
+    mp.level = bv.level
+;
             `;
             db.query(sql, (err, results) => {
                 if (err) {
@@ -757,6 +761,8 @@ module.exports = (app, db) => {
                     level: row.level,
                     cp: 0, // Not sure what this is supposed to be
                     effectiveness_score: parseFloat(row.total_effect)*100,
+                    def1: row.defType1,
+                    def2: row.defType2,
                 }));
 
                 return res.json({
@@ -821,13 +827,17 @@ module.exports = (app, db) => {
         });
 
         const sql = `
-            SELECT t.time, fromU.username fromUser, toU.username toUser, l.description,
+            SELECT t.time, fromU.username as fromUser, toU.username as toUser, l.description, 
+            CASE 
+                WHEN toMP.instanceID=${instanceID} THEN TRUE
+                ELSE FALSE
+            END as isTo,
 
-            fromP.name fromName, fromMP.nickname fromNickname, 
-            fromMP.level fromLevel, fromP.type1 fromType1, fromP.type2 fromType2,
+            fromP.name as fromName, fromMP.nickname as fromNickname, 
+            fromMP.level as fromLevel, fromP.type1 as fromType1, fromP.type2 as fromType2,
 
-            toP.name toName, toMP.nickname toNickname, 
-            toMP.level toLevel, toP.type1 toType1, toP.type2 toType2 
+            toP.name as toName, toMP.nickname as toNickname, 
+            toMP.level as toLevel, toP.type1 as toType1, toP.type2 as toType2 
 
             FROM Trades t 
                 JOIN Listing l ON t.listingID=l.listingID
@@ -848,25 +858,43 @@ module.exports = (app, db) => {
             return res.status(500).json({ error: "Database error" });
             }
             console.log(username);
-            const formatted = results.map((row, index) => ({
-                id: index,
-                date: row.time,
-                fromTrainer: row.fromUser === username ? 'You' : row.fromUser,
-                toTrainer: row.toUser === username ? 'You' : row.toUser,
-                tradedAway: {
-                    pokemon: row.toName,
-                    nickname: row.toNickname,
-                    level: row.toLevel,
-                    types: row.toType2 ? [row.toType1, row.toType2] : [row.toType1],
-                },
-                tradedFor: {
-                    pokemon: row.fromName,
-                    nickname: row.fromNickname,
-                    level: row.fromLevel,
-                    types: row.fromType2 ? [row.fromType1, row.fromType2] : [row.fromType1],
-                },
-                notes: row.description,
-
+            const formatted = results.map((row, index) => (
+                row.isTo ? {
+                    id: index,
+                    date: row.time,
+                    fromTrainer: row.toUser === username ? 'You' : row.toUser,
+                    toTrainer: row.fromUser === username ? 'You' : row.fromUser,
+                    tradedAway: {
+                        pokemon: row.fromName,
+                        nickname: row.fromNickname,
+                        level: row.fromLevel,
+                        types: row.fromType2 ? [row.fromType1, row.fromType2] : [row.fromType1],
+                    },
+                    tradedFor: {
+                        pokemon: row.toName,
+                        nickname: row.toNickname,
+                        level: row.toLevel,
+                        types: row.toType2 ? [row.toType1, row.toType2] : [row.toType1],
+                    },
+                    notes: row.description,
+                } : {
+                    id: index,
+                    date: row.time,
+                    fromTrainer: row.fromUser === username ? 'You' : row.fromUser,
+                    toTrainer: row.toUser === username ? 'You' : row.toUser,
+                    tradedAway: {
+                        pokemon: row.toName,
+                        nickname: row.toNickname,
+                        level: row.toLevel,
+                        types: row.toType2 ? [row.toType1, row.toType2] : [row.toType1],
+                    },
+                    tradedFor: {
+                        pokemon: row.fromName,
+                        nickname: row.fromNickname,
+                        level: row.fromLevel,
+                        types: row.fromType2 ? [row.fromType1, row.fromType2] : [row.fromType1],
+                    },
+                    notes: row.description,
             }));
 
             return res.json(formatted);

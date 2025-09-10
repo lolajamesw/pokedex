@@ -466,7 +466,7 @@ const MyPokeDetail = () => {
                         <Progress value={(value / 150) * 100} className="h-2" />
                         <div
                           className={`absolute top-0 left-0 h-2 rounded-full ${getStatColor(value)}`}
-                          style={{ width: `${(value / 150) * 100}%` }}
+                          style={{ width: `${Math.min((value / 150) * 100, 100)}%` }}
                         />
                       </div>
                     </div>
@@ -560,7 +560,9 @@ const MyPokeDetail = () => {
                     </div>
 
                     {/* Evolution Paths */}
-                    <div className="evolution-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div className={`evolution-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-${
+                      evolutions.length % 4===0 ? 4 : evolutions.length % 3===0 ? 3 : 2
+                    } gap-4`}>
                       {evolutions.map((evo: any) => (
                         <div key={evo.id} className="relative">
                           <Link
@@ -985,7 +987,7 @@ const MyPokeDetail = () => {
                               <div className="space-y-2">
                                 <div className="flex items-center gap-2 text-sm font-medium">
                                   <User className="h-4 w-4" />
-                                  To: {trade.toTrainer}
+                                  {trade.toTrainer}
                                 </div>
                                 <div className="pl-6">
                                   <div className="text-sm text-muted-foreground">Received:</div>
@@ -1012,7 +1014,7 @@ const MyPokeDetail = () => {
                               <div className="space-y-2">
                                 <div className="flex items-center gap-2 text-sm font-medium">
                                   <User className="h-4 w-4" />
-                                  From: {trade.fromTrainer}
+                                  {trade.fromTrainer}
                                 </div>
                                 <div className="pl-6">
                                   <div className="text-sm text-muted-foreground">Received:</div>

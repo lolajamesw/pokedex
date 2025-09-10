@@ -132,7 +132,7 @@ export default function PokemonMarket() {
   const handleCreateListing = async () => {
     
     try {
-      const response = await fetch("http://localhost:8081/listPokemon", {
+      const response = await fetch(`http://localhost:8081/listPokemon`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -173,7 +173,7 @@ export default function PokemonMarket() {
     if (!replyForm.pokemonId) return
 
     try {
-      const response = await fetch("http://localhost:8081/reply", {
+      const response = await fetch(`http://localhost:8081/reply`, {
         method: "POST",
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify({
@@ -210,7 +210,7 @@ export default function PokemonMarket() {
     console.log("handling trade");
 
     try {
-      const response = await fetch("http://localhost:8081/trade", {
+      const response = await fetch(`http://localhost:8081/trade`, {
         method: "POST",
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify({
