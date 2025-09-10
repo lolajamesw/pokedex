@@ -318,51 +318,51 @@ module.exports = (app, db) => {
         )
 
         SELECT atk.type, atkSum, defSum FROM (
-        SELECT type, SUM(effect)/(SELECT COUNT(*) FROM MyPokemon WHERE uID=95 AND onteam=1) as defSum FROM (
+        SELECT type, SUM(effect)/(SELECT COUNT(*) FROM MyPokemon WHERE uID=${uID} AND onteam=1) as defSum FROM (
             SELECT type1 type, effect*(
                 SELECT COUNT(*) from Pokedex p WHERE pID IN (
-                    SELECT pID FROM MyPokemon WHERE uID=95 AND onteam=1
+                    SELECT pID FROM MyPokemon WHERE uID=${uID} AND onteam=1
                 )
                 AND p.type1=typeA AND p.type2=typeB
             ) as effect
             FROM crossed2 WHERE typeA IN (
                 SELECT p.type1 from Pokedex p WHERE pID IN (
-                SELECT pID FROM MyPokemon WHERE uID=95 AND onteam=1
+                SELECT pID FROM MyPokemon WHERE uID=${uID} AND onteam=1
             )
             AND p.type2=typeB
             ) UNION ALL
             SELECT type1 type, effect*(
         SELECT COUNT(*) from Pokedex p WHERE pID IN (
-                    SELECT pID FROM MyPokemon WHERE uID=95 AND onteam=1
+                    SELECT pID FROM MyPokemon WHERE uID=${uID} AND onteam=1
                 )
                 AND p.type1=full.type2 AND p.type2=""
             ) as effect FROM full WHERE type2 IN (
                 SELECT p.type1 FROM Pokedex p WHERE pID IN (
-                SELECT pID FROM MyPokemon WHERE uID=95 AND onteam=1
+                SELECT pID FROM MyPokemon WHERE uID=${uID} AND onteam=1
             )AND p.type2="") 
         )as subDef GROUP BY type
-        ) as def, (SELECT type, SUM(effect)/(SELECT COUNT(*) FROM MyPokemon WHERE uID=95 AND onteam=1) 
+        ) as def, (SELECT type, SUM(effect)/(SELECT COUNT(*) FROM MyPokemon WHERE uID=${uID} AND onteam=1) 
             as atkSum FROM (
                 SELECT type2 as type, effect*(
                     SELECT COUNT(*) from Pokedex p WHERE pID IN (
-                    SELECT pID FROM MyPokemon WHERE uID=95 AND onteam=1
+                    SELECT pID FROM MyPokemon WHERE uID=${uID} AND onteam=1
                 )
                 AND p.type1=typeA AND p.type2=typeB
             ) as effect
             FROM crossed1 WHERE typeA IN (
         SELECT type1 from Pokedex p WHERE pID IN (
-                SELECT pID FROM MyPokemon WHERE uID=95 AND onteam=1
+                SELECT pID FROM MyPokemon WHERE uID=${uID} AND onteam=1
             )
             AND p.type2=typeB
         ) UNION ALL
         SELECT type2 type, effect*(
         SELECT COUNT(*) from Pokedex p WHERE pID IN (
-                SELECT pID FROM MyPokemon WHERE uID=95 AND onteam=1
+                SELECT pID FROM MyPokemon WHERE uID=${uID} AND onteam=1
         )
         AND p.type1=full.type1 AND p.type2=""
         ) as effect FROM full WHERE type1 IN (
             SELECT type1 FROM Pokedex p WHERE pID IN (
-                SELECT pID FROM MyPokemon WHERE uID=95 AND onteam=1
+                SELECT pID FROM MyPokemon WHERE uID=${uID} AND onteam=1
         )
             AND p.type2=""
         )) as subAtk GROUP BY type
