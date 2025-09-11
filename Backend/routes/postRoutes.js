@@ -46,7 +46,7 @@ module.exports = (app, db) => {
     });
 
     app.post("/dropPokemon", async (req, res) => {
-        const { pID } = req.body;
+        const { instanceID } = req.body;
 
         console.log("Incoming request to /dropPokemon with:", req.body);
 

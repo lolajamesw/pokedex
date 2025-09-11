@@ -13,7 +13,8 @@ import { useEffect, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./components/ui/card";
 import { Progress } from "./components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./components/ui/tabs.tsx";
-import { ArrowRight, Shield, Swords, Footprints, Heart, X, Plus, Star, ArrowLeftRight, Calendar, User } from "lucide-react";
+import { ArrowRight, Shield, Swords, Footprints, Heart, X, 
+          Plus, Star, ArrowLeftRight, Calendar, User, LogOut } from "lucide-react";
 
 // Styles
 import "./pokedex.css";
@@ -314,6 +315,27 @@ const MyPokeDetail = () => {
     return date.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
   };
 
+  /* ---------- Release Pokemon Call ---------- */
+
+  const ReleasePokemon = async () => {
+    try {
+      console.log("Releasing Pokemon: ", pokemon.nickname);
+      await fetch("http://localhost:8081/dropPokemon", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          instanceID: pokemon.id,
+        }),
+      });
+      // Navigate back to myPokemon since this pokemon doesn't 
+      // exist anymore and hence lacks a detail page
+      location.href = '/my-pokemon'
+    } catch (err) {
+      console.error("Error releasing Pokémon: ", err);
+      alert("Something went wrong releasing the Pokémon.");
+    }
+  };
+
   /* ---------- Favourite Toggle ---------- */
 
   const toggleFavorite = async () => {
@@ -346,6 +368,15 @@ const MyPokeDetail = () => {
             <div className={`gradient-${pokemon.types[0].toLowerCase()} p-6 text-white relative`}>
               {/* Top Right Controls */}
               <div className="absolute top-4 right-4 flex items-center gap-3">
+                {/* Release Button */}
+                <button
+                  onClick={ReleasePokemon}
+                  className={`p-2 rounded-full transition-all duration-200 hover:scale-110 
+                    bg-white/10 text-white/60 hover:bg-white/20 hover:text-white`}
+                  title="Release this Pokemon"
+                >
+                  <LogOut className="h-6 w-6" />
+                </button>
                 {/* Favorite Button */}
                 <button
                   onClick={toggleFavorite}
@@ -859,11 +890,16 @@ const MyPokeDetail = () => {
             </div>
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Swords className="h-5 w-5" />
-                  Learnable Moves
-                </CardTitle>
-                <CardDescription>Moves that this Pokémon can learn through leveling up and TMs</CardDescription>
+                <div className='flex flex-col sm:flex-row sm:items-center justify-between'>
+                  <div>
+                    <CardTitle className="flex items-center gap-2">
+                      <Swords className="h-5 w-5" />
+                      Learnable Moves
+                    </CardTitle>
+                    <CardDescription>Moves that this Pokémon can learn through leveling up and TMs</CardDescription>
+                  </div>
+                  <p>Hello</p>
+                </div>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
