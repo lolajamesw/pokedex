@@ -1,6 +1,8 @@
 "use client"
 
 import { useState, useEffect, useMemo } from "react"
+import Autocomplete from '@mui/material/Autocomplete'
+import TextField from '@mui/material/TextField';
 import { Search, SortAsc, SortDesc, LogOut } from "lucide-react"
 import { Link } from "react-router-dom"
 import "./pokedex.css"
@@ -34,6 +36,7 @@ export default function MyPokedex() {
   const [sortOrder, setSortOrder] = useState("asc")
   const [filterType, setFilterType] = useState("all")
   const [pokemonList, setPokemonList] = useState<PokemonDetailType[]>([])
+  const [pokemonNames, setPokemonNames] = useState<string[]>([])
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newPokemonName, setNewPokemonName] = useState("");
   const [newNickname, setNewNickname] = useState("");
@@ -43,6 +46,12 @@ export default function MyPokedex() {
     fetch(`http://localhost:8081/userPokemon?uID=${localStorage.getItem("uID")}`)
       .then((res) => res.json())
       .then((data) => setPokemonList(data))
+      .catch((err) => console.error("Failed to fetch Pokémon:", err));
+  }, [])
+  useEffect(() => {
+    fetch(`http://localhost:8081/pokemonNames`)
+      .then((res) => res.json())
+      .then((data) => setPokemonNames(data))
       .catch((err) => console.error("Failed to fetch Pokémon:", err));
   }, [])
   const filteredAndSortedPokemon = useMemo(() => {
@@ -339,13 +348,31 @@ export default function MyPokedex() {
                     <div className="input-row">
                       <div className="input-group">
                         <label>Pokemon</label>
-                        <input
-                          type="text"
-                          placeholder="e.g., Pikachu"
-                          value={newPokemonName}
-                          onChange={(e) => setNewPokemonName(e.target.value)}
-                          required
-                        />
+                        <Autocomplete
+                          // disablePortal
+                          options={pokemonNames}
+                          sx={{
+                            "& .MuiOutlinedInput-root": {
+                              "& fieldset": {
+                                border: "0px solid #ccc",   // normal border
+                              }
+                            },
+                          }}
+                          popupIcon={null}
+                          disableClearable
+                          autoSelect
+                          autoHighlight
+                          freeSolo={false}
+                          inputValue={newPokemonName}
+                          onInputChange={(event, newInputValue) => {setNewPokemonName(newInputValue)}}                          
+                          renderInput={
+                            (params) => <TextField {...params} size="small" fullWidth
+                            sx={{
+                              "& .MuiInputBase-input": {
+                                height: 30,      // optional: controls text height
+                              }
+                            }}/>
+                          }/>
                       </div>
                       <div className="input-group">
                         <label>Nickname</label>

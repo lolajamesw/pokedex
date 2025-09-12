@@ -3,7 +3,9 @@
 import type React from "react"
 import { Link } from "react-router-dom"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
+import Autocomplete from '@mui/material/Autocomplete'
+import TextField from '@mui/material/TextField';
 import { Button } from "./components/ui/button"
 import { Input } from "./components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./components/ui/card"
@@ -28,10 +30,18 @@ interface CounterResponse {
 }
 
 export default function PokemonCounterPage() {
-  const [pokemonName, setPokemonName] = useState("")
-  const [results, setResults] = useState<CounterResponse | null>(null)
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState("")
+  const [pokemonName, setPokemonName] = useState("");
+  const [pokemonNames, setPokemonNames] = useState<string[]>([]);
+  const [results, setResults] = useState<CounterResponse | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  useEffect(() => {
+      fetch(`http://localhost:8081/pokemonNames`)
+        .then((res) => res.json())
+        .then((data) => setPokemonNames(data))
+        .catch((err) => console.error("Failed to fetch Pokémon:", err));
+    }, []);
+  
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -98,13 +108,19 @@ export default function PokemonCounterPage() {
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="flex gap-4 items-center">
-              <Input
-                type="text"
-                placeholder="Enter Pokemon name (e.g., Pikachu)"
-                value={pokemonName}
-                onChange={(e) => setPokemonName(e.target.value)}
-                className="flex-1"
-                disabled={loading}
+              <Autocomplete
+                // disablePortal
+                options={pokemonNames}
+                sx={{width: 800,}}
+                // popupIcon={null}
+                // disableClearable
+                autoSelect
+                autoHighlight
+                freeSolo={false}
+                inputValue={pokemonName}
+                onInputChange={(event, newInputValue) => {setPokemonName(newInputValue)}}                          
+                renderInput={
+                  (params) => <TextField {...params} size="small" fullWidth/>}
               />
               <Button type="submit" disabled={loading || !pokemonName.trim()}>
                 {loading ? "Searching..." : "Find Counters"}
