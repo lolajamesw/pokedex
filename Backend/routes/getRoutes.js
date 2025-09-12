@@ -63,6 +63,20 @@ module.exports = (app, db) => {
     });
     });
 
+    app.get('/pokemonNames', (req, res) => {
+    const sql = `SELECT name FROM Pokedex ORDER BY name`;
+
+    db.query(sql, (err, results) => {
+        if (err) {
+        console.error("Error fetching Pokémon names:", err);
+        return res.status(500).json({ error: "Database error" });
+        }
+
+        const formatted = results.map((row) => row.name);
+        res.json(formatted);
+    });
+    });
+
     app.get(`/pokemon/:id`, (req, res) => {
         const pID = req.params.id;
         const sql = `
