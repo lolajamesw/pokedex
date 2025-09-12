@@ -96,20 +96,21 @@ CREATE TABLE CurrentAttacks(
     aID INT NOT NULL REFERENCES Attacks(aID),
     PRIMARY KEY (instanceID, aID),
     FOREIGN KEY (instanceID) REFERENCES MyPokemon(instanceID)
+    ON DELETE CASCADE
 );
 
 CREATE TABLE Listing(
 	listingID INT AUTO_INCREMENT PRIMARY KEY,
-    instanceID INT NOT NULL REFERENCES MyPokemon(instanceID),
-    sellerID INT NOT NULL REFERENCES User(uID),
+    instanceID INT NOT NULL REFERENCES MyPokemon(instanceID) ON DELETE CASCADE,
+    sellerID INT NOT NULL REFERENCES User(uID) ON DELETE CASCADE,
     postedTime DATETIME DEFAULT '2000-01-01',
     description VARCHAR(100) DEFAULT NULL
 );
 
 CREATE TABLE Reply(
 	replyID INT AUTO_INCREMENT PRIMARY KEY,
-    listingID INT NOT NULL REFERENCES Listing(listingID),
-    instanceID INT NOT NULL REFERENCES MyPokemon(instanceID),
+    listingID INT NOT NULL REFERENCES Listing(listingID) ON DELETE CASCADE,
+    instanceID INT NOT NULL REFERENCES MyPokemon(instanceID) ON DELETE CASCADE,
     respondantID INT NOT NULL REFERENCES User(uID),
     sentTime DATETIME DEFAULT '2000-01-01',
     message VARCHAR(100) DEFAULT NULL

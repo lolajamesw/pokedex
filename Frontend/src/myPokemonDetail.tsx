@@ -1,346 +1,363 @@
+/**
+ * MyPokeDetail.tsx
+ * 
+ * A React component for displaying detailed information about a user's Pokémon, 
+ * including stats, moves, evolutions, and trade history. 
+ * Allows interactions such as teaching/forgetting moves and marking a Pokémon as a favourite.
+ */
+
 import { useParams, Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./components/ui/card"
-import { Progress } from "./components/ui/progress"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "./components/ui/tabs.tsx"
-import { ArrowRight, Shield, Swords, Footprints, Heart, X, Plus, Star, ArrowLeftRight, Calendar, User } from "lucide-react"
-import "./pokedex.css"
-import "./details.css"
+// UI components
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./components/ui/card";
+import { Progress } from "./components/ui/progress";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "./components/ui/tabs.tsx";
+import { ArrowRight, Shield, Swords, Footprints, Heart, X, 
+          Plus, Star, ArrowLeftRight, Calendar, User, LogOut } from "lucide-react";
 
+// Styles
+import "./pokedex.css";
+import "./details.css";
 
-// const tradeHistory = [
-//     {
-//       id: 1,
-//       date: "2024-01-15",
-//       fromTrainer: "Alex_Trainer92",
-//       toTrainer: "You",
-//       tradedAway: {
-//         pokemon: "Caterpie",
-//         nickname: "Greenie",
-//         level: 8,
-//         types: ["Bug"],
-//       },
-//       tradedFor: {
-//         pokemon: "Wurmple",
-//         nickname: "Wiggly",
-//         level: 10,
-//         types: ["Bug"],
-//       },
-//       location: "Petalburg City",
-//       notes: "Great trade! Both Pokemon were well-trained.",
-//     },
-//     {
-//       id: 2,
-//       date: "2023-12-03",
-//       fromTrainer: "Sarah_PokeMaster",
-//       toTrainer: "Alex_Trainer92",
-//       tradedAway: {
-//         pokemon: "Wurmple",
-//         nickname: "Wiggly",
-//         level: 8,
-//         types: ["Bug"],
-//       },
-//       tradedFor: {
-//         pokemon: "Pidgey",
-//         nickname: "Skyler",
-//         level: 12,
-//         types: ["Normal", "Flying"],
-//       },
-//       location: "Route 104",
-//       notes: "Traded to help complete Pokedex.",
-//     },
-//     {
-//       id: 3,
-//       date: "2023-11-20",
-//       fromTrainer: "Mike_BugCatcher",
-//       toTrainer: "Sarah_PokeMaster",
-//       tradedAway: {
-//         pokemon: "Weedle",
-//         nickname: null,
-//         level: 5,
-//         types: ["Bug", "Poison"],
-//       },
-//       tradedFor: {
-//         pokemon: "Wurmple",
-//         nickname: "Wiggly",
-//         level: 5,
-//         types: ["Bug"],
-//       },
-//       location: "Rustboro City Pokemon Center",
-//       notes: "First trade for this Pokemon! Excited to train it.",
-//     },
-//   ]
+/* ---------- Type Definitions ---------- */
 
+/**
+ * Represents a Pokémon involved in a trade.
+ * (Temporary, will be removed with market system.)
+ */
 type TradedPokemonType = {
-  pokemon: string,
-  nickname: string,
-  level: number,
-  types: string[],
-}
-
-type TradeType = {
-  id: number,
-  date: Date,
-  fromTrainer: string,
-  toTrainer: string,
-  tradedAway: TradedPokemonType,
-  tradedFor: TradedPokemonType,
-  notes: string
-}
-
-type PokemonStatType = {
-    hp: number,
-    atk: number,
-    def: number,
-    spAtk: number,
-    spDef: number,
-    speed: number
-}
-
-type AttackStatType = {
-    power: number,
-    accuracy: number,
-    pp: number
-}
-
-type AttackDetailType = {
-    id: number,
-    name: string,
-    type: string,
-    category: string,
-    stats: AttackStatType,
-    effect: string,
-    TM: boolean
-}
-
-type PokemonDetailType = {
-  id: number,
-  pID: number,
-  name: string,
-  nickname: string,
-  level: number,
-  onTeam: boolean,
-  favourite: boolean,
-  types: string[],
-  stats: PokemonStatType,
-  legendary: boolean,
-  description: string,
-  learnableAttacks: AttackDetailType[],
-  knownAttacks: AttackDetailType[],
+  pokemon: string;
+  nickname: string;
+  level: number;
+  types: string[];
 };
 
+/**
+ * Represents a single trade record.
+ */
+type TradeType = {
+  id: number;
+  date: Date;
+  fromTrainer: string;
+  toTrainer: string;
+  tradedAway: TradedPokemonType;
+  tradedFor: TradedPokemonType;
+  notes: string;
+};
+
+/**
+ * Pokémon stat distribution.
+ */
+type PokemonStatType = {
+  hp: number;
+  atk: number;
+  def: number;
+  spAtk: number;
+  spDef: number;
+  speed: number;
+};
+
+/**
+ * Attack stats (power, accuracy, etc.).
+ */
+type AttackStatType = {
+  power: number;
+  accuracy: number;
+  pp: number;
+};
+
+/**
+ * Detailed attack info.
+ */
+type AttackDetailType = {
+  id: number;
+  name: string;
+  type: string;
+  category: string;
+  stats: AttackStatType;
+  effect: string;
+  TM: boolean;
+};
+
+/**
+ * Full Pokémon detail object.
+ */
+type PokemonDetailType = {
+  id: number; // instance ID (user-owned Pokémon)
+  pID: number; // Pokémon species ID
+  name: string;
+  nickname: string;
+  level: number;
+  onTeam: boolean;
+  favourite: boolean;
+  types: string[];
+  stats: PokemonStatType;
+  legendary: boolean;
+  description: string;
+  learnableAttacks: AttackDetailType[];
+  knownAttacks: AttackDetailType[];
+};
+
+/**
+ * Compact Pokémon info used for evolution chains.
+ */
 type PokemonSummary = {
-    id: number,
-    name: string,
-    types: string[],
-    image: string
-}
+  id: number;
+  name: string;
+  types: string[];
+  image: string;
+};
 
-function PokemonSummary(id, name, types, img) {
-  this.id = id; this.name = name; this.types=types; this.image=img;
-}
-
+/**
+ * Evolution chain for a species.
+ */
 type Evolution = {
-    base: PokemonSummary,
-    stage1: PokemonSummary,
-    stage2: PokemonSummary
+  base: PokemonSummary;
+  stage1: PokemonSummary;
+  stage2: PokemonSummary;
+};
+
+/* ---------- Helper Constructor ---------- */
+
+// Simple function constructor for summaries
+function PokemonSummary(id, name, types, img) {
+  this.id = id;
+  this.name = name;
+  this.types = types;
+  this.image = img;
 }
+
+/* ---------- Main Component ---------- */
 
 const MyPokeDetail = () => {
-    const { id, pID } = useParams<{ id: string, pID: string}>();
-    const [pokemon, setPokemonDetail] = useState<PokemonDetailType | null>(null);
-    const [evolutions, setEvolutions] = useState<Evolution[] | null>(null);
-    const [tradeHistory, setTradeHistory] = useState<TradeType[]>([])
+  // Grab Pokémon instance and species IDs from URL params
+  const { id, pID } = useParams<{ id: string; pID: string }>();
 
-    
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                console.log("id:", id, "pID:",pID);
+  // State
+  const [pokemon, setPokemonDetail] = useState<PokemonDetailType | null>(null);
+  const [evolutions, setEvolutions] = useState<Evolution[] | null>(null);
+  const [tradeHistory, setTradeHistory] = useState<TradeType[]>([]);
 
-                const overviewRes = await fetch(`http://localhost:8081/userPokemon/${id}`);
-                const overviewData = await overviewRes.json();
+  /**
+   * Fetch Pokémon details, evolutions, and trade history from backend.
+   */
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        console.log("id:", id, "pID:", pID);
 
-                const attackRes = await fetch(`http://localhost:8081/pokemon/attacks/${pID}`);
-                const attackData = await attackRes.json();
+        // 1. Fetch overview info
+        const overviewRes = await fetch(`http://localhost:8081/userPokemon/${id}`);
+        const overviewData = await overviewRes.json();
 
-                const knownRes = await fetch(`http://localhost:8081/pokemon/knownAttacks/${id}`)
-                const knownData = await knownRes.json();
+        // 2. Fetch learnable attacks
+        const attackRes = await fetch(`http://localhost:8081/pokemon/attacks/${pID}`);
+        const attackData = await attackRes.json();
 
-                const combined: PokemonDetailType = {
-                    ...overviewData,
-                    learnableAttacks: attackData,
-                    knownAttacks: knownData,
-                };
+        // 3. Fetch known attacks
+        const knownRes = await fetch(`http://localhost:8081/pokemon/knownAttacks/${id}`);
+        const knownData = await knownRes.json();
 
-                setPokemonDetail(combined);
-
-                const evolutionRes = await fetch(`http://localhost:8081/pokemon/evolutions/${pID}`);
-                const evolutionData = await evolutionRes.json();
-                console.log("fetched evolution data");
-                setEvolutions(evolutionData);
-
-                const tradeRes = await fetch(`http://localhost:8081/pastTrades/${id}`);
-                const tradeData = await tradeRes.json();
-                console.log("fetched trade data");
-                setTradeHistory(tradeData);
-            } catch (error) {
-                console.error(error);
-            }
+        // Combine into Pokémon detail object
+        const combined: PokemonDetailType = {
+          ...overviewData,
+          learnableAttacks: attackData,
+          knownAttacks: knownData,
         };
-        fetchData();
-    }, [id])
+        setPokemonDetail(combined);
 
+        // 4. Fetch evolution data
+        const evolutionRes = await fetch(`http://localhost:8081/pokemon/evolutions/${pID}`);
+        const evolutionData = await evolutionRes.json();
+        console.log("fetched evolution data");
+        setEvolutions(evolutionData);
 
-    if (!pokemon) return <div>Loading...first {id}</div>;
-    console.log("learnableAttacks: ", pokemon.learnableAttacks);
-    const placeholderImg = "/placeholder.png";    
-    var evolutionaryLine: PokemonSummary[] = [];
-    if (evolutions) {
-      if (evolutions.length>1 && evolutions[0].stage1.id===evolutions[1].stage1.id) evolutionaryLine = [evolutions[0].base, evolutions[0].stage1]
-      else if (evolutions.length == 0) evolutionaryLine = [new PokemonSummary(pokemon.pID, pokemon.name, pokemon.types, placeholderImg)];
-      else if (!evolutions[0].stage2.id) evolutionaryLine = [evolutions[0].base, evolutions[0].stage1];
-      else evolutionaryLine = [evolutions[0].base, evolutions[0].stage1, evolutions[0].stage2];
-    }
-    else return <div>Loading...second</div>;
-    const getEvolutionType = () => {
-        if (evolutions.length<2) return "linear"; // Charizard
-        let myBool=true;
-        for (let i=0; i<evolutions.length; i++)
-          if (evolutions[i].stage2.id!=null) myBool=false
-        if (myBool) return "base_branching" // Eevee
-        for (let i=1; i<evolutions.length; i++)
-          if (evolutions[i].stage1.id!=evolutions[i-1].stage1.id) myBool=true;
-        if (!myBool) return "middle_branching";
-        return "random_branching"
+        // 5. Fetch trade history
+        const tradeRes = await fetch(`http://localhost:8081/pastTrades/${id}`);
+        const tradeData = await tradeRes.json();
+        console.log("fetched trade data");
+        setTradeHistory(tradeData);
+      } catch (error) {
+        console.error(error);
       }
-    const evolutionType = getEvolutionType()
+    };
+    fetchData();
+  }, [id]);
 
-    const learnMove = async (moveToLearn: AttackDetailType) => {
-      try {
-        const response = await fetch("http://localhost:8081/learnMove", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            instanceID: id,
-            aID: moveToLearn.id,
-          }),
-        });
+  if (!pokemon) return <div>Loading...first {id}</div>;
 
-        if (response.ok) {
-          const overviewRes = await fetch(`http://localhost:8081/userPokemon/${id}`);
-          const overviewData = await overviewRes.json();
+  /* ---------- Evolution Helpers ---------- */
 
-          const attackRes = await fetch(`http://localhost:8081/pokemon/attacks/${pID}`);
-          const attackData = await attackRes.json();
+  const placeholderImg = "/placeholder.png";
+  let evolutionaryLine: PokemonSummary[] = [];
 
-          const knownRes = await fetch(`http://localhost:8081/pokemon/knownAttacks/${id}`)
-          const knownData = await knownRes.json();
+  if (evolutions) {
+    // Build evolution line depending on branching
+    if (evolutions.length > 1 && evolutions[0].stage1.id === evolutions[1].stage1.id)
+      evolutionaryLine = [evolutions[0].base, evolutions[0].stage1];
+    else if (evolutions.length === 0)
+      evolutionaryLine = [new PokemonSummary(pokemon.pID, pokemon.name, pokemon.types, placeholderImg)];
+    else if (!evolutions[0].stage2.id)
+      evolutionaryLine = [evolutions[0].base, evolutions[0].stage1];
+    else evolutionaryLine = [evolutions[0].base, evolutions[0].stage1, evolutions[0].stage2];
+  } else return <div>Loading...second</div>;
 
-          const combined: PokemonDetailType = {
-              ...overviewData,
-              learnableAttacks: attackData,
-              knownAttacks: knownData,
-          };
+  /**
+   * Determine the evolution type (linear, branching, etc.).
+   */
+  const getEvolutionType = () => {
+    if (evolutions.length < 2) return "linear"; // Ex: Charizard
+    let myBool = true;
 
-          setPokemonDetail(combined);
-        } else {
-          const errMsg = await response.text();
-          console.error("Failed to update Pokémon moveset:", errMsg);
+    for (let i = 0; i < evolutions.length; i++) if (evolutions[i].stage2.id != null) myBool = false;
+    if (myBool) return "base_branching"; // Ex: Eevee
 
-          alert("Failed to update Pokémon moveset. See console for details.");
-        }
-      } catch (err) {
-        console.error("Error updating Pokémon moveset:", err);
-        alert("Something went wrong updating Pokémon moveset.");
+    for (let i = 1; i < evolutions.length; i++)
+      if (evolutions[i].stage1.id != evolutions[i - 1].stage1.id) myBool = true;
+    if (!myBool) return "middle_branching";
+
+    return "random_branching";
+  };
+  const evolutionType = getEvolutionType();
+
+  /* ---------- Move Management ---------- */
+
+  /**
+   * Teach a new move to this Pokémon.
+   */
+  const learnMove = async (moveToLearn: AttackDetailType) => {
+    try {
+      const response = await fetch("http://localhost:8081/learnMove", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ instanceID: id, aID: moveToLearn.id }),
+      });
+
+      if (response.ok) {
+        // Refresh details after update
+        const overviewRes = await fetch(`http://localhost:8081/userPokemon/${id}`);
+        const overviewData = await overviewRes.json();
+        const attackRes = await fetch(`http://localhost:8081/pokemon/attacks/${pID}`);
+        const attackData = await attackRes.json();
+        const knownRes = await fetch(`http://localhost:8081/pokemon/knownAttacks/${id}`);
+        const knownData = await knownRes.json();
+
+        const combined: PokemonDetailType = { ...overviewData, learnableAttacks: attackData, knownAttacks: knownData };
+        setPokemonDetail(combined);
+      } else {
+        const errMsg = await response.text();
+        console.error("Failed to update Pokémon moveset:", errMsg);
+        alert("Failed to update Pokémon moveset. See console for details.");
       }
-
+    } catch (err) {
+      console.error("Error updating Pokémon moveset:", err);
+      alert("Something went wrong updating Pokémon moveset.");
     }
+  };
 
-    const forgetMove = async (moveToForget: AttackDetailType) => {
-      try {
-        const response = await fetch("http://localhost:8081/unlearnMove", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            instanceID: id,
-            aID: moveToForget.id,
-          }),
-        });
+  /**
+   * Forget a known move.
+   */
+  const forgetMove = async (moveToForget: AttackDetailType) => {
+    try {
+      const response = await fetch("http://localhost:8081/unlearnMove", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ instanceID: id, aID: moveToForget.id }),
+      });
 
-        if (response.ok) {
-          const overviewRes = await fetch(`http://localhost:8081/userPokemon/${id}`);
-          const overviewData = await overviewRes.json();
+      if (response.ok) {
+        // Refresh details after update
+        const overviewRes = await fetch(`http://localhost:8081/userPokemon/${id}`);
+        const overviewData = await overviewRes.json();
+        const attackRes = await fetch(`http://localhost:8081/pokemon/attacks/${pID}`);
+        const attackData = await attackRes.json();
+        const knownRes = await fetch(`http://localhost:8081/pokemon/knownAttacks/${id}`);
+        const knownData = await knownRes.json();
 
-          const attackRes = await fetch(`http://localhost:8081/pokemon/attacks/${pID}`);
-          const attackData = await attackRes.json();
-
-          const knownRes = await fetch(`http://localhost:8081/pokemon/knownAttacks/${id}`)
-          const knownData = await knownRes.json();
-
-          const combined: PokemonDetailType = {
-              ...overviewData,
-              learnableAttacks: attackData,
-              knownAttacks: knownData,
-          };
-
-          setPokemonDetail(combined);
-        } else {
-          const errMsg = await response.text();
-          console.error("Failed to update Pokémon moveset:", errMsg);
-
-          alert("Failed to update Pokémon moveset. See console for details.");
-        }
-      } catch (err) {
-        console.error("Error updating Pokémon moveset:", err);
-        alert("Something went wrong updating Pokémon moveset.");
+        const combined: PokemonDetailType = { ...overviewData, learnableAttacks: attackData, knownAttacks: knownData };
+        setPokemonDetail(combined);
+      } else {
+        const errMsg = await response.text();
+        console.error("Failed to update Pokémon moveset:", errMsg);
+        alert("Failed to update Pokémon moveset. See console for details.");
       }
+    } catch (err) {
+      console.error("Error updating Pokémon moveset:", err);
+      alert("Something went wrong updating Pokémon moveset.");
     }
+  };
 
-    const isMoveKnown = (move: AttackDetailType) => {
-      return pokemon.knownAttacks.some((knownMove) => knownMove.id === move.id)
+  /**
+   * Check if a move is already known by this Pokémon.
+   */
+  const isMoveKnown = (move: AttackDetailType) =>
+    pokemon.knownAttacks.some((knownMove) => knownMove.id === move.id);
+
+  /* ---------- Utilities ---------- */
+
+  /**
+   * Get a color class for stat bars based on value.
+   */
+  const getStatColor = (stat: number) => {
+    if (stat >= 100) return "bg-green-500";
+    if (stat >= 80) return "bg-yellow-500";
+    if (stat >= 60) return "bg-orange-500";
+    return "bg-red-500";
+  };
+
+  /**
+   * Format date string for trade history.
+   */
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
+  };
+
+  /* ---------- Release Pokemon Call ---------- */
+
+  const ReleasePokemon = async () => {
+    try {
+      console.log("Releasing Pokemon: ", pokemon.nickname);
+      await fetch("http://localhost:8081/dropPokemon", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          instanceID: pokemon.id,
+        }),
+      });
+      // Navigate back to myPokemon since this pokemon doesn't 
+      // exist anymore and hence lacks a detail page
+      location.href = '/my-pokemon'
+    } catch (err) {
+      console.error("Error releasing Pokémon: ", err);
+      alert("Something went wrong releasing the Pokémon.");
     }
+  };
 
-    const getStatColor = (stat: number) => {
-        if (stat >= 100) return "bg-green-500"
-        if (stat >= 80) return "bg-yellow-500"
-        if (stat >= 60) return "bg-orange-500"
-        return "bg-red-500"
-    }
-
-    const formatDate = (dateString: string) => {
-      const date = new Date(dateString)
-      return date.toLocaleDateString("en-US", {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      })
-    }
-
-    // return (<div className="bg-testcolor w-32 h-32">
-    //   Test box
-    //   </div>);
+  /* ---------- Favourite Toggle ---------- */
 
   const toggleFavorite = async () => {
     try {
       console.log("Marking Pokemon: ", pokemon.nickname);
-      const response = await fetch("http://localhost:8081/setFavourite", {
+      await fetch("http://localhost:8081/setFavourite", {
         method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({instanceID: pokemon.id, user: localStorage.getItem("uID"), value:Number(!pokemon.favourite)}),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          instanceID: pokemon.id,
+          user: localStorage.getItem("uID"),
+          value: Number(!pokemon.favourite),
+        }),
       });
-      // Convert UserPokemon to ShowcasedPokemon format
-      setPokemonDetail((prev) => {
-      if (!prev) return prev;  
-      return {...prev, favourite: !prev.favourite,};});
 
+      // Update state optimistically
+      setPokemonDetail((prev) => (prev ? { ...prev, favourite: !prev.favourite } : prev));
     } catch (err) {
       console.error("Error favouriting Pokémon: ", err);
-      alert("Something went wrong favouriting the Pokémon.")
+      alert("Something went wrong favouriting the Pokémon.");
     }
-    
-  }
+  };
 
     return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-red-50 p-4">
@@ -351,6 +368,15 @@ const MyPokeDetail = () => {
             <div className={`gradient-${pokemon.types[0].toLowerCase()} p-6 text-white relative`}>
               {/* Top Right Controls */}
               <div className="absolute top-4 right-4 flex items-center gap-3">
+                {/* Release Button */}
+                <button
+                  onClick={ReleasePokemon}
+                  className={`p-2 rounded-full transition-all duration-200 hover:scale-110 
+                    bg-white/10 text-white/60 hover:bg-white/20 hover:text-white`}
+                  title="Release this Pokemon"
+                >
+                  <LogOut className="h-6 w-6" />
+                </button>
                 {/* Favorite Button */}
                 <button
                   onClick={toggleFavorite}
@@ -864,11 +890,16 @@ const MyPokeDetail = () => {
             </div>
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Swords className="h-5 w-5" />
-                  Learnable Moves
-                </CardTitle>
-                <CardDescription>Moves that this Pokémon can learn through leveling up and TMs</CardDescription>
+                <div className='flex flex-col sm:flex-row sm:items-center justify-between'>
+                  <div>
+                    <CardTitle className="flex items-center gap-2">
+                      <Swords className="h-5 w-5" />
+                      Learnable Moves
+                    </CardTitle>
+                    <CardDescription>Moves that this Pokémon can learn through leveling up and TMs</CardDescription>
+                  </div>
+                  <p>Hello</p>
+                </div>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
