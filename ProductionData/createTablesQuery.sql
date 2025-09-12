@@ -5,6 +5,7 @@ DROP TABLE IF EXISTS Listing;
 DROP TABLE IF EXISTS LearnableAttacks;
 DROP TABLE IF EXISTS CurrentAttacks;
 DROP TABLE IF EXISTS Attacks;
+DROP TABLE IF EXISTS Items;
 DROP TABLE IF EXISTS MyPokemon;
 DROP TABLE IF EXISTS Evolutions;
 DROP TABLE IF EXISTS Pokedex;
@@ -70,6 +71,13 @@ CREATE TABLE MyPokemon(
     showcase BIT DEFAULT 0,
     dateAdded DATETIME DEFAULT '2000-01-01',
     CHECK (level>0)
+);
+
+CREATE TABLE Items(
+	name VARCHAR(20) PRIMARY KEY,
+    effect VARCHAR(200),
+    speciesSpecific bit,
+    description VARCHAR(200)
 );
 
 CREATE TABLE Attacks(
