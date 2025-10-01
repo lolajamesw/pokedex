@@ -1,437 +1,325 @@
-const mysqlPromise = require('mysql2/promise');
+/**
+ * Pokémon Trading/Collection API
+ * ----------------------------------
+ * This module defines multiple Express.js POST routes for interacting
+ * with a MySQL database that manages Pokémon, users, listings, replies,
+ * and trades. It allows adding/removing Pokémon, managing movesets,
+ * setting favourites/teams/showcases, user login/account creation,
+ * and handling trades between users.
+ *
+ * Improvements made:
+ *  - Uses a MySQL connection pool (faster + scalable).
+ *  - All queries use parameterized statements (prevents SQL injection).
+ *  - Thorough logging for debugging.
+ *  - Consistent error handling & response format.
+ */
 
-module.exports = (app, db) => {
-    
+const mysqlPromise = require("mysql2/promise");
+
+/**
+ * Create a MySQL connection pool (reused across all requests).
+ */
+const pool = mysqlPromise.createPool({
+    host: process.env.DB_HOST,
+    port: process.env.DB_PORT,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME,
+    waitForConnections: true,
+    connectionLimit: 10,  // max concurrent connections
+    queueLimit: 0         // unlimited queued requests
+});
+
+module.exports = (app) => {
+    /**
+     * Helper: run a query with pooled connection.
+     */
+    async function runQuery(sql, params = []) {
+        const conn = await pool.getConnection();
+        try {
+            const [rows] = await conn.query(sql, params);
+            return rows;
+        } finally {
+            conn.release();
+        }
+    }
+
+    /**
+     * -------------------------
+     * Pokémon-related Endpoints
+     * -------------------------
+     */
+
+    // Add a Pokémon to user's collection
     app.post("/addPokemon", async (req, res) => {
         const { pokemonName, nickname, level, uID } = req.body;
-
-        console.log("Incoming request to /addPokemon with:", req.body);
+        console.log("POST /addPokemon:", req.body);
 
         try {
-            const dbPromise = await mysqlPromise.createConnection({
-                host: process.env.DB_HOST,
-                port: process.env.DB_PORT,
-                user: process.env.DB_USER,
-                password: process.env.DB_PASSWORD,
-                database: process.env.DB_NAME
-            });
-
-            const [rows] = await dbPromise.query(
-            "SELECT pID FROM Pokedex WHERE LOWER(name) = LOWER(?)",
-            [pokemonName]
+            // Lookup Pokémon ID (case-insensitive)
+            const rows = await runQuery(
+                "SELECT pID FROM Pokedex WHERE LOWER(name) = LOWER(?)",
+                [pokemonName]
             );
-            console.log("Pokedex lookup result:", rows);
 
             if (rows.length === 0) {
-            await dbPromise.end();
-            return res.status(400).send("Pokémon not found in Pokedex.");
+                return res.status(400).send("Pokémon not found in Pokedex.");
             }
 
             const pID = rows[0].pID;
-            console.log(`Found pID: ${pID}, inserting into MyPokemon...`);
 
-            await dbPromise.query(
-            `INSERT INTO MyPokemon (pID, uID, nickname, level, dateAdded)
-            VALUES (?, ?, ?, ?, NOW())`,
-            [pID, uID, nickname || null, level]
+            // Insert Pokémon into user's collection
+            await runQuery(
+                `INSERT INTO MyPokemon (pID, uID, nickname, level, dateAdded)
+                 VALUES (?, ?, ?, ?, NOW())`,
+                [pID, uID, nickname || null, level]
             );
 
-            console.log("Insert successful.");
-            await dbPromise.end();
             res.send("Pokémon added successfully.");
         } catch (err) {
-            console.error("Error adding Pokémon:", err);
+            console.error("Error in /addPokemon:", err);
             res.status(500).send("Server error adding Pokémon.");
         }
     });
 
+    // Remove Pokémon from user's collection
     app.post("/dropPokemon", async (req, res) => {
         const { instanceID } = req.body;
-
-        console.log("Incoming request to /dropPokemon with:", req.body);
+        console.log("POST /dropPokemon:", req.body);
 
         try {
-            const dbPromise = await mysqlPromise.createConnection({
-                host: process.env.DB_HOST,
-                port: process.env.DB_PORT,
-                user: process.env.DB_USER,
-                password: process.env.DB_PASSWORD,
-                database: process.env.DB_NAME
-            });
-
-            await dbPromise.query(
-            `DELETE FROM MyPokemon WHERE instanceID=?`,
-            [instanceID]
-            );
-
-            console.log("delete successful.");
-            await dbPromise.end();
+            await runQuery("DELETE FROM MyPokemon WHERE instanceID=?", [instanceID]);
             res.send("Pokémon forgotten successfully.");
         } catch (err) {
-            console.error("Error adding Pokémon:", err);
-            res.status(500).send("Server error adding Pokémon.");
+            console.error("Error in /dropPokemon:", err);
+            res.status(500).send("Server error dropping Pokémon.");
         }
     });
 
+    // Make Pokémon unlearn a move
     app.post("/unlearnMove", async (req, res) => {
         const { instanceID, aID } = req.body;
-
-        console.log("Incoming request to /unlearnMove with:", req.body);
+        console.log("POST /unlearnMove:", req.body);
 
         try {
-            const dbPromise = await mysqlPromise.createConnection({
-                host: process.env.DB_HOST,
-                port: process.env.DB_PORT,
-                user: process.env.DB_USER,
-                password: process.env.DB_PASSWORD,
-                database: process.env.DB_NAME
-            });
-
-            await dbPromise.query(
-            `DELETE FROM CurrentAttacks WHERE instanceID = ${instanceID} AND aID = ${aID};`
+            await runQuery(
+                "DELETE FROM CurrentAttacks WHERE instanceID = ? AND aID = ?",
+                [instanceID, aID]
             );
-
-            console.log("Delete successful.");
-            await dbPromise.end();
-            res.send("Pokémon moveset decreased successfully.");
+            res.send("Pokémon move removed successfully.");
         } catch (err) {
-            console.error("Error decreasing Pokémon moveset:", err);
-            res.status(500).send("Server error updating Pokémon moveset.");
+            console.error("Error in /unlearnMove:", err);
+            res.status(500).send("Server error updating moveset.");
         }
     });
 
+    // Teach Pokémon a new move
     app.post("/learnMove", async (req, res) => {
         const { instanceID, aID } = req.body;
-
-        console.log("Incoming request to /unlearnMove with:", req.body);
+        console.log("POST /learnMove:", req.body);
 
         try {
-            const dbPromise = await mysqlPromise.createConnection({
-                host: process.env.DB_HOST,
-                port: process.env.DB_PORT,
-                user: process.env.DB_USER,
-                password: process.env.DB_PASSWORD,
-                database: process.env.DB_NAME
-            });
-
-            await dbPromise.query(
-            `INSERT INTO CurrentAttacks (instanceID, aID) VALUES 
-            (${instanceID}, ${aID});`
+            await runQuery(
+                "INSERT INTO CurrentAttacks (instanceID, aID) VALUES (?, ?)",
+                [instanceID, aID]
             );
-
-            console.log("Insert successful.");
-            await dbPromise.end();
-            res.send("Pokémon moveset increased successfully.");
+            res.send("Pokémon learned new move successfully.");
         } catch (err) {
-            console.error("Error increasing Pokémon moveset:", err);
-            res.status(500).send("Server error updating Pokémon moveset.");
+            console.error("Error in /learnMove:", err);
+            res.status(500).send("Server error updating moveset.");
         }
     });
 
-    app.post("/setShowcased", async(req,res) => {
-        const {instanceIDs, user} = req.body;
-        console.log("Incoming request to /setShowcased pokemon instance:", req.body);
+    // Mark Pokémon as showcased
+    app.post("/setShowcased", async (req, res) => {
+        const { instanceIDs, user } = req.body;
+        console.log("POST /setShowcased:", req.body);
 
         try {
-        const dbPromise = await mysqlPromise.createConnection({
-            host: process.env.DB_HOST,
-            port: process.env.DB_PORT,
-            user: process.env.DB_USER,
-            password: process.env.DB_PASSWORD,
-            database: process.env.DB_NAME
-        });
+            // First, reset showcase status for all user's Pokémon
+            await runQuery("UPDATE MyPokemon SET showcase=0 WHERE uID=?", [user]);
 
-        await dbPromise.query(
-            `UPDATE MyPokemon
-            SET showcase=1
-            WHERE instanceID IN (${instanceIDs.toString()}) AND uID=${user};`
-        );
-        await dbPromise.query(
-            `UPDATE MyPokemon
-            SET showcase=0
-            WHERE instanceID NOT IN (${instanceIDs.toString()}) AND uID=${user};`
-        )
+            // Then mark only the provided Pokémon
+            if (instanceIDs.length > 0) {
+                await runQuery(
+                    `UPDATE MyPokemon SET showcase=1
+                     WHERE instanceID IN (?) AND uID=?`,
+                    [instanceIDs, user]
+                );
+            }
 
-        console.log("Marking successful.");
-        await dbPromise.end();
-        res.send("Pokémon updated successfully.");
-    } catch (err) {
-        console.error("Error marking Pokémon:", err);
-        res.status(500).send("Server error marking Pokémon.");
-    }
-    });
-
-    app.post("/setFavourite", async(req,res) => {
-        const {instanceID, user, value} = req.body;
-        console.log("Incoming request to /setFavourite pokemon instance:", req.body);
-
-        try {
-        const dbPromise = await mysqlPromise.createConnection({
-            host: process.env.DB_HOST,
-            port: process.env.DB_PORT,
-            user: process.env.DB_USER,
-            password: process.env.DB_PASSWORD,
-            database: process.env.DB_NAME
-        });
-
-        await dbPromise.query(
-            `UPDATE MyPokemon
-            SET favourite=${value}
-            WHERE instanceID = ${instanceID} AND uID=${user};`
-        );
-
-        console.log("Marking successful.");
-        await dbPromise.end();
-        res.send("Pokémon updated successfully.");
-    } catch (err) {
-        console.error("Error marking Pokémon:", err);
-        res.status(500).send("Server error marking Pokémon.");
-    }
-    });
-
-    app.post("/setTeam", async(req,res) => {
-        const {instanceIDs, user} = req.body;
-        console.log("Incoming request to /setTeam pokemon instance:", req.body);
-
-        try {
-        const dbPromise = await mysqlPromise.createConnection({
-            host: process.env.DB_HOST,
-            port: process.env.DB_PORT,
-            user: process.env.DB_USER,
-            password: process.env.DB_PASSWORD,
-            database: process.env.DB_NAME
-        });
-
-        if (instanceIDs.length>0) {
-            await dbPromise.query(
-                `UPDATE MyPokemon
-                SET onteam=0
-                WHERE instanceID NOT IN (${instanceIDs.toString()}) AND uID=${user};`
-            );
-            await dbPromise.query(
-                `UPDATE MyPokemon
-                SET onteam=1
-                WHERE instanceID IN (${instanceIDs.toString()}) AND uID=${user};`
-            );
+            res.send("Showcased Pokémon updated successfully.");
+        } catch (err) {
+            console.error("Error in /setShowcased:", err);
+            res.status(500).send("Server error updating showcase.");
         }
-        else {
-            await dbPromise.query(
-                `UPDATE MyPokemon
-                SET onteam=0
-                WHERE uID=${user};`
-            );
-        }
-
-        
-
-        console.log("Marking successful.");
-        await dbPromise.end();
-        res.send("Pokémon updated successfully.");
-    } catch (err) {
-        console.error("Error marking Pokémon:", err);
-        res.status(500).send("Server error marking Pokémon.");
-    }
     });
 
-    app.post("/updateUserDisplayName", async(req,res) => {
-        const {uID, name} = req.body;
-        console.log("Incoming request to update name to:", name);
+    // Mark Pokémon as favourite
+    app.post("/setFavourite", async (req, res) => {
+        const { instanceID, user, value } = req.body;
+        console.log("POST /setFavourite:", req.body);
 
         try {
-            const dbPromise = await mysqlPromise.createConnection({
-                host: process.env.DB_HOST,
-                port: process.env.DB_PORT,
-                user: process.env.DB_USER,
-                password: process.env.DB_PASSWORD,
-                database: process.env.DB_NAME
-            });
+            await runQuery(
+                "UPDATE MyPokemon SET favourite=? WHERE instanceID=? AND uID=?",
+                [value, instanceID, user]
+            );
+            res.send("Favourite Pokémon updated successfully.");
+        } catch (err) {
+            console.error("Error in /setFavourite:", err);
+            res.status(500).send("Server error updating favourite.");
+        }
+    });
 
-            await dbPromise.query(
-                `UPDATE User
-                SET name='${name}'
-                WHERE uID=${uID};`
-            )
-            console.log("Update successful");
-            await dbPromise.end();
+    // Set user's active team
+    app.post("/setTeam", async (req, res) => {
+        const { instanceIDs, user } = req.body;
+        console.log("POST /setTeam:", req.body);
+
+        try {
+            // Reset all team flags
+            await runQuery("UPDATE MyPokemon SET onteam=0 WHERE uID=?", [user]);
+
+            // Set new team members
+            if (instanceIDs.length > 0) {
+                await runQuery(
+                    "UPDATE MyPokemon SET onteam=1 WHERE instanceID IN (?) AND uID=?",
+                    [instanceIDs, user]
+                );
+            }
+
+            res.send("Team updated successfully.");
+        } catch (err) {
+            console.error("Error in /setTeam:", err);
+            res.status(500).send("Server error updating team.");
+        }
+    });
+
+    /**
+     * -------------------------
+     * User-related Endpoints
+     * -------------------------
+     */
+
+    // Update user display name
+    app.post("/updateUserDisplayName", async (req, res) => {
+        const { uID, name } = req.body;
+        console.log("POST /updateUserDisplayName:", req.body);
+
+        try {
+            await runQuery("UPDATE User SET name=? WHERE uID=?", [name, uID]);
             res.send("User's name updated successfully.");
         } catch (err) {
-        console.error("Error marking Pokémon:", err);
-        res.status(500).send("Server error marking Pokémon.");
-    }});
+            console.error("Error in /updateUserDisplayName:", err);
+            res.status(500).send("Server error updating user name.");
+        }
+    });
 
+    // User login
     app.post("/userLogin", async (req, res) => {
         const { username, password } = req.body;
-        console.log("Incoming request to /userLogin with:", req.body);
+        console.log("POST /userLogin:", req.body);
 
         try {
-            const dbPromise = await mysqlPromise.createConnection({
-                host: process.env.DB_HOST,
-                port: process.env.DB_PORT,
-                user: process.env.DB_USER,
-                password: process.env.DB_PASSWORD,
-                database: process.env.DB_NAME
-            });
-
-            const [rows] = await dbPromise.query(
-                "SELECT * FROM User WHERE username= ? AND password= ?",
+            const rows = await runQuery(
+                "SELECT * FROM User WHERE username=? AND password=?",
                 [username, password]
             );
-
-            console.log("Login query result:", rows);
-
-            await dbPromise.end();
 
             if (rows.length === 0) {
                 return res.status(401).send("Invalid username or password.");
             }
 
-            console.log("Login successful for user:", username);
             res.status(200).json({ message: "Login successful", user: rows[0] });
         } catch (err) {
-            console.error("Error during user login:", err);
+            console.error("Error in /userLogin:", err);
             res.status(500).send("Server error during login.");
         }
     });
 
+    // Create a new account
     app.post("/createAccount", async (req, res) => {
-    const { name, username, password } = req.body;
-    console.log("Incoming request to /createAccount with:", req.body);
-
-    try {
-        const db = await mysqlPromise.createConnection({
-            host: process.env.DB_HOST,
-            port: process.env.DB_PORT,
-            user: process.env.DB_USER,
-            password: process.env.DB_PASSWORD,
-            database: process.env.DB_NAME
-        });
-
-        const [result] = await db.execute(
-        `INSERT INTO User (name, tradeCount, username, password)
-        VALUES (?, 0, ?, ?)`,
-        [name, username, password]
-        );
-
-        const newUser = {
-        uID: result.insertId,
-        name: name,
-        username: username,
-        };
-
-        await db.end();
-        res.status(201).json({ user: newUser });
-    } catch (err) {
-        console.error("Error creating account:", err);
-
-        if (err.code === 'ER_DUP_ENTRY') {
-        res.status(409).send("Username or password already exists.");
-        } else {
-        res.status(500).send("Server error while creating account.");
-        }
-    }
-    });
-
-    app.post("/listPokemon/", async (req, res) => {
-        const {iid, uid, desc} = req.body;
-        console.log("Incoming request to /listPokemon with:", req.body);
+        const { name, username, password } = req.body;
+        console.log("POST /createAccount:", req.body);
 
         try {
-            const db = await mysqlPromise.createConnection({
-            host: process.env.DB_HOST,
-            port: process.env.DB_PORT,
-            user: process.env.DB_USER,
-            password: process.env.DB_PASSWORD,
-            database: process.env.DB_NAME
-            });
-
-            const [result] = await db.execute(
-            `INSERT INTO Listing (instanceID, sellerID, description, postedTime)
-            VALUES (?, ?, ?, NOW());`,
-            [iid, uid, desc]
+            const result = await runQuery(
+                "INSERT INTO User (name, tradeCount, username, password) VALUES (?, 0, ?, ?)",
+                [name, username, password]
             );
 
-            const newListing = {
-                instanceID: result.instanceID,
-                sellerID: result.sellerID,
-                description: result.description
+            const newUser = {
+                uID: result.insertId,
+                name,
+                username
             };
 
-            await db.end();
-            res.status(201).json({ listing: newListing });
+            res.status(201).json({ user: newUser });
         } catch (err) {
-            console.error("Error creating listing:", err);
+            console.error("Error in /createAccount:", err);
 
+            if (err.code === "ER_DUP_ENTRY") {
+                res.status(409).send("Username already exists.");
+            } else {
+                res.status(500).send("Server error while creating account.");
+            }
+        }
+    });
+
+    /**
+     * -------------------------
+     * Trading-related Endpoints
+     * -------------------------
+     */
+
+    // List a Pokémon for trade
+    app.post("/listPokemon", async (req, res) => {
+        const { iid, uid, desc } = req.body;
+        console.log("POST /listPokemon:", req.body);
+
+        try {
+            await runQuery(
+                "INSERT INTO Listing (instanceID, sellerID, description, postedTime) VALUES (?, ?, ?, NOW())",
+                [iid, uid, desc]
+            );
+
+            res.status(201).json({ message: "Listing created successfully." });
+        } catch (err) {
+            console.error("Error in /listPokemon:", err);
             res.status(500).send("Server error while creating listing.");
         }
+    });
 
-        });
-
-    app.post("/reply/", async (req, res) => {
-        const {listingID, instanceID, respondantID, message} = req.body;
+    // Reply to a listing
+    app.post("/reply", async (req, res) => {
+        const { listingID, instanceID, respondantID, message } = req.body;
+        console.log("POST /reply:", req.body);
 
         try {
-            const db = await mysqlPromise.createConnection({
-            host: process.env.DB_HOST,
-            port: process.env.DB_PORT,
-            user: process.env.DB_USER,
-            password: process.env.DB_PASSWORD,
-            database: process.env.DB_NAME
-            });
-
-            const [result] = await db.execute(
-            `INSERT INTO Reply (listingID, instanceID, respondantID, message, sentTime)
-            VALUES (?, ?, ?, ?, NOW());`,
-            [listingID, instanceID, respondantID, message]
+            await runQuery(
+                "INSERT INTO Reply (listingID, instanceID, respondantID, message, sentTime) VALUES (?, ?, ?, ?, NOW())",
+                [listingID, instanceID, respondantID, message]
             );
 
-            const newReply = {
-                listingID: result.listingID,
-                instanceID: result.instanceID,
-                respondantID: result.respondantID,
-                message: result.message
-            };
-
-            await db.end();
-            res.status(201).json({ reply: newReply });
+            res.status(201).json({ message: "Reply created successfully." });
         } catch (err) {
-            console.error("Error creating reply:", err);
-
+            console.error("Error in /reply:", err);
             res.status(500).send("Server error while creating reply.");
         }
-
-
     });
 
-
-    app.post("/trade/", async (req, res) => {
-        const {replyID} = req.body;
-        console.log("Incoming request to /trade with replyID:", replyID);
-
-        const sql = `CALL doTrade(${replyID});`;
+    // Execute a trade
+    app.post("/trade", async (req, res) => {
+        const { replyID } = req.body;
+        console.log("POST /trade:", req.body);
 
         try {
-            console.log("connecting");
-            const db = await mysqlPromise.createConnection({
-            host: process.env.DB_HOST,
-            port: process.env.DB_PORT,
-            user: process.env.DB_USER,
-            password: process.env.DB_PASSWORD,
-            database: process.env.DB_NAME
-            });
-            console.log("executing");
-            const [result] = await db.execute(sql);
-            console.log("execution complete");
-
-            await db.end();
-            console.log("db.ended");
-            res.status(201).json({});
+            await runQuery("CALL doTrade(?)", [replyID]);
+            res.status(201).json({ message: "Trade executed successfully." });
         } catch (err) {
-            console.error("Error accepting reply:", err);
-
-            res.status(500).send("Server error while accepting reply.");
+            console.error("Error in /trade:", err);
+            res.status(500).send("Server error while executing trade.");
         }
-
-
     });
-
-}
+};
