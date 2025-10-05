@@ -17,23 +17,24 @@ async function getItemInfo(url) {
     const res = await axios.get(url);
     const entries = res.data.flavor_text_entries;
     const effects = res.data.effect_entries;
-    // console.log(effects);
+    var icon = "";
+    try {icon = res.data.sprites.default;}
+    catch (error) {}
+    
 
     // Prefer first English entry
     var entry = entries.find(e => e.language.name === 'en');
       // Normalize whitespace and line breaks
-    entry = (entry.text ?? "").replace(/\f/g, ' ').replace(/\s+/g, ' ').replace(/\n/g, ' ').trim();
+    entry = (entry ?? {text: ""}).text.replace(/\f/g, ' ').replace(/\s+/g, ' ').replace(/\n/g, ' ').trim();
 
     // Prefer first English entry
     var effect = effects.find(e => e.language.name === 'en');
-    // console.log(effect.effect)
     // Normalize whitespace and line breaks
-    effect = (effect.effect ?? "").replace(/\f/g, ' ').replace(/\s+/g, ' ').replace(/\n/g, ' ').trim();
+    effect = (effect ?? {effect: ""}).effect.replace(/\f/g, ' ').replace(/\s+/g, ' ').replace(/\n/g, ' ').trim();
 
-    // console.log("Hello");
-    // console.log(effect);
-    // console.log("Hello");
-    return [effect, entry];
+    //get icon address
+
+    return [effect, entry, icon];
   } catch (error) {
     console.error(`Error fetching url ${url}:`, error.message);
   }
@@ -43,7 +44,7 @@ async function getItemInfo(url) {
 
 async function updateDatabase() {
   const connection = await mysqlPromise.createConnection(dbConfig);
-  const res = await  axios.get("https://pokeapi.co/api/v2/item-category/12/");
+  const res = await  axios.get("https://pokeapi.co/api/v2/item-category/44/");
   const items = res.data.items;
 
   for (const item of items) {
@@ -51,8 +52,8 @@ async function updateDatabase() {
     if (info) {
       try {
         await connection.execute(
-          `INSERT INTO Items(name, effect, speciesSpecific, description) 
-           VALUES ('${item.name}', '${info[0]}', 0, '${info[1]}');`
+          `INSERT INTO Items(name, effect, speciesSpecific, description, type, icon) 
+           VALUES ('${item.name}', '${info[0]}', 1, '${info[1]}', 'mega-stones', '${info[2]}');`
         );
       } catch (err) {
         console.error(`DB error on item ${item.name}:`, err.message);

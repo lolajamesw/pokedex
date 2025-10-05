@@ -21,13 +21,12 @@ function PokemonCard({ pokemon }) {
             </h3>
             <div className="pokemon-badges">{pokemon.caught && <span className="badge badge-caught">Caught</span>}</div>
           </div>
-          <div className="pokemon-image">
+          <div className="pokemon-image w-[200px] h-[200px] flex items-center justify-center overflow-hidden">
             <img
-              src={`https://www.pokemon.com/static-assets/content-assets/cms2/img/pokedex/detail/${pokemon.number.toString().padStart(3, "0")}.png`}
+              src={`https://img.pokemondb.net/artwork/${pokemon.img_suffix}.jpg`}
               alt={pokemon.name}
-              width={200}
-              height={200}
-              className="rounded-lg bg-white/20 p-4"
+              // width={200}
+              className="rounded-lg bg-white/20 p-2 h-[100%]"
             />
           </div>
           <div className="pokemon-types">

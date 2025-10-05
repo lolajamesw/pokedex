@@ -29,6 +29,7 @@ module.exports = (app, db) => {
         p.spAtk,
         p.spDef,
         p.speed,
+        p.img_suffix,
         EXISTS (
             SELECT 1 
             FROM MyPokemon mp 
@@ -54,9 +55,10 @@ module.exports = (app, db) => {
             defense: row.def,
             spAttack: row.spAtk,
             spDefense: row.spDef,
-            speed: row.speed
+            speed: row.speed,
         },
-        caught: !!row.caught
+        caught: !!row.caught,
+        img_suffix: row.img_suffix ?? row.name.toLowerCase()
         }));
 
         res.json(formatted);
@@ -74,6 +76,21 @@ module.exports = (app, db) => {
 
         const formatted = results.map((row) => row.name);
         res.json(formatted);
+    });
+    });
+
+    app.get('/pokemon/items/:pID', (req, res) => {
+    const pID = req.params.pID;
+    const sql = `(SELECT name, effect, description, icon FROM Items WHERE type!='mega-stones')
+    UNION (SELECT i.name, effect, description, icon FROM Items i, MegaStones m WHERE type='mega-stones' AND pID=${pID} AND i.name=m.name)
+    ORDER BY name;`;
+
+    db.query(sql, (err, results) => {
+        if (err) {
+        console.error("Error fetching Pokémon names:", err);
+        return res.status(500).json({ error: "Database error" });
+        }
+        res.json(results);
     });
     });
 
@@ -111,8 +128,15 @@ module.exports = (app, db) => {
     app.get(`/userPokemon/:id`, (req, res) => {
         const id = req.params.id;
         const sql = `
-        SELECT instanceID, mp.pID, name, nickname, level, favourite, onteam, type1, type2, hp, atk, def, spAtk, spDef, speed, legendary, description
-        FROM Pokedex p, MyPokemon mp WHERE instanceID=${id} AND p.pID=mp.pID;
+        (SELECT mp.instanceID, mp.pID, p.name, nickname, level, favourite, onteam, p.img_suffix
+        type1, type2, hp, atk, def, spAtk, spDef, speed, legendary, p.description, h.item, i.icon
+        FROM Pokedex p, MyPokemon mp, Items i, HeldItems h 
+        WHERE mp.instanceID=${id} AND p.pID=mp.pID AND h.instanceID=${id} AND i.name=h.item)
+        UNION 
+        (SELECT mp.instanceID, mp.pID, p.name, nickname, level, favourite, onteam, 
+        type1, type2, hp, atk, def, spAtk, spDef, speed, legendary, p.description, null as item, null as icon
+        FROM Pokedex p, MyPokemon mp
+        WHERE mp.instanceID=${id} AND p.pID=mp.pID AND ${id} NOT IN (SELECT instanceID FROM heldItems));
         `
         db.query(sql, (err, results) => {
             if (err) {
@@ -138,7 +162,10 @@ module.exports = (app, db) => {
                     speed: row.speed
                 },
                 legendary: row.legendary[0] === 1, 
-                description: row.description
+                description: row.description,
+                heldItem: row.item,
+                heldItemIcon: row.icon,
+                imgID: row.img_suffix ?? row.pID.toString().padStart(3, '0')// row.name.toLowerCase(),
             }))
             return res.json(formatted[0]);
         });
@@ -202,6 +229,39 @@ module.exports = (app, db) => {
             return res.json(formatted);
         });
     });
+
+    app.get('/pokemon/variants/:id', (req, res) => {
+        const pID = req.params.id;
+        const sql = `
+        SELECT pID, name, form, type1, type2, hp, atk, def, spAtk, spDef, speed, mega, description, img_suffix
+        FROM PokemonVariants WHERE pID=${pID};
+        `
+        db.query(sql, (err, results) => {
+            if (err) {
+                console.error("Error fetching pokemon's data", err);
+                return res.status(500).json({error: "Database error"});
+            }
+
+            const formatted = results.map((row) => ({
+                pID: row.pID,
+                name: row.name,
+                form: row.form,
+                types: row.type2 ? [row.type1, row.type2] : [row.type1],
+                stats: {
+                    hp: row.hp,
+                    atk: row.atk, 
+                    def: row.def, 
+                    spAtk: row.spAtk, 
+                    spDef: row.spDef, 
+                    speed: row.speed
+                },
+                mega: row.mega[0] === 1, 
+                description: row.description,
+                imgID: row.img_suffix// `${row.pID.toString().padStart(3, "0")}_${row.img_suffix}`
+            }))
+            return res.json(formatted);
+        });
+    })
 
     app.get(`/pokemon/evolutions/:id`, (req, res) => {
         const pID = req.params.id;
@@ -422,10 +482,17 @@ module.exports = (app, db) => {
         mp.level,
         mp.nickname,
         mp.showcase,
-        mp.onteam
+        mp.onteam,
+        icon
         FROM MyPokemon mp
         JOIN Pokedex p ON mp.pID = p.pID
-        WHERE mp.uID = ?
+        JOIN (
+            SELECT h.instanceID, icon FROM heldItems h, items i, MyPokemon mp2
+            WHERE h.instanceID=mp2.instanceID AND h.item=i.name
+            UNION
+            SELECT instanceID, null as icon FROM MyPokemon mp2 WHERE mp2.instanceID NOT IN (Select instanceID FROM HeldItems)
+        ) as ico ON mp.instanceID=ico.instanceID
+        WHERE mp.uID = ?;
     `;
 
     db.query(sql, [uID], (err, results) => {
@@ -450,7 +517,8 @@ module.exports = (app, db) => {
             level: row.level,
             nickname: row.nickname,
             showcase: row.showcase[0]===1,
-            onTeam: row.onteam[0]===1
+            onTeam: row.onteam[0]===1,
+            item: row.icon
             }));
 
             return res.json(formatted);

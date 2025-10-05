@@ -233,6 +233,38 @@ module.exports = (app, db) => {
     }
     });
 
+    app.post("/setHeldItem", async(req,res) => {
+        const {instanceID, item} = req.body;
+        console.log("Incoming request to update item to: ", item);
+
+        try {
+            const dbPromise = await mysqlPromise.createConnection({
+                host: process.env.DB_HOST,
+                port: process.env.DB_PORT,
+                user: process.env.DB_USER,
+                password: process.env.DB_PASSWORD,
+                database: process.env.DB_NAME
+            });
+
+
+            await dbPromise.query(
+                `DELETE FROM HeldItems
+                WHERE instanceID=${instanceID};`
+            )
+            if (item!=null){
+                await dbPromise.query(
+                    `INSERT INTO HeldItems(instanceID, item)
+                    VALUES(${instanceID}, '${item}');`
+                )
+            }
+            console.log("Update successful");
+            await dbPromise.end();
+            res.send("Pokemon's item updated successfully.");
+        } catch (err) {
+        console.error("Error marking Pokémon:", err);
+        res.status(500).send("Server error marking Pokémon.");
+    }});
+
     app.post("/updateUserDisplayName", async(req,res) => {
         const {uID, name} = req.body;
         console.log("Incoming request to update name to:", name);

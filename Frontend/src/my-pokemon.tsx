@@ -5,6 +5,7 @@ import Autocomplete from '@mui/material/Autocomplete'
 import TextField from '@mui/material/TextField';
 import { Search, SortAsc, SortDesc, LogOut } from "lucide-react"
 import { Link } from "react-router-dom"
+import pokeIcon from "./assets/pokeIcon.png";
 import "./pokedex.css"
 import "./my-pokemon.css"
 
@@ -17,6 +18,7 @@ type PokemonDetailType = {
   level: number,
   nickname: string,
   showcase: boolean
+  item: string | null
 };
 
 type PokemonStatType = {
@@ -223,12 +225,25 @@ export default function MyPokedex() {
               className="rounded-lg bg-white/20 p-4"
             />
           </div>
-          <div className="pokemon-types">
-            {pokemon.types.map((type) => (
-              <span key={type} className={`type-badge type-${type.toLowerCase()}`}>
-                {type}
+          <div className="flex flex-row items-center justify-between">
+            <div className="pokemon-types">
+              {pokemon.types.map((type) => (
+                <span key={type} className={`type-badge type-${type.toLowerCase()}`}>
+                  {type}
+                </span>
+              ))}
+            </div>
+            {pokemon.item != null && (
+              <span>
+                <img
+                  src={pokemon.item==="null" ? pokeIcon : pokemon.item}
+                  alt={pokemon.heldItem}
+                  width={30}
+                  height={30}
+                  className="mx-auto"
+                />
               </span>
-            ))}
+            )}
           </div>
         </div>
         <div className="pokemon-card-content">
