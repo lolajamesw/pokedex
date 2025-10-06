@@ -45,20 +45,20 @@ module.exports = (app, db) => {
         }
 
         const formatted = results.map((row) => ({
-        id: row.id,
+        pID: row.id,
         number: row.id,
         name: row.name,
         types: row.type2 ? [row.type1, row.type2] : [row.type1],
         stats: {
             hp: row.hp,
-            attack: row.atk,
-            defense: row.def,
-            spAttack: row.spAtk,
-            spDefense: row.spDef,
+            atk: row.atk,
+            def: row.def,
+            spAtk: row.spAtk,
+            spDef: row.spDef,
             speed: row.speed,
         },
         caught: !!row.caught,
-        img_suffix: row.img_suffix ?? row.name.toLowerCase()
+        imgID: row.id.toString().padStart(3, '0'),
         }));
 
         res.json(formatted);
@@ -107,7 +107,7 @@ module.exports = (app, db) => {
             }
 
             const formatted = results.map((row) => ({
-                id: row.pID,
+                pID: row.pID,
                 name: row.name,
                 types: row.type2 ? [row.type1, row.type2] : [row.type1],
                 stats: {
@@ -119,7 +119,8 @@ module.exports = (app, db) => {
                     speed: row.speed
                 },
                 legendary: row.legendary[0] === 1, 
-                description: row.description
+                description: row.description,
+                imgID: row.pID.toString().padStart(3, '0'),
             }))
             return res.json(formatted[0]);
         });
@@ -128,12 +129,12 @@ module.exports = (app, db) => {
     app.get(`/userPokemon/:id`, (req, res) => {
         const id = req.params.id;
         const sql = `
-        (SELECT mp.instanceID, mp.pID, p.name, nickname, level, favourite, onteam, p.img_suffix
+        (SELECT mp.instanceID, mp.pID, mp.form, p.name, nickname, level, favourite, onteam,
         type1, type2, hp, atk, def, spAtk, spDef, speed, legendary, p.description, h.item, i.icon
         FROM Pokedex p, MyPokemon mp, Items i, HeldItems h 
         WHERE mp.instanceID=${id} AND p.pID=mp.pID AND h.instanceID=${id} AND i.name=h.item)
         UNION 
-        (SELECT mp.instanceID, mp.pID, p.name, nickname, level, favourite, onteam, 
+        (SELECT mp.instanceID, mp.pID, mp.form, p.name, nickname, level, favourite, onteam, 
         type1, type2, hp, atk, def, spAtk, spDef, speed, legendary, p.description, null as item, null as icon
         FROM Pokedex p, MyPokemon mp
         WHERE mp.instanceID=${id} AND p.pID=mp.pID AND ${id} NOT IN (SELECT instanceID FROM heldItems));
@@ -148,6 +149,7 @@ module.exports = (app, db) => {
                 id: row.instanceID,
                 pID: row.pID,
                 name: row.name,
+                form: row.form,
                 nickname: row.nickname,
                 level: row.level,
                 favourite: row.favourite[0]===1,
@@ -319,22 +321,22 @@ module.exports = (app, db) => {
 
             const formatted = results.map((row) => ({
                 base: {
-                    id: row.pID1,
+                    pID: row.pID1,
                     name: row.name1,
                     types: row.type21 ? [row.type11, row.type21] : [row.type11],
-                    image: placeholderImg
+                    imgID: row.pID1.toString().padStart(3, '0'),
                 },
                 stage1: {
-                    id: row.pID2,
+                    pID: row.pID2,
                     name: row.name2,
                     types: row.type22 ? [row.type12, row.type22] : [row.type12],
-                    image: placeholderImg
+                    imgID: row.pID2.toString().padStart(3, '0'),
                 },
                 stage2: {
-                    id: row.pID3,
+                    pID: row.pID3,
                     name: row.name3,
                     types: row.type23 ? [row.type13, row.type23] : [row.type13],
-                    image: placeholderImg
+                    imgID: row.pID3?.toString().padStart(3, '0'),
                 }
             }));
             return res.json(formatted);

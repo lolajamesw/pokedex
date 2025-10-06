@@ -5,69 +5,25 @@ import { useState, useEffect, useMemo } from "react"
 import { Search, SortAsc, SortDesc } from "lucide-react"
 import { Link } from "react-router-dom"
 import "./pokedex.css"
+import PokeCard from './components/pokeCard.js'
 
-function PokemonCard({ pokemon }) {
-  return (
-    <div className="pokemon-card">
-      <Link
-        to={`/pokedex/${pokemon.number}`}
-        key={pokemon.number}
-        style={{ textDecoration:"none", color: "inherit" }}
-      >
-        <div className="pokemon-card-header">
-          <div className="pokemon-title-row">
-            <h3 className="pokemon-title">
-              #{pokemon.number.toString().padStart(3, "0")} {pokemon.name}
-            </h3>
-            <div className="pokemon-badges">{pokemon.caught && <span className="badge badge-caught">Caught</span>}</div>
-          </div>
-          <div className="pokemon-image w-[200px] h-[200px] flex items-center justify-center overflow-hidden">
-            <img
-              src={`https://img.pokemondb.net/artwork/${pokemon.img_suffix}.jpg`}
-              alt={pokemon.name}
-              // width={200}
-              className="rounded-lg bg-white/20 p-2 h-[100%]"
-            />
-          </div>
-          <div className="pokemon-types">
-            {pokemon.types.map((type) => (
-              <span key={type} className={`type-badge type-${type.toLowerCase()}`}>
-                {type}
-              </span>
-            ))}
-          </div>
-        </div>
-        <div className="pokemon-card-content">
-          <div className="pokemon-stats">
-            <div className="stat-row">
-              <span className="stat-label">HP:</span>
-              <span className="stat-value">{pokemon.stats.hp}</span>
-            </div>
-            <div className="stat-row">
-              <span className="stat-label">Attack:</span>
-              <span className="stat-value">{pokemon.stats.attack}</span>
-            </div>
-            <div className="stat-row">
-              <span className="stat-label">Defense:</span>
-              <span className="stat-value">{pokemon.stats.defense}</span>
-            </div>
-            <div className="stat-row">
-              <span className="stat-label">Sp. Atk:</span>
-              <span className="stat-value">{pokemon.stats.spAttack}</span>
-            </div>
-            <div className="stat-row">
-              <span className="stat-label">Sp. Def:</span>
-              <span className="stat-value">{pokemon.stats.spDefense}</span>
-            </div>
-            <div className="stat-row">
-              <span className="stat-label">Speed:</span>
-              <span className="stat-value">{pokemon.stats.speed}</span>
-            </div>
-          </div>
-        </div>
-      </Link>
-    </div>
-  )
+type PokemonStats = {
+  hp: number,
+  atk: number,
+  def: number,
+  spAtk: number,
+  spDef: number,
+  speed: number,
+}
+
+type Pokemon = {
+  pID: number,
+  number: number,
+  name: string,
+  types: string[],
+  stats: PokemonStats,
+  caught: boolean,
+  imgID: string,
 }
 
 export default function Pokedex() {
@@ -76,7 +32,7 @@ export default function Pokedex() {
   const [sortOrder, setSortOrder] = useState("asc")
   const [filterType, setFilterType] = useState("all")
   const [showCaughtOnly, setShowCaughtOnly] = useState(false)
-  const [pokemonList, setPokemonList] = useState([])
+  const [pokemonList, setPokemonList] = useState<Pokemon[]>([])
   useEffect(() => {
     fetch(`http://localhost:8081/pokemon?uID=${localStorage.getItem("uID")}`)
       .then((res) => res.json())
@@ -88,7 +44,7 @@ export default function Pokedex() {
   const filtered = pokemonList.filter((pokemon) => {
     const matchesSearch =
       pokemon.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      pokemon.number.toString().includes(searchTerm)
+      pokemon.pID.toString().includes(searchTerm)
     const matchesType = filterType === "all" || pokemon.types.includes(filterType)
     const matchesCaught = !showCaughtOnly || pokemon.caught
 
@@ -103,43 +59,45 @@ export default function Pokedex() {
         bValue = b.name
         break
       case "number":
-        aValue = a.number
-        bValue = b.number
+        aValue = a.pID
+        bValue = b.pID
         break
       case "hp":
         aValue = a.stats.hp
         bValue = b.stats.hp
         break
       case "attack":
-        aValue = a.stats.attack
-        bValue = b.stats.attack
+        aValue = a.stats.atk
+        bValue = b.stats.atk
         break
       case "defense":
-        aValue = a.stats.defense
-        bValue = b.stats.defense
+        aValue = a.stats.def
+        bValue = b.stats.def
         break
       case "spAttack":
-        aValue = a.stats.spAttack
-        bValue = b.stats.spAttack
+        aValue = a.stats.spAtk
+        bValue = b.stats.spAtk
         break
       case "spDefense":
-        aValue = a.stats.spDefense
-        bValue = b.stats.spDefense
+        aValue = a.stats.spDef
+        bValue = b.stats.spDef
         break
       case "speed":
         aValue = a.stats.speed
         bValue = b.stats.speed
         break
       default:
-        aValue = a.number
-        bValue = b.number
+        aValue = a.pID
+        bValue = b.pID
     }
 
     if (typeof aValue === "string" && typeof bValue === "string") {
       return sortOrder === "asc" ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue)
     }
-
-    return sortOrder === "asc" ? aValue - bValue : bValue - aValue
+    else if (typeof aValue === "number" && typeof bValue === "number") {
+      return sortOrder === "asc" ? aValue - bValue : bValue - aValue
+    }
+    else throw("Can't sort");
   })
 
   return filtered
@@ -222,7 +180,14 @@ export default function Pokedex() {
         {/* Pokemon Grid */}
         <div className="pokemon-grid">
           {filteredAndSortedPokemon.map((pokemon) => (
-            <PokemonCard key={pokemon.id} pokemon={pokemon} />
+            // <PokemonCard key={pokemon.id} pokemon={pokemon} />
+            <Link
+              to={`/pokedex/${pokemon.pID}`}
+              key={pokemon.pID}
+              style={{ textDecoration:"none", color: "inherit" }}
+            >
+              <PokeCard pokemon={pokemon} numberVisible={true}/>
+            </Link>
           ))}
         </div>
 

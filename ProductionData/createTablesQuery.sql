@@ -60,6 +60,7 @@ CREATE TABLE Pokedex (
 CREATE TABLE PokemonVariants (
 	pID INT REFERENCES Pokedex(pID) ON DELETE CASCADE,
     name VARCHAR(40) PRIMARY KEY,
+    form VARCHAR(25) NOT NULL,
     type1 VARCHAR(10) NOT NULL REFERENCES Types(type),
     type2 VARCHAR(10) REFERENCES Types(type),
     hp INT NOT NULL,
@@ -82,6 +83,7 @@ CREATE TABLE MyPokemon(
 	pID INT NOT NULL REFERENCES Pokedex(pID),
     uID INT NOT NULL REFERENCES User(uID),
     instanceID INT AUTO_INCREMENT PRIMARY KEY,
+    form VARCHAR(25),
     nickname VARCHAR(30),
     level INT,
     favourite BIT DEFAULT 0,
