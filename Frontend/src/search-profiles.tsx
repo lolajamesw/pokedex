@@ -7,7 +7,7 @@ import "./profile.css"
 
 type PokemonSummaryType = {
   id: number,
-  number: number,
+  pID: number,
   nickname: string,
   level: number,
   name: string
@@ -45,7 +45,7 @@ function PokemonLink({ pokemon, isSelected, onSelect, showSelectButton }) {
   return (
     <div className={`showcase-card ${isSelected ? "showcase-card-selected" : ""}`}>
       <Link
-        to={`/my-pokemon/${pokemon.number}/${pokemon.id}`}
+        to={`/my-pokemon/${pokemon.pID}/${pokemon.id}`}
         key={pokemon.id}
         style={{ textDecoration:"none", color: "inherit" }}
       >
@@ -70,7 +70,7 @@ function PokemonLink({ pokemon, isSelected, onSelect, showSelectButton }) {
         <div className="showcase-card-content">
           <div className="pokemon-image">
             <img
-              src={`https://www.pokemon.com/static-assets/content-assets/cms2/img/pokedex/detail/${pokemon.number.toString().padStart(3, "0")}.png`}
+              src={`https://www.pokemon.com/static-assets/content-assets/cms2/img/pokedex/detail/${pokemon.pID.toString().padStart(3, "0")}.png`}
               alt={pokemon.name}
               width={100}
               height={100}

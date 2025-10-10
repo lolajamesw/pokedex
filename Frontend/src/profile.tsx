@@ -17,14 +17,16 @@ type PokemonSummaryType = {
 
 type PokemonDetailType = {
   id: number,
-  number: number,
+  pID: number,
   name: string,
+  form: string,
   types: string[],
   stats: PokemonStatType,
   level: number,
   nickname: string,
   showcase: boolean,
-  onTeam: boolean
+  onTeam: boolean,
+  imgID: string,
 };
 
 type PokemonStatType = {
@@ -46,7 +48,7 @@ function PokemonLink({ pokemon, isSelected, onSelect, showSelectButton }) {
   return (
     <div className={`showcase-card ${isSelected ? "showcase-card-selected" : ""}`}>
       <Link
-        to={`/my-pokemon/${pokemon.number}/${pokemon.id}`}
+        to={`/my-pokemon/${pokemon.pID}/${pokemon.id}`}
         key={pokemon.id}
         style={{ textDecoration:"none", color: "inherit" }}
       >
@@ -71,7 +73,7 @@ function PokemonLink({ pokemon, isSelected, onSelect, showSelectButton }) {
         <div className="showcase-card-content">
           <div className="pokemon-image">
             <img
-              src={`https://www.pokemon.com/static-assets/content-assets/cms2/img/pokedex/detail/${pokemon.number.toString().padStart(3, "0")}.png`}
+              src={`https://www.serebii.net/pokemon/art/${pokemon.imgID}.png`}
               alt={pokemon.name}
               width={100}
               height={100}
@@ -79,7 +81,7 @@ function PokemonLink({ pokemon, isSelected, onSelect, showSelectButton }) {
             />
           </div>
           <h3 className="showcase-nickname">{pokemon.nickname}</h3>
-          <p className="showcase-species">{pokemon.name}</p>
+          <p className="showcase-species">{pokemon.form !== 'original' ? pokemon.form : pokemon.name}</p>
         </div>
       </Link>
     </div>
