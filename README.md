@@ -61,3 +61,11 @@ DB_PORT=your_port_number
 7. Verify the database is connecting by checking for the table details in http://localhost:8081/group_members
 8. Open a new terminal (don't close the previous one), navigate to the Frontend folder and run "npm run dev"
 9. You can find the site running at the address http://localhost:5173/
+
+## Project Preview
+![Pokedex Home Page](./ProjectPreviewPics/Pokedex.png)
+![My Pokemon Page](./ProjectPreviewPics/MyPokemon.png)
+![Pokemon Counter Finder Page](./ProjectPreviewPics/Counters.png)
+![User Team View](./ProjectPreviewPics/Team.png)
+![Pokedex Detail Page](./ProjectPreviewPics/Eevee.png)
+![My Pokemon Detail Page](./ProjectPreviewPics/Zoroark.png)

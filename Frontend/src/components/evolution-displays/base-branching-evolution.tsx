@@ -29,9 +29,9 @@ export default function BaseBranchingEvolutionContent({evolutions, selectedName}
             </div>
 
             {/* Evolution Paths */}
-            <div className={`evolution-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-${
+            <div className={`grid md:grid-cols-${
             evolutions.length % 4===0 ? 4 : evolutions.length % 3===0 ? 3 : 2
-            } gap-4`}>
+            } sm:grid-cols-2 gap-4`}>
             {evolutions.map((evo: Evolution, index) => (
                 <div key={index} className="relative">
                 <Link
