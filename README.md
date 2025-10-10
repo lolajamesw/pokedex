@@ -63,9 +63,15 @@ DB_PORT=your_port_number
 9. You can find the site running at the address http://localhost:5173/
 
 ## Project Preview
+#### Pokedex Home Page
 ![Pokedex Home Page](./ProjectPreviewPics/Pokedex.png)
+#### My Pokemon Page
 ![My Pokemon Page](./ProjectPreviewPics/MyPokemon.png)
+#### Pokemon Battle Page
 ![Pokemon Counter Finder Page](./ProjectPreviewPics/Counters.png)
+#### User Team View
 ![User Team View](./ProjectPreviewPics/Team.png)
+#### Pokedex Detail Page (Eevee)
 ![Pokedex Detail Page](./ProjectPreviewPics/Eevee.png)
+#### My Pokemon Detail Page (Zoroark)
 ![My Pokemon Detail Page](./ProjectPreviewPics/Zoroark.png)
