@@ -7,6 +7,7 @@ type PokeCardInput = {
     pokemon: CardPokemon,
     defaultDescription?: string,
     cornerElement?: React.ReactNode,
+    extraElement?: React.ReactNode,
     numberVisible? : boolean,
 }
 
@@ -31,7 +32,7 @@ switch (form.toLowerCase()) {
 }
 }
 
-export default function PokeCard({pokemon, defaultDescription="", onClick, numberVisible=false, cornerVisible=false, cornerElement}: PokeCardInput) {
+export default function PokeCard({pokemon, defaultDescription="", onClick, numberVisible=false, cornerVisible=false, cornerElement, extraElement}: PokeCardInput) {
     return (
     <div
         className={`border bg-white rounded-lg cursor-pointer transition-all duration-200 hover:shadow-md ${
@@ -56,17 +57,21 @@ export default function PokeCard({pokemon, defaultDescription="", onClick, numbe
             className="rounded-lg bg-white/20 p-2 h-[100%]"
             />
         </div>
-        <div className={`pokemon-types ${pokemon.form && "justify-center"} flex gap-1`}>
-            {pokemon.types.map((type: string) => (
-            <span key={type} className={`type-badge type-${type.toLowerCase()}`}>
-                {type}
-            </span>
-            ))}
-            {pokemon.form && 
-                <span key={pokemon.form} className={`ml-3 badge ${getFormBadgeColor(pokemon.form)}`}>
-                    {pokemon.form}
-                </span>}
+        <div className="flex flex-row items-center justify-between">
+            <div className={`pokemon-types ${(pokemon.form && !extraElement) && "justify-center"} flex gap-1`}>
+                {pokemon.types.map((type: string) => (
+                <span key={type} className={`type-badge type-${type.toLowerCase()}`}>
+                    {type}
+                </span>
+                ))}
+                {(pokemon.form && !extraElement) &&
+                    <span key={pokemon.form} className={`ml-3 badge ${getFormBadgeColor(pokemon.form)}`}>
+                        {pokemon.form}
+                    </span>}
+            </div>
+            {extraElement}
         </div>
+        
         {/* Variant Description */}
         <div className="pt-1">
             <p className="text-xs text-muted-foreground leading-relaxed">

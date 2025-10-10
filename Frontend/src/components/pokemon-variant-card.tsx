@@ -5,20 +5,46 @@ import PokeCard from "./pokeCard.tsx";
 type Inputs<T extends PokedexPokemon> = {
     variants: CardPokemon[],
     currentForm: string,
+    instanceID?: number,
     updatePokemonDetail: React.Dispatch<React.SetStateAction<T | null>>,
 }
 
-export default function PokemonVariantCard<T extends PokedexPokemon>({ variants, currentForm, updatePokemonDetail }: Inputs<T>) {
-    const selectVariant = (variant: CardPokemon) => {
+export default function PokemonVariantCard<T extends PokedexPokemon>({ variants, currentForm, instanceID, updatePokemonDetail }: Inputs<T>) {
+    const updateVariantDisplay = (variant: CardPokemon) => {
         updatePokemonDetail((prev) => ({
-          ...prev,
-          name: variant.name,
-          form: variant.form,
-          types: variant.types,
-          description: variant.description,
-          stats: variant.stats,
-          imgID: variant.imgID
+            ...prev,
+            name: variant.name,
+            form: variant.form,
+            types: variant.types,
+            description: variant.description,
+            stats: variant.stats,
+            imgID: variant.imgID
         } as T))
+    }
+
+    const selectVariant = async (variant: CardPokemon) => {
+        if (instanceID) {
+            try {
+                const response = await fetch("http://localhost:8081/setVariant", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ instanceID: instanceID, form: variant.name }),
+                });
+                if (response.ok) {
+                    updateVariantDisplay(variant)
+                } else {
+                    const errMsg = await response.text();
+                    console.error("Failed to update Pokémon moveset:", errMsg);
+                    alert("Failed to update Pokémon moveset. See console for details.");
+                }
+            } catch (err) {
+                console.error("Error updating Pokémon item:", err);
+                alert("Something went wrong updating Pokémon heldItem.");
+            }  
+        }
+        else {
+            updateVariantDisplay(variant);
+        }
       }
 
     return (

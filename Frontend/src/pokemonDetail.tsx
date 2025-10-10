@@ -94,7 +94,7 @@ const PokemonDetail = () => {
         <PokemonTitleCard pokemon={pokemon} />
 
         {/* Main Content Tabs */}
-        <Tabs defaultValue="stats" className="space-y-3">
+        <Tabs defaultValue="stats" className="space-y-4">
           <TabsList className={`grid w-full grid-cols-${variants.length > 1 ? '4' : '3'}`}>
             <TabsTrigger value="stats">Stats</TabsTrigger>
             <TabsTrigger value="evolution">Evolution</TabsTrigger>

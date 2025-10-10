@@ -85,6 +85,7 @@ const MyPokeDetail = () => {
           return data;
         });
         console.log("fetched variant data");
+
         let original = variantData.filter((data: CardPokemon) => !(data.imgID));
         // Manage if default pokemon is itself a variant
         if (original.length > 0) {
@@ -110,9 +111,12 @@ const MyPokeDetail = () => {
             imgID: combined.imgID
           } as CardPokemon;
           variantData.push(original);
+          console.log(variantData)
         }
         console.log(original)
         setVariants(variantData);
+        if (combined.form !== 'original')
+          setPokemonDetail({...combined, ...variantData.find((variant: CardPokemon) => variant.name===combined.form)})
       } catch (error) {
         console.error(error);
       }
@@ -160,6 +164,7 @@ const MyPokeDetail = () => {
                 variants={variants} 
                 currentForm={pokemon.form} 
                 updatePokemonDetail={setPokemonDetail}
+                instanceID={pokemon.id}
               />
           </TabsContent>
         </Tabs>
