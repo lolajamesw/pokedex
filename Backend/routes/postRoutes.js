@@ -130,6 +130,23 @@ module.exports = (app) => {
         }
     });
 
+    // Set the Pokemon's active variant
+    app.post("/setVariant", async (req, res) => {
+        const { instanceID, form } = req.body;
+        console.log("POST /setVariant:", req.body);
+
+        try {
+            await runQuery(
+                "UPDATE MyPokemon SET form=? WHERE instanceID=?",
+                [form, instanceID]
+            );
+            res.send("Pokémon form set successfully.");
+        } catch (err) {
+            console.error("Error in /setVariant:", err);
+            res.status(500).send("Server error updating variant.");
+        }
+    });
+
     // Mark Pokémon as showcased
     app.post("/setShowcased", async (req, res) => {
         const { instanceIDs, user } = req.body;
@@ -152,6 +169,39 @@ module.exports = (app) => {
         } catch (err) {
             console.error("Error in /setShowcased:", err);
             res.status(500).send("Server error updating showcase.");
+        }
+    });
+
+    app.post("/setHeldItem", async(req,res) => {
+        const {instanceID, item} = req.body;
+        console.log("Incoming request to update item to: ", item);
+
+        try {
+            const dbPromise = await mysqlPromise.createConnection({
+                host: process.env.DB_HOST,
+                port: process.env.DB_PORT,
+                user: process.env.DB_USER,
+                password: process.env.DB_PASSWORD,
+                database: process.env.DB_NAME
+            });
+
+
+            await dbPromise.query(
+                `DELETE FROM HeldItems
+                WHERE instanceID=${instanceID};`
+            )
+            if (item!=null){
+                await dbPromise.query(
+                    `INSERT INTO HeldItems(instanceID, item)
+                    VALUES(${instanceID}, '${item}');`
+                )
+            }
+            console.log("Update successful");
+            await dbPromise.end();
+            res.send("Pokemon's item updated successfully.");
+        } catch (err) {
+        console.error("Error marking Pokémon:", err);
+        res.status(500).send("Server error marking Pokémon.");
         }
     });
 

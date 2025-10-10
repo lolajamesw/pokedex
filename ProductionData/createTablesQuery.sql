@@ -5,8 +5,10 @@ DROP TABLE IF EXISTS Listing;
 DROP TABLE IF EXISTS LearnableAttacks;
 DROP TABLE IF EXISTS CurrentAttacks;
 DROP TABLE IF EXISTS Attacks;
+DROP TABLE IF EXISTS HeldItems;
 DROP TABLE IF EXISTS Items;
 DROP TABLE IF EXISTS MyPokemon;
+DROP TABLE IF EXISTS PokemonVariants;
 DROP TABLE IF EXISTS Evolutions;
 DROP TABLE IF EXISTS Pokedex;
 DROP TABLE IF EXISTS User;
@@ -54,6 +56,23 @@ CREATE TABLE Pokedex (
 	description varchar(300),
     CHECK (HP >=0 AND atk >= 0 AND def >= 0 AND spAtk >= 0 AND spDef >= 0 AND speed >= 0)
 );
+
+CREATE TABLE PokemonVariants (
+	pID INT REFERENCES Pokedex(pID) ON DELETE CASCADE,
+    name VARCHAR(40) PRIMARY KEY,
+    form VARCHAR(25) NOT NULL,
+    type1 VARCHAR(10) NOT NULL REFERENCES Types(type),
+    type2 VARCHAR(10) REFERENCES Types(type),
+    hp INT NOT NULL,
+    atk INT NOT NULL,
+    def INT NOT NULL,
+    spAtk INT NOT NULL,
+    spDef INT NOT NULL,
+    speed INT NOT NULL,
+    mega BIT NOT NULL,
+    description varchar(300),
+    img_suffix VARCHAR(10)
+);
     
 CREATE TABLE Evolutions (
 	evolvesFrom INT REFERENCES Pokedex(pID),
@@ -64,6 +83,7 @@ CREATE TABLE MyPokemon(
 	pID INT NOT NULL REFERENCES Pokedex(pID),
     uID INT NOT NULL REFERENCES User(uID),
     instanceID INT AUTO_INCREMENT PRIMARY KEY,
+    form VARCHAR(25),
     nickname VARCHAR(30),
     level INT,
     favourite BIT DEFAULT 0,
@@ -75,9 +95,21 @@ CREATE TABLE MyPokemon(
 
 CREATE TABLE Items(
 	name VARCHAR(20) PRIMARY KEY,
-    effect VARCHAR(200),
+    effect LONGTEXT,
     speciesSpecific bit,
-    description VARCHAR(200)
+    description LONGTEXT,
+    type VARCHAR(20),
+    icon VARCHAR(150)
+);
+
+CREATE TABLE MegaStones(
+	name VARCHAR(20) PRIMARY KEY REFERENCES Items(name) ON DELETE CASCADE,
+    pID INT REFERENCES Pokedex(pID) ON DELETE CASCADE
+);
+
+CREATE TABLE HeldItems(
+	instanceID INT PRIMARY KEY REFERENCES MyPokemon(instanceID) ON DELETE CASCADE,
+    item VARCHAR(20) NOT NULL REFERENCES Items(name)
 );
 
 CREATE TABLE Attacks(

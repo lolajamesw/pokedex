@@ -1,22 +1,27 @@
 "use client"
 
-import { useState, useEffect, useMemo } from "react"
+import { useState, useEffect, useMemo, FormEvent } from "react"
 import Autocomplete from '@mui/material/Autocomplete'
 import TextField from '@mui/material/TextField';
 import { Search, SortAsc, SortDesc, LogOut } from "lucide-react"
 import { Link } from "react-router-dom"
+import pokeIcon from "./assets/pokeIcon.png";
 import "./pokedex.css"
 import "./my-pokemon.css"
+import PokeCard from "./components/pokeCard";
 
 type PokemonDetailType = {
   id: number,
-  number: number,
+  pID: number,
   name: string,
+  form: string,
   types: string[],
   stats: PokemonStatType,
   level: number,
   nickname: string,
-  showcase: boolean
+  showcase: boolean,
+  item: string | null,
+  imgID: string,
 };
 
 type PokemonStatType = {
@@ -45,7 +50,10 @@ export default function MyPokedex() {
   useEffect(() => {
     fetch(`http://localhost:8081/userPokemon?uID=${localStorage.getItem("uID")}`)
       .then((res) => res.json())
-      .then((data) => setPokemonList(data))
+      .then((data) => setPokemonList(data.map((pokemon: PokemonDetailType) => {
+        if (pokemon.form !== 'original') pokemon.name = pokemon.form;
+        return pokemon
+      })))
       .catch((err) => console.error("Failed to fetch Pokémon:", err));
   }, [])
   useEffect(() => {
@@ -54,11 +62,12 @@ export default function MyPokedex() {
       .then((data) => setPokemonNames(data))
       .catch((err) => console.error("Failed to fetch Pokémon:", err));
   }, [])
+
   const filteredAndSortedPokemon = useMemo(() => {
   const filtered = pokemonList.filter((pokemon) => {
     const matchesSearch =
       pokemon.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      pokemon.number.toString().includes(searchTerm)
+      pokemon.pID.toString().includes(searchTerm)
     const matchesType = filterType === "all" || pokemon.types.includes(filterType)
 
     return matchesSearch && matchesType
@@ -72,8 +81,8 @@ export default function MyPokedex() {
         bValue = b.name
         break
       case "number":
-        aValue = a.number
-        bValue = b.number
+        aValue = a.pID
+        bValue = b.pID
         break
       case "hp":
         aValue = a.stats.hp
@@ -100,22 +109,23 @@ export default function MyPokedex() {
         bValue = b.stats.speed
         break
       default:
-        aValue = a.number
-        bValue = b.number
+        aValue = a.pID
+        bValue = b.pID
     }
 
-    if (typeof aValue === "string" && typeof bValue === "string") {
+    if (typeof aValue === "string" && typeof bValue === "string")
       return sortOrder === "asc" ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue)
-    }
-
-    return sortOrder === "asc" ? aValue - bValue : bValue - aValue
+    else if (typeof aValue === "number" && typeof bValue === "number")
+      return sortOrder === "asc" ? aValue - bValue : bValue - aValue
+    else 
+      return sortOrder === "asc" ? a.pID - b.pID : b.pID - a.pID
   })
 
   return filtered
 }, [searchTerm, sortBy, sortOrder, filterType, pokemonList])
 
   const allTypes = Array.from(new Set(pokemonList.flatMap((p) => p.types))).sort()
-  const handleAddPokemon = async (e) => {
+  const handleAddPokemon = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     if (!newPokemonName || !newLevel) {
@@ -161,7 +171,7 @@ export default function MyPokedex() {
     }
   };
 
-    const ReleasePokemon = async (instanceID) => {
+    const ReleasePokemon = async (instanceID: number) => {
     try {
       console.log("Releasing Pokemon: ", instanceID);
       await fetch("http://localhost:8081/dropPokemon", {
@@ -181,88 +191,6 @@ export default function MyPokedex() {
       alert("Something went wrong releasing the Pokémon.");
     }
   };
-
-  function PokemonCard({ pokemon }) {
-  return (
-    <div className="pokemon-card">
-      <Link
-        to={`/my-pokemon/${pokemon.number}/${pokemon.id}`}
-        key={pokemon.id}
-        style={{ textDecoration:"none", color: "inherit" }}
-      >                   
-        <div className="pokemon-card-header">
-          <div className="pokemon-title-row">
-            <h3 className="pokemon-title">
-              #{pokemon.number.toString().padStart(3, "0")} {pokemon.name} 
-              {pokemon.nickname && (
-                <span className="pokemon-nickname"> ({pokemon.nickname})</span>
-              )}
-            </h3>
-            {/* Release Button */}
-            <button
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                ReleasePokemon(pokemon.id);
-              }}
-              className={`p-2 rounded-full transition-all duration-200 hover:scale-110 ${
-                "bg-black/5 text-black/75 hover:bg-black/2"
-              }`}
-              title="Release this Pokemon"
-            >
-              <LogOut className="h-6 w-6" />
-            </button>
-            {/* <h3>Hello</h3> */}
-          </div>
-          <div className="pokemon-image">
-            <img
-              src={`https://www.pokemon.com/static-assets/content-assets/cms2/img/pokedex/detail/${pokemon.number.toString().padStart(3, "0")}.png`}
-              alt={pokemon.name}
-              width={200}
-              height={200}
-              className="rounded-lg bg-white/20 p-4"
-            />
-          </div>
-          <div className="pokemon-types">
-            {pokemon.types.map((type) => (
-              <span key={type} className={`type-badge type-${type.toLowerCase()}`}>
-                {type}
-              </span>
-            ))}
-          </div>
-        </div>
-        <div className="pokemon-card-content">
-          <div className="pokemon-stats">
-            <div className="stat-row">
-              <span className="stat-label">HP:</span>
-              <span className="stat-value">{pokemon.stats.hp}</span>
-            </div>
-            <div className="stat-row">
-              <span className="stat-label">Attack:</span>
-              <span className="stat-value">{pokemon.stats.attack}</span>
-            </div>
-            <div className="stat-row">
-              <span className="stat-label">Defense:</span>
-              <span className="stat-value">{pokemon.stats.defense}</span>
-            </div>
-            <div className="stat-row">
-              <span className="stat-label">Sp. Atk:</span>
-              <span className="stat-value">{pokemon.stats.spAttack}</span>
-            </div>
-            <div className="stat-row">
-              <span className="stat-label">Sp. Def:</span>
-              <span className="stat-value">{pokemon.stats.spDefense}</span>
-            </div>
-            <div className="stat-row">
-              <span className="stat-label">Speed:</span>
-              <span className="stat-value">{pokemon.stats.speed}</span>
-            </div>
-          </div>
-        </div>
-      </Link>
-    </div>
-  )
-}
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-red-50">
@@ -415,7 +343,44 @@ export default function MyPokedex() {
         {/* Pokemon Grid */}
         <div className="pokemon-grid">
           {filteredAndSortedPokemon.map((pokemon) => (
-            <PokemonCard key={pokemon.id} pokemon={pokemon} />
+            // <PokemonCard key={pokemon.id} pokemon={pokemon} />
+            <Link
+              to={`/my-pokemon/${pokemon.pID}/${pokemon.id}`}
+              key={pokemon.id}
+              style={{ textDecoration:"none", color: "inherit" }}
+            >
+              <PokeCard 
+                pokemon={pokemon} 
+                numberVisible={true}
+                cornerVisible={true}
+                cornerElement={
+                  <button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      ReleasePokemon(pokemon.id);
+                    }}
+                    className={`p-2 rounded-full transition-all duration-200 hover:scale-110 ${
+                      "bg-black/5 text-black/75 hover:bg-black/2"
+                    }`}
+                    title="Release this Pokemon"
+                  >
+                    <LogOut className="h-6 w-6" />
+                  </button>
+                }
+                extraElement={pokemon.item != null ? (
+                  <span>
+                    <img
+                      src={pokemon.item==="null" ? pokeIcon : pokemon.item}
+                      alt={pokemon.item}
+                      width={30}
+                      height={30}
+                      className="mx-auto"
+                    />
+                  </span>
+                ) : <div></div>}
+              />
+            </Link>
           ))}
         </div>
 
