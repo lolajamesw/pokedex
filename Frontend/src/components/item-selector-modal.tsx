@@ -2,33 +2,48 @@ import { useState } from "react";
 import { X, Star } from "lucide-react";
 
 import pokeIcon from "./../assets/pokeIcon.png";
-import { MyPokemon, Item } from "../types/pokemon-details";
+import { MyPokemon, Item, CardPokemon } from "../types/pokemon-details";
 
 
 type InputType = {
     items: Item[];
+    variants: CardPokemon[];
     heldItem: string | null;
     instanceID: number;
     updatePokemonDetail: React.Dispatch<React.SetStateAction<MyPokemon | null>>;
     setShowItemSelector: React.Dispatch<React.SetStateAction<boolean>>;
     removeItem: () => void;
+    updateVariant: (form: string, findFunc: (variant: CardPokemon) => boolean) => void;
 }
 
-export default function ItemSelectorModal({ items, heldItem, instanceID, updatePokemonDetail, setShowItemSelector, removeItem }: InputType) {
+export default function ItemSelectorModal({ 
+    items, variants, heldItem, instanceID, updatePokemonDetail, setShowItemSelector, removeItem, updateVariant 
+}: InputType) {
 
     const [expandAll, setExpandAll] = useState(false);
     const [collapsedItems, setCollapsedItems] = useState(new Set(items.map((item) => item.name)));
 
-    const giveItem = async (item: string, icon: string) => {
+    const giveItem = async (item: Item) => {
         try {
         const response = await fetch("http://localhost:8081/setHeldItem", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ instanceID: instanceID, item: item }),
+            body: JSON.stringify({ instanceID: instanceID, item: item.name }),
         });
 
         if (response.ok) {
-            updatePokemonDetail((prev) => ({ ...prev, heldItem: item, heldItemIcon: icon } as MyPokemon));
+            updatePokemonDetail((prev) => {
+                if (items.find((item) => item.name === prev?.heldItem)?.variant && !item.variant) {
+                    updateVariant(
+                        variants.find((variant) => variant.form === 'original')?.name ?? "", 
+                        (variant) => variant.form === 'original'
+                    );
+                }
+                return ({ ...prev, heldItem: item.name, heldItemIcon: item.icon } as MyPokemon)
+            });
+            if (item.variant) {
+                updateVariant(item.variant, (variant) => variant.name === item.variant);
+            }            
             setShowItemSelector(false);
         } else {
             const errMsg = await response.text();
@@ -36,8 +51,8 @@ export default function ItemSelectorModal({ items, heldItem, instanceID, updateP
             alert("Failed to update Pokémon moveset. See console for details.");
         }
         } catch (err) {
-        console.error("Error updating Pokémon item:", err);
-        alert("Something went wrong updating Pokémon heldItem.");
+            console.error("Error updating Pokémon item:", err);
+            alert("Something went wrong updating Pokémon heldItem.");
         }       
     }
 
@@ -122,7 +137,7 @@ export default function ItemSelectorModal({ items, heldItem, instanceID, updateP
                         <button
                         onClick={(e) => {
                             e.stopPropagation()
-                            giveItem(item.name, item.icon)
+                            giveItem(item)
                         }}
                         className={`px-3 py-1 text-sm rounded-lg transition-colors text-green-600 ${
                             isSelected

@@ -3,6 +3,7 @@ export interface Item{
   effect: string;
   description: string;
   icon: string;
+  variant: string | null
 }
 
 export interface Evolution {

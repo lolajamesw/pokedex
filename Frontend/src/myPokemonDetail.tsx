@@ -126,12 +126,15 @@ const MyPokeDetail = () => {
 
   if (!pokemon) return <div>Loading...first {id}</div>;
 
+  
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-red-50 p-4">
       <div className="max-w-6xl mx-auto space-y-6">
         {/* Header Section */}
         <MyPokemonTitleCard 
           items={items}
+          variants={variants}
           pokemon={pokemon}
           fromPokedex={false}
           updatePokemonDetail={setPokemonDetail}

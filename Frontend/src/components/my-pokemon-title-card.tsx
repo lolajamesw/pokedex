@@ -1,21 +1,21 @@
 import { Heart, X, Plus, Star, LogOut } from "lucide-react";
 import { useState } from "react";
 import ItemSelectorModal from "./item-selector-modal";
-import { Badge } from "./ui/badge"
 
 import pokeIcon from "./../assets/pokeIcon.png";
-import { MyPokemon, PokedexPokemon, Item } from "../types/pokemon-details";
+import { MyPokemon, CardPokemon, Item } from "../types/pokemon-details";
 import PokemonTitleCard from "./pokemon-title-card";
 
 type InputType = {
     items: Item[];
+    variants: CardPokemon[];
     pokemon: MyPokemon;
     fromPokedex: boolean;
     updatePokemonDetail: React.Dispatch<React.SetStateAction<MyPokemon | null>>;
 }
 
 
-export default function MyPokemonTitleCard({items, pokemon, fromPokedex=false, updatePokemonDetail}: InputType) {
+export default function MyPokemonTitleCard({items, variants, pokemon, fromPokedex=false, updatePokemonDetail}: InputType) {
     // Item-relevant states
     const [showItemSelector, setShowItemSelector] = useState(false);
     
@@ -63,6 +63,31 @@ export default function MyPokemonTitleCard({items, pokemon, fromPokedex=false, u
     }
     };
 
+    const updateVariant = async(form: string, findFunc: (variant: CardPokemon) => boolean) => {
+        const response = await fetch("http://localhost:8081/setVariant", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ instanceID: pokemon.id, form: form }),
+        });
+        if (response.ok) {
+            const variant = variants.find(findFunc);
+            updatePokemonDetail((prev) => ({
+                ...prev,
+                name: variant?.name,
+                form: variant?.form,
+                types: variant?.types,
+                description: variant?.description,
+                stats: variant?.stats,
+                imgID: variant?.imgID,
+            } as MyPokemon))
+        } else {
+            const errMsg = await response.text();
+            console.error("Failed to update Pokémon variant:", errMsg);
+            alert("Failed to update Pokémon variant. See console for details.");
+        }
+        
+    }
+
     const removeItem = async () => {
         try {
         const response = await fetch("http://localhost:8081/setHeldItem", {
@@ -72,6 +97,13 @@ export default function MyPokemonTitleCard({items, pokemon, fromPokedex=false, u
         });
 
         if (response.ok) {
+            const prevItem = items.find((item) => item.name === pokemon.heldItem);
+            if (prevItem && prevItem.variant === pokemon.name) {
+                updateVariant(
+                    variants.find((variant) => variant.form === 'original')?.name ?? "", 
+                    (variant) => variant.form === 'original'
+                );
+            }
             updatePokemonDetail((prev) => ({ ...prev, heldItem: null, heldItemIcon: null } as MyPokemon));
             setShowItemSelector(false);
         } else {
@@ -177,11 +209,13 @@ export default function MyPokemonTitleCard({items, pokemon, fromPokedex=false, u
             {/* Item Selector Modal */}
             {showItemSelector && <ItemSelectorModal 
                 items={items}
+                variants={variants}
                 heldItem={pokemon.heldItem}
                 instanceID={pokemon.id}
                 updatePokemonDetail={updatePokemonDetail}
                 setShowItemSelector={setShowItemSelector}
                 removeItem={removeItem}
+                updateVariant={updateVariant}
             />}
         </div>
     )

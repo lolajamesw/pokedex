@@ -103,26 +103,7 @@ const PokemonDetail = () => {
           </TabsList>
 
           <TabsContent value="stats" className="space-y-3">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Shield className="h-5 w-5" />
-                  Base Stats
-                </CardTitle>
-                <CardDescription>The base statistical values for this Pokémon</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <PokemonStatsCard pokemon={pokemon} />
-                <div className="pt-4 border-t">
-                  <div className="flex justify-between items-center">
-                    <span className="font-semibold">Total:</span>
-                    <span className="font-bold text-lg">
-                      {Object.values(pokemon.stats).reduce((sum, stat) => sum + stat, 0)}
-                    </span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            <PokemonStatsCard pokemon={pokemon} />
           </TabsContent>
 
           <EvolutionTab 

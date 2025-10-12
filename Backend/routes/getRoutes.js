@@ -146,12 +146,12 @@ module.exports = (app, db) => {
     /**
      * GET /pokemon/items/:pID
      * Returns a list of items a pokemon can hold.
-     * Response: [ {name, effect, description, icon}, ... ]
+     * Response: [ {name, effect, description, icon, variant?}, ... ]
      */
     app.get('/pokemon/items/:pID', (req, res) => {
     const pID = req.params.pID;
-    const sql = `(SELECT name, effect, description, icon FROM Items WHERE type!='mega-stones')
-    UNION (SELECT i.name, effect, description, icon FROM Items i, MegaStones m WHERE type='mega-stones' AND pID=${pID} AND i.name=m.name)
+    const sql = `(SELECT name, effect, description, icon, null AS variant FROM Items WHERE type!='mega-stones')
+    UNION (SELECT i.name, effect, description, icon, result AS Variant FROM Items i, MegaStones m WHERE type='mega-stones' AND pID=${pID} AND i.name=m.name)
     ORDER BY name;`;
 
     db.query(sql, (err, results) => {

@@ -173,9 +173,9 @@ module.exports = (app) => {
     });
 
     app.post("/setHeldItem", async(req,res) => {
-        const {instanceID, item} = req.body;
-        console.log("Incoming request to update item to: ", item);
-
+        let {instanceID, item} = req.body;
+        // console.log("Incoming request to update item to: ", item);
+        console.log(item);
         try {
             const dbPromise = await mysqlPromise.createConnection({
                 host: process.env.DB_HOST,
@@ -185,15 +185,25 @@ module.exports = (app) => {
                 database: process.env.DB_NAME
             });
 
-
             await dbPromise.query(
                 `DELETE FROM HeldItems
                 WHERE instanceID=${instanceID};`
             )
-            if (item!=null){
+            console.log(item + item!==undefined)
+            if (item){
+                await dbPromise.query(
+                    "INSERT INTO HeldItems(instanceID, item) VALUES(?, ?);", [instanceID, item]
+                )
+            } else if (item === null) {
+                await dbPromise.query(
+                    "DELETE FROM HeldItems WHERE instanceID=?", instanceID
+                )
+            } else {
                 await dbPromise.query(
                     `INSERT INTO HeldItems(instanceID, item)
-                    VALUES(${instanceID}, '${item}');`
+                    VALUES(${instanceID}, (
+                        SELECT name FROM MegaStones WHERE result=(SELECT form FROM MyPokemon WHERE instanceID=${instanceID})
+                    ));`
                 )
             }
             console.log("Update successful");

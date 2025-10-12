@@ -18,7 +18,7 @@ export default function PokemonVariantCard<T extends PokedexPokemon>({ variants,
             types: variant.types,
             description: variant.description,
             stats: variant.stats,
-            imgID: variant.imgID
+            imgID: variant.imgID,
         } as T))
     }
 
@@ -30,16 +30,42 @@ export default function PokemonVariantCard<T extends PokedexPokemon>({ variants,
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ instanceID: instanceID, form: variant.name }),
                 });
+                if (variant.mega) {
+                    console.log("mega")
+                    const megaResponse = await fetch("http://localhost:8081/setHeldItem", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ instanceID: instanceID, mega: true }),
+                    })
+                    if (!megaResponse.ok) {
+                        const errMsg = await response.text();
+                        console.error("Failed to update Pokémon megaStone:", errMsg);
+                        alert("Failed to update Pokémon megaStone. See console for details.");
+                    } else {
+                        const overviewRes = await fetch(`http://localhost:8081/userPokemon/${instanceID}`);
+                        const overviewData: MyPokemon = await overviewRes.json();
+                        updatePokemonDetail((prev) => {
+                            if (prev && 'heldItem' in prev && 'heldItemIcon' in prev) {
+                                return {
+                                    ...prev,
+                                    heldItem: overviewData.heldItem,
+                                    heldItemIcon: overviewData.heldItemIcon
+                                } 
+                            } 
+                            return prev
+                        })
+                    }
+                }
                 if (response.ok) {
                     updateVariantDisplay(variant)
                 } else {
                     const errMsg = await response.text();
-                    console.error("Failed to update Pokémon moveset:", errMsg);
-                    alert("Failed to update Pokémon moveset. See console for details.");
+                    console.error("Failed to update Pokémon variant:", errMsg);
+                    alert("Failed to update Pokémon variant. See console for details.");
                 }
             } catch (err) {
-                console.error("Error updating Pokémon item:", err);
-                alert("Something went wrong updating Pokémon heldItem.");
+                console.error("Error updating Pokémon variant:", err);
+                alert("Something went wrong updating Pokémon variant.");
             }  
         }
         else {
