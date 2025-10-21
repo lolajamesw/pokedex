@@ -4,14 +4,14 @@ import { useEffect, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./components/ui/tabs.tsx"
 import { Shield, Swords } from "lucide-react"
-import "./pokedex.css"
-import "./details.css"
-import PokemonTitleCard from "./components/pokemon-title-card.tsx";
+import "./css/pokedex.css"
+import "./css/details.css"
+import PokemonTitleCard from "./components/PokemonDetails/pokemon-title-card.tsx";
 import { PokedexPokemon, Evolution, CardPokemon } from "./types/pokemon-details.ts"
-import EvolutionTab from "./components/evolution-tab.tsx";
-import PokemonStatsCard from "./components/pokemon-stats-card.tsx";
-import PokemonMovesCard from "./components/learnable-moves-card.tsx";
-import PokemonVariantCard from "./components/pokemon-variant-card.tsx";
+import EvolutionTab from "./components/PokemonDetails/evolution-tab.tsx";
+import PokemonStatsCard from "./components/PokemonDetails/pokemon-stats-card.tsx";
+import PokemonMovesCard from "./components/PokemonDetails/learnable-moves-card.tsx";
+import PokemonVariantCard from "./components/PokemonDetails/pokemon-variant-card.tsx";
 
 const PokemonDetail = () => {
     const { id: pID } = useParams<{ id: string}>();

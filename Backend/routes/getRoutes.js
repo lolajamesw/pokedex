@@ -108,10 +108,10 @@ module.exports = (app, db) => {
                 types: row.type2 ? [row.type1, row.type2] : [row.type1],
                 stats: {
                     hp: row.hp,
-                    attack: row.atk,
-                    defense: row.def,
-                    spAttack: row.spAtk,
-                    spDefense: row.spDef,
+                    atk: row.atk,
+                    def: row.def,
+                    spAtk: row.spAtk,
+                    spDef: row.spDef,
                     speed: row.speed
                 },
                 imgID: row.id.toString().padStart(3, '0'),
@@ -160,6 +160,25 @@ module.exports = (app, db) => {
         return res.status(500).json({ error: "Database error" });
         }
         res.json(results);
+    });
+    });
+
+    /**
+     * GET /pokemon/items/:pID
+     * Returns a list of items a pokemon can hold.
+     * Response: [ {name, effect, description, icon, variant?}, ... ]
+     */
+    app.get('/EVsIVs/:instanceID', (req, res) => {
+    const instanceID = req.params.instanceID;
+    const sql = `SELECT hpEV, atkEV, defEV, spAtkEV, spDefEV, speedEV, hpIV, atkIV, defIV, spAtkIV, spDefIV, speedIV
+    FROM MyPokemon WHERE instanceID=${instanceID}`;
+
+    db.query(sql, (err, results) => {
+        if (err) {
+        console.error("Error fetching Pokémon EVs / IVs:", err);
+        return res.status(500).json({ error: "Database error" });
+        }
+        res.json(results[0]);
     });
     });
 
@@ -219,6 +238,7 @@ module.exports = (app, db) => {
             SELECT mp.instanceID,
             mp.pID,
             mp.form,
+            mp.nature,
             p.name,
             nickname,
             level,
@@ -252,6 +272,7 @@ module.exports = (app, db) => {
                 form: row.form,
                 nickname: row.nickname,
                 level: row.level,
+                nature: row.nature,
                 favourite: row.favourite[0]===1,
                 onTeam: row.onteam[0]===1,
                 types: row.type2 ? [row.type1, row.type2] : [row.type1],
@@ -607,48 +628,62 @@ module.exports = (app, db) => {
         const uID = req.query.uID;
         console.log("Incoming request to /userPokemon with uID:", uID);
 
-    const sql = `
-        SELECT
-        mp.instanceID AS id,
-        p.pID,
-        p.name,
-        p.type1,
-        p.type2,
-        p.hp,
-        p.atk,
-        p.def,
-        p.spAtk,
-        p.spDef,
-        p.speed,
-        v.type1 vtype1,
-        v.type2 vtype2,
-        v.hp vhp,
-        v.atk vatk,
-        v.def vdef,
-        v.spAtk vspAtk,
-        v.spDef vspDef,
-        v.speed vspeed,
-        mp.level,
-        mp.nickname,
-        mp.showcase,
-        mp.form,
-        mp.onteam,
-        icon,
-        v.imgID
-        FROM MyPokemon mp
-        JOIN Pokedex p ON mp.pID = p.pID
-        JOIN (
-            SELECT h.instanceID, icon FROM heldItems h, items i, MyPokemon mp2
-            WHERE h.instanceID=mp2.instanceID AND h.item=i.name
-            UNION
-            SELECT instanceID, null as icon FROM MyPokemon mp2 WHERE mp2.instanceID NOT IN (Select instanceID FROM HeldItems)
-        ) as ico ON mp.instanceID=ico.instanceID
-        LEFT JOIN (
-            SELECT name, img_suffix AS imgID, hp, atk, def, spDef, spAtk, speed, type1, type2
-            FROM PokemonVariants pv
-        ) as v ON v.name=mp.form
-        WHERE mp.uID = ?;
-    `;
+        const sql = `
+            SELECT
+            mp.instanceID AS id,
+            p.pID,
+            p.name,
+            p.type1,
+            p.type2,
+            p.hp,
+            p.atk,
+            p.def,
+            p.spAtk,
+            p.spDef,
+            p.speed,
+            mp.hpEV,
+            mp.atkEV,
+            mp.defEV,
+            mp.spAtkEV,
+            mp.spDefEV,
+            mp.speedEV,
+            mp.hpIV,
+            mp.atkIV,
+            mp.defIV,
+            mp.spAtkIV,
+            mp.spDefIV,
+            mp.speedIV,
+            v.type1 vtype1,
+            v.type2 vtype2,
+            v.hp vhp,
+            v.atk vatk,
+            v.def vdef,
+            v.spAtk vspAtk,
+            v.spDef vspDef,
+            v.speed vspeed,
+            mp.level,
+            mp.nickname,
+            mp.showcase,
+            mp.form,
+            mp.nature,
+            mp.onteam,
+            icon,
+            v.imgID
+            FROM MyPokemon mp
+            JOIN Pokedex p ON mp.pID = p.pID
+            JOIN (
+                SELECT h.instanceID, icon FROM heldItems h, items i, MyPokemon mp2
+                WHERE h.instanceID=mp2.instanceID AND h.item=i.name
+                UNION
+                SELECT instanceID, null as icon FROM MyPokemon mp2 WHERE mp2.instanceID NOT IN (Select instanceID FROM HeldItems)
+            ) as ico ON mp.instanceID=ico.instanceID
+            LEFT JOIN (
+                SELECT name, img_suffix AS imgID, hp, atk, def, spDef, spAtk, speed, type1, type2
+                FROM PokemonVariants pv
+            ) as v ON v.name=mp.form
+            WHERE mp.uID = ?
+            ORDER BY pID;
+        `;
 
         db.query(sql, [uID], (err, results) => {
             if (err) {
@@ -656,28 +691,44 @@ module.exports = (app, db) => {
                 return res.status(500).json({ error: "Database error" });
             }
 
-        const formatted = results.map((row) => ({
-            id: row.id,
-            pID: row.pID,
-            name: row.name,
-            types: row.vtype1 ? row.vtype2 ? [row.vtype1, row.vtype2] : [row.vtype1] : row.type2 ? [row.type1, row.type2] : [row.type1],
-            stats: {
-                hp: row.vhp === null ? row.hp : row.vhp,
-                atk: row.vatk === null ? row.atk : row.vatk,
-                def: row.vdef === null ? row.def : row.vdef,
-                spAtk: row.vspAtk === null ? row.spAtk : row.vspAtk,
-                spDef: row.vspDef === null ? row.spDef : row.vspDef,
-                speed: row.vspeed === null ? row.speed : row.vspeed,
-            },
-            level: row.level,
-            form: row.form,
-            nickname: row.nickname,
-            showcase: row.showcase[0]===1,
-            onTeam: row.onteam[0]===1,
-            item: row.icon,
-            imgID: row.imgID ?? row.pID.toString().padStart(3, '0')
+            const formatted = results.map((row) => ({
+                id: row.id,
+                pID: row.pID,
+                name: (row.form === 'original' || row.form === null) ? row.name : row.form,
+                types: row.vtype1 ? row.vtype2 ? [row.vtype1, row.vtype2] : [row.vtype1] : row.type2 ? [row.type1, row.type2] : [row.type1],
+                stats: {
+                    hp: row.vhp === null ? row.hp : row.vhp,
+                    atk: row.vatk === null ? row.atk : row.vatk,
+                    def: row.vdef === null ? row.def : row.vdef,
+                    spAtk: row.vspAtk === null ? row.spAtk : row.vspAtk,
+                    spDef: row.vspDef === null ? row.spDef : row.vspDef,
+                    speed: row.vspeed === null ? row.speed : row.vspeed,
+                },
+                evs: {
+                    hp: row.hpEV,
+                    atk: row.atkEV,
+                    def: row.defEV,
+                    spAtk: row.spAtkEV,
+                    spDef: row.spDefEV,
+                    speed: row.speedEV
+                },
+                ivs: {
+                    hp: row.hpIV,
+                    atk: row.atkIV,
+                    def: row.defIV,
+                    spAtk: row.spAtkIV,
+                    spDef: row.spDefIV,
+                    speed: row.speedIV
+                },
+                level: row.level,
+                nature: row.nature,
+                nickname: row.nickname,
+                showcase: row.showcase[0]===1,
+                onTeam: row.onteam[0]===1,
+                item: row.icon,
+                imgID: row.imgID ?? row.pID.toString().padStart(3, '0')
             }));
-
+            // console.log((formatted));
             return res.json(formatted);
         });
     });

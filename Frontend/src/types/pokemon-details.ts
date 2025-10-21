@@ -12,7 +12,7 @@ export interface Evolution {
   stage2: PokemonSummary;
 };
 
-type PokemonStats = {
+export interface PokemonStats {
   hp: number;
   atk: number;
   def: number;
@@ -48,6 +48,19 @@ export interface CardPokemon {
     mega?: boolean;
 };
 
+export interface MyCardPokemon {
+    pID: number;
+    id: number;
+    name: string;
+    nickname?: string;
+    types: string[];
+    stats: PokemonStats;
+    level: number
+    imgID: string;
+    mega?: boolean;
+    item: string | null;
+};
+
 export interface PokedexPokemon {
     pID: number;
     name: string;
@@ -68,6 +81,7 @@ export interface MyPokemon {
     name: string;
     nickname: string;
     level: number;
+    nature: string;
     onTeam: boolean;
     favourite: boolean;
     types: string[];
@@ -82,7 +96,159 @@ export interface MyPokemon {
 
 export interface PokemonSummary {
   pID: number;
-  name: string;
+  id: number;
   types: string[];
+  name: string;
+  nickname?: string;
+  item?: string;
+  onTeam?: boolean;
   imgID: string;
 };
+
+export interface EffectType {
+  type: string;
+  atkAvg: number;
+  defAvg: number;
+}
+
+export interface User {
+  id: number;
+  tradeCount: number;
+  displayName: string;
+  username: string;
+}
+
+
+export interface Nature {
+  nature: string;
+  strength: keyof PokemonStats;
+  weakness: keyof PokemonStats;
+}
+
+export const natures: Nature[] = [
+  {
+    nature: "Hardy",
+    strength: "atk",
+    weakness: "atk"
+  }, 
+  {
+    nature: "Lonely",
+    strength: "atk",
+    weakness: "def"
+  }, 
+  {
+    nature: "Adamant",
+    strength: "atk",
+    weakness: "spAtk"
+  }, 
+  {
+    nature: "Naughty",
+    strength: "atk",
+    weakness: "spDef"
+  }, 
+  {
+    nature: "Brave",
+    strength: "atk",
+    weakness: "speed"
+  }, 
+  {
+    nature: "Bold",
+    strength: "def",
+    weakness: "atk"
+  }, 
+  {
+    nature: "Docile",
+    strength: "def",
+    weakness: "def"
+  }, 
+  {
+    nature: "Impish",
+    strength: "def",
+    weakness: "spAtk"
+  }, 
+  {
+    nature: "Lax",
+    strength: "def",
+    weakness: "spDef"
+  }, 
+  {
+    nature: "Relaxed",
+    strength: "def",
+    weakness: "speed"
+  },
+  {
+    nature: "Modest",
+    strength: "spAtk",
+    weakness: "atk"
+  }, 
+  {
+    nature: "Mild",
+    strength: "spAtk",
+    weakness: "def"
+  }, 
+  {
+    nature: "Bashful",
+    strength: "spAtk",
+    weakness: "spAtk"
+  }, 
+  {
+    nature: "Rash",
+    strength: "spAtk",
+    weakness: "spDef"
+  }, 
+  {
+    nature: "Quiet",
+    strength: "spAtk",
+    weakness: "speed"
+  },
+  {
+    nature: "Calm",
+    strength: "spDef",
+    weakness: "atk"
+  }, 
+  {
+    nature: "Gentle",
+    strength: "spDef",
+    weakness: "def"
+  }, 
+  {
+    nature: "Careful",
+    strength: "spDef",
+    weakness: "spAtk"
+  }, 
+  {
+    nature: "Quirky",
+    strength: "spDef",
+    weakness: "spDef"
+  }, 
+  {
+    nature: "Sassy",
+    strength: "spDef",
+    weakness: "speed"
+  },
+  {
+    nature: "Timid",
+    strength: "speed",
+    weakness: "atk"
+  }, 
+  {
+    nature: "Hasty",
+    strength: "speed",
+    weakness: "def"
+  }, 
+  {
+    nature: "Jolly",
+    strength: "speed",
+    weakness: "spAtk"
+  }, 
+  {
+    nature: "Naive",
+    strength: "speed",
+    weakness: "spDef"
+  }, 
+  {
+    nature: "Serious",
+    strength: "speed",
+    weakness: "speed"
+  }, 
+]

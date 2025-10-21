@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { X, Star } from "lucide-react";
 
-import pokeIcon from "./../assets/pokeIcon.png";
-import { MyPokemon, Item, CardPokemon } from "../types/pokemon-details";
+import pokeIcon from "./../../assets/pokeIcon.png";
+import { MyPokemon, Item, CardPokemon } from "../../types/pokemon-details";
 
 
 type InputType = {

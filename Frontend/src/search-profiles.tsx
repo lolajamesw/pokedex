@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { Link, useParams } from "react-router-dom"
-import "./profile.css"
+import "./css/profile.css"
 
 
 type PokemonSummaryType = {

@@ -1,4 +1,4 @@
-import { PokemonSummary, PokedexPokemon, MyPokemon, Evolution } from "../../types/pokemon-details.ts";
+import { PokemonSummary, PokedexPokemon, MyPokemon, Evolution } from "../../../types/pokemon-details.ts";
 import { Link } from "react-router-dom";
 
 type Input = {

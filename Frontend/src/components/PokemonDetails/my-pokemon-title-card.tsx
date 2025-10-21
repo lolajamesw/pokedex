@@ -2,8 +2,8 @@ import { Heart, X, Plus, Star, LogOut } from "lucide-react";
 import { useState } from "react";
 import ItemSelectorModal from "./item-selector-modal";
 
-import pokeIcon from "./../assets/pokeIcon.png";
-import { MyPokemon, CardPokemon, Item } from "../types/pokemon-details";
+import pokeIcon from "./../../assets/pokeIcon.png";
+import { MyPokemon, CardPokemon, Item } from "../../types/pokemon-details";
 import PokemonTitleCard from "./pokemon-title-card";
 
 type InputType = {

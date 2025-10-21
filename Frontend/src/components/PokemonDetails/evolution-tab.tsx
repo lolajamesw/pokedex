@@ -1,7 +1,7 @@
-import { PokemonSummary, PokedexPokemon, MyPokemon, Evolution } from "../types/pokemon-details.ts";
+import { PokemonSummary, PokedexPokemon, MyPokemon, Evolution } from "../../types/pokemon-details.ts";
 import BaseBranchingEvolutionContent from "./evolution-displays/base-branching-evolution.tsx";
 import LinearEvolutionContent from "./evolution-displays/linear-evolution.tsx";
-import { TabsContent } from "./ui/tabs.tsx";
+import { TabsContent } from "../ui/tabs.tsx";
 import { Footprints } from "lucide-react";
 import { useMemo } from "react";
 import RandomBranchingEvolutionContent from "./evolution-displays/random-branching-evolution.tsx";

@@ -1,6 +1,6 @@
 import { Swords, X, Plus } from "lucide-react"
-import { CardTitle } from "./ui/card";
-import { MyPokemon, AttackDetails } from "../types/pokemon-details"
+import { CardTitle } from "../ui/card";
+import { MyPokemon, AttackDetails } from "../../types/pokemon-details"
 import PokemonMovesCard from "./learnable-moves-card";
 
 

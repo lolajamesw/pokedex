@@ -70,15 +70,36 @@ module.exports = (app) => {
 
             // Insert Pokémon into user's collection
             await runQuery(
-                `INSERT INTO MyPokemon (pID, uID, nickname, level, dateAdded)
-                 VALUES (?, ?, ?, ?, NOW())`,
-                [pID, uID, nickname || null, level]
+                `INSERT INTO MyPokemon (pID, uID, nickname, form, nature, level, dateAdded, 
+                    hpEV, atkEV, defEV, spAtkEV, spDefEV, speedEV,
+                    hpIV, atkIV, defIV, spAtkIV, spDefIV, speedIV
+                )
+                 VALUES (?, ?, ?, ?, ?, ?, NOW(), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                [pID, uID, nickname || null, 'original', 'Hardy', level, 0, 0, 0, 0, 0, 0, 31, 31, 31, 31, 31, 31]
             );
 
             res.send("Pokémon added successfully.");
         } catch (err) {
             console.error("Error in /addPokemon:", err);
             res.status(500).send("Server error adding Pokémon.");
+        }
+    });
+
+    app.post("/setEVsIVs", async (req, res) => {
+        const { instanceID,
+            hpEV, atkEV, defEV, spAtkEV, spDefEV, speedEV,
+            hpIV, atkIV, defIV, spAtkIV, spDefIV, speedIV
+         } = req.body;
+        console.log("POST /setEVsIVs:", req.body);
+
+        try {
+            await runQuery(("UPDATE MyPokemon SET hpEV=?, atkEV=?, defEV=?, spAtkEV=?, spDefEV=?, speedEV=?" +
+                 ", hpIV=?, atkIV=?, defIV=?, spAtkIV=?, spDefIV=?, speedIV=? WHERE instanceID=?"), 
+                [hpEV, atkEV, defEV, spAtkEV, spDefEV, speedEV, hpIV, atkIV, defIV, spAtkIV, spDefIV, speedIV, instanceID]);
+            res.send("Pokémon EVs/IVs updated successfully.");
+        } catch (err) {
+            console.error("Error in /dropPokemon:", err);
+            res.status(500).send("Server error updating Pokémon EVs/IVs.");
         }
     });
 
@@ -146,6 +167,21 @@ module.exports = (app) => {
             res.status(500).send("Server error updating variant.");
         }
     });
+
+    app.post("/setNature", async (req, res) => {
+        const { instanceID, nature } = req.body;
+        console.log("POST /setNature:", req.body);
+        try {
+            await runQuery(
+                "UPDATE MyPokemon SET nature=? WHERE instanceID=?",
+                [nature, instanceID]
+            );
+            res.send("Pokémon nature set successfully.");
+        } catch (err) {
+            console.error("Error in /setNature:", err);
+            res.status(500).send("Server error updating nature.");
+        }
+    })
 
     // Mark Pokémon as showcased
     app.post("/setShowcased", async (req, res) => {

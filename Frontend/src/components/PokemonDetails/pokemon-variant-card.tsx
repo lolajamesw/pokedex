@@ -1,6 +1,6 @@
 import { Sparkles } from "lucide-react"
-import { CardPokemon, MyPokemon, PokedexPokemon } from "../types/pokemon-details"
-import PokeCard from "./pokeCard.tsx";
+import { CardPokemon, MyPokemon, PokedexPokemon } from "../../types/pokemon-details.ts"
+import PokeCard from "./../pokeCard.tsx";
 
 type Inputs<T extends PokedexPokemon> = {
     variants: CardPokemon[],

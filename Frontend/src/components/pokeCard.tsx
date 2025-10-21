@@ -1,10 +1,11 @@
-import { CardPokemon } from "../types/pokemon-details"
+import { CardPokemon, Nature, PokemonStats } from "../types/pokemon-details"
 
 
 type PokeCardInput = {
     cornerVisible?: boolean,
     onClick?: (variant: CardPokemon) => void,
     pokemon: CardPokemon,
+    nature?: Nature,
     defaultDescription?: string,
     cornerElement?: React.ReactNode,
     extraElement?: React.ReactNode,
@@ -32,7 +33,7 @@ switch (form.toLowerCase()) {
 }
 }
 
-export default function PokeCard({pokemon, defaultDescription="", onClick, numberVisible=false, cornerVisible=false, cornerElement, extraElement}: PokeCardInput) {
+export default function PokeCard({pokemon, nature, defaultDescription="", onClick, numberVisible=false, cornerVisible=false, cornerElement, extraElement}: PokeCardInput) { 
     return (
     <div
         className={`border bg-white rounded-lg cursor-pointer transition-all duration-200 hover:shadow-md ${
@@ -45,7 +46,8 @@ export default function PokeCard({pokemon, defaultDescription="", onClick, numbe
         <div className="pokemon-card-header">
         <div className="pokemon-title-row">
             <h3 className="pokemon-title">
-            {`${numberVisible ? `#${pokemon.pID.toString().padStart(3, '0')}` : ""}  ${pokemon.name}`}
+                {`${numberVisible ? `#${pokemon.pID.toString().padStart(3, '0')}` : ""}  ${'nickname' in pokemon && pokemon.nickname ? pokemon.nickname : pokemon.name}`}
+                {'nickname' in pokemon && !!pokemon.nickname && <span className="pokemon-nickname">({pokemon.name})</span>}
             </h3>
             <div className="pokemon-badges">{cornerVisible && cornerElement}</div>
         </div>

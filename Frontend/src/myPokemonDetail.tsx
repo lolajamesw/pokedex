@@ -11,19 +11,19 @@ import { useEffect, useState } from "react";
 
 // UI components
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./components/ui/tabs.tsx";
-import MyPokemonTitleCard from "./components/my-pokemon-title-card.tsx";
-import EvolutionTab from "./components/evolution-tab.tsx";
-import PokemonStatsCard from "./components/pokemon-stats-card.tsx";
-import MyPokemonMovesCard from "./components/known-moves-card.tsx";
-import PokemonVariantCard from "./components/pokemon-variant-card.tsx";
+import MyPokemonTitleCard from "./components/PokemonDetails/my-pokemon-title-card.tsx";
+import EvolutionTab from "./components/PokemonDetails/evolution-tab.tsx";
+import MyPokemonStatsCard from "./components/PokemonDetails/my-pokemon-stats-card.tsx";
+import MyPokemonMovesCard from "./components/PokemonDetails/known-moves-card.tsx";
+import PokemonVariantCard from "./components/PokemonDetails/pokemon-variant-card.tsx";
 
 // types
 import { Evolution, MyPokemon, CardPokemon, Item } from "./types/pokemon-details.ts"
 
 // Styles
-import "./pokedex.css";
-import "./details.css";
-import "./profile.css";
+import "./css/pokedex.css";
+import "./css/details.css";
+import "./css/profile.css";
 
 /* ---------- Main Component ---------- */
 
@@ -142,7 +142,7 @@ const MyPokeDetail = () => {
 
         {/* Main Content Tabs */}
         <Tabs defaultValue="stats" className="space-y-4">
-          <TabsList className={`grid w-full grid-cols-${variants.length > 1 ? '4' : '3'}`}>
+          <TabsList className={`grid w-full ${variants.length > 1 ? 'grid-cols-4' : 'grid-cols-3'}`}>
             <TabsTrigger value="stats">Stats</TabsTrigger>
             <TabsTrigger value="evolution">Evolution</TabsTrigger>
             <TabsTrigger value="moves">Moves</TabsTrigger>
@@ -150,7 +150,7 @@ const MyPokeDetail = () => {
           </TabsList>
 
           <TabsContent value="stats" className="space-y-3">
-            <PokemonStatsCard pokemon={pokemon}/>
+            <MyPokemonStatsCard pokemon={pokemon} updatePokemon={setPokemonDetail}/>
           </TabsContent>
 
           <EvolutionTab

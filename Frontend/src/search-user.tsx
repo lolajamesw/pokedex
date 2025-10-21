@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import "./search-user.css";
+import "./css/search-user.css";
 
 export default function SearchUserPage() {
   const [query, setQuery] = useState("");

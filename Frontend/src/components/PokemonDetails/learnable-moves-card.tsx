@@ -1,5 +1,5 @@
 import { Swords } from "lucide-react"
-import { MyPokemon, PokedexPokemon, AttackDetails } from "../types/pokemon-details"
+import { MyPokemon, PokedexPokemon, AttackDetails } from "../../types/pokemon-details"
 
 type Inputs = {
     pokemon: MyPokemon | PokedexPokemon,

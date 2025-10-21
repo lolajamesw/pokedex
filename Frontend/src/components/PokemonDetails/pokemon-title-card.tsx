@@ -1,5 +1,5 @@
-import { Badge } from "./ui/badge"
-import { PokedexPokemon, MyPokemon } from "../types/pokemon-details";
+import { Badge } from "../ui/badge"
+import { PokedexPokemon, MyPokemon } from "../../types/pokemon-details";
 
 type InputType = {
     pokemon: PokedexPokemon | MyPokemon;
@@ -47,7 +47,7 @@ export default function PokemonTitleCard({ pokemon, nickname, level, topRight, s
                                 </div>
 
                                 {/* Status Text Indicators */}
-                                <div className="flex mb-2 gap-2">
+                                <div className="flex mb-2 gap-2 justify-center md:justify-start">
                                     {pokemon.types.map((type) => (
                                         <span key={type} className={`badge badge-type type-${type.toLowerCase()}`}>
                                             {type}

@@ -17,7 +17,7 @@ import {
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./components/ui/select"
 import { Avatar, AvatarFallback, AvatarImage } from "./components/ui/avatar"
 import { MessageSquare, Plus, Eye } from "lucide-react"
-import "./market.css"
+import "./css/market.css"
 import { Description } from "@radix-ui/react-dialog"
 
 type pokemonType = {

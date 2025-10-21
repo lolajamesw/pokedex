@@ -1,4 +1,4 @@
-import { Evolution } from "../../types/pokemon-details.ts";
+import { Evolution } from "../../../types/pokemon-details.ts";
 import { ArrowRight } from "lucide-react"
 import { Link } from "react-router-dom";
 

@@ -84,6 +84,7 @@ CREATE TABLE MyPokemon(
     uID INT NOT NULL REFERENCES User(uID),
     instanceID INT AUTO_INCREMENT PRIMARY KEY,
     form VARCHAR(25),
+    nature VARCHAR(10),
     nickname VARCHAR(30),
     level INT,
     favourite BIT DEFAULT 0,

@@ -582,6 +582,11 @@
     outline-offset: 2px;
   }
 
+  .progress-smooth > div {
+    transition: width 700ms ease !important;
+    will-change: width;
+  }
+
   /* Selection styles */
   ::selection {
     background-color: rgb(var(--color-primary));
