@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react"
 import { useLocation, Link, useNavigate } from "react-router-dom"
-import { Menu, User, LogOut, BookOpen, ShoppingCart, Sword } from "lucide-react"
+import { Menu, User, LogOut, BookOpen, ShoppingCart, Sword, UserSearch } from "lucide-react"
 import "./navbar.css"
 
 const navigationItems = [
@@ -10,7 +10,7 @@ const navigationItems = [
   { name: "My Pokémon", href: "/my-pokemon", icon: User },
   { name: "Market", href: "/market", icon: ShoppingCart },
   { name: "Battle", href: "/battle", icon: Sword},
-  { name: "Search User", href: "/search-user", icon: User }
+  { name: "Search User", href: "/search-user", icon: UserSearch }
 ]
 
 export default function Navbar({ currentPage, setCurrentPage }) {

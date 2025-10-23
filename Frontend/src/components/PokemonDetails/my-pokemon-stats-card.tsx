@@ -175,7 +175,7 @@ export default function MyPokemonStatsCard({pokemon, updatePokemon}: Inputs) {
             <CardContent className="space-y-3">
             <div className="grid gap-3">
                 {Object.entries(stats).map(([stat, value]) => (
-                    <Card className="p-3 border-gray-200 bg-white hover:!bg-muted">
+                    <Card className="p-3 border-gray-200 bg-white hover:!bg-muted hover:shadow-[0_4px_12px_rgba(0,0,0,0.15)]">
                         <div key={stat} className="space-y-2">
                             <div className="flex justify-between items-center">
                             <div className="flex justify-left">

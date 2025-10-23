@@ -183,6 +183,22 @@ module.exports = (app) => {
         }
     })
 
+    // Set selected ability of Pokemon
+    app.post("/setAbility", async (req, res) => {
+        const { instanceID, ability } = req.body;
+        console.log("POST /setAbility:", req.body);
+        try {
+            await runQuery(
+                "UPDATE MyPokemon SET ability=? WHERE instanceID=?",
+                [ability, instanceID]
+            );
+            res.send("Pokémon nature set successfully.");
+        } catch (err) {
+            console.error("Error in /setAbility:", err);
+            res.status(500).send("Server error updating ability.");
+        }
+    })
+
     // Mark Pokémon as showcased
     app.post("/setShowcased", async (req, res) => {
         const { instanceIDs, user } = req.body;

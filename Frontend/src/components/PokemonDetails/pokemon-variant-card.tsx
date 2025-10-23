@@ -22,6 +22,32 @@ export default function PokemonVariantCard<T extends PokedexPokemon>({ variants,
         } as T))
     }
 
+    const setMegaStone = async(variant: CardPokemon) => {
+        const response = await fetch("http://localhost:8081/setHeldItem", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ instanceID: instanceID, mega: true }),
+        })
+        if (response.ok) {
+            const overviewRes = await fetch(`http://localhost:8081/userPokemon/${instanceID}`);
+            const overviewData: MyPokemon = await overviewRes.json();
+            updatePokemonDetail((prev) => {
+                if (prev && 'heldItem' in prev && 'heldItemIcon' in prev) {
+                    return {
+                        ...prev,
+                        heldItem: overviewData.heldItem,
+                        heldItemIcon: overviewData.heldItemIcon
+                    } 
+                } 
+                return prev
+            })
+        } else {
+            const errMsg = await response.text();
+            console.error("Failed to update Pokémon megaStone:", errMsg);
+            alert("Failed to update Pokémon megaStone. See console for details.");
+        }
+    }
+
     const selectVariant = async (variant: CardPokemon) => {
         if (instanceID) {
             try {
@@ -31,30 +57,7 @@ export default function PokemonVariantCard<T extends PokedexPokemon>({ variants,
                     body: JSON.stringify({ instanceID: instanceID, form: variant.name }),
                 });
                 if (variant.mega) {
-                    console.log("mega")
-                    const megaResponse = await fetch("http://localhost:8081/setHeldItem", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ instanceID: instanceID, mega: true }),
-                    })
-                    if (!megaResponse.ok) {
-                        const errMsg = await response.text();
-                        console.error("Failed to update Pokémon megaStone:", errMsg);
-                        alert("Failed to update Pokémon megaStone. See console for details.");
-                    } else {
-                        const overviewRes = await fetch(`http://localhost:8081/userPokemon/${instanceID}`);
-                        const overviewData: MyPokemon = await overviewRes.json();
-                        updatePokemonDetail((prev) => {
-                            if (prev && 'heldItem' in prev && 'heldItemIcon' in prev) {
-                                return {
-                                    ...prev,
-                                    heldItem: overviewData.heldItem,
-                                    heldItemIcon: overviewData.heldItemIcon
-                                } 
-                            } 
-                            return prev
-                        })
-                    }
+                    setMegaStone(variant);
                 }
                 if (response.ok) {
                     updateVariantDisplay(variant)

@@ -7,6 +7,8 @@ DROP TABLE IF EXISTS CurrentAttacks;
 DROP TABLE IF EXISTS Attacks;
 DROP TABLE IF EXISTS HeldItems;
 DROP TABLE IF EXISTS Items;
+DROP TABLE IF EXISTS PokemonAbilities;
+DROP TABLE IF EXISTS Abilities;
 DROP TABLE IF EXISTS MyPokemon;
 DROP TABLE IF EXISTS PokemonVariants;
 DROP TABLE IF EXISTS Evolutions;
@@ -111,6 +113,19 @@ CREATE TABLE MegaStones(
 CREATE TABLE HeldItems(
 	instanceID INT PRIMARY KEY REFERENCES MyPokemon(instanceID) ON DELETE CASCADE,
     item VARCHAR(20) NOT NULL REFERENCES Items(name)
+);
+
+CREATE TABLE Abilities(
+	name VARCHAR(40) PRIMARY KEY,
+    effect TEXT,
+    description TEXT
+);
+
+CREATE TABLE PokemonAbilities(
+	pID INT REFERENCES Pokedex(pID) ON DELETE CASCADE,
+    ability VARCHAR(40) REFERENCES Abilities(name) ON DELETE CASCADE,
+    variant VARCHAR(40),
+    PRIMARY KEY(pID, variant, ability)
 );
 
 CREATE TABLE Attacks(

@@ -7,17 +7,27 @@ import { Shield, Swords } from "lucide-react"
 import "./css/pokedex.css"
 import "./css/details.css"
 import PokemonTitleCard from "./components/PokemonDetails/pokemon-title-card.tsx";
-import { PokedexPokemon, Evolution, CardPokemon } from "./types/pokemon-details.ts"
+import { PokedexPokemon, Evolution, CardPokemon, Ability } from "./types/pokemon-details.ts"
 import EvolutionTab from "./components/PokemonDetails/evolution-tab.tsx";
 import PokemonStatsCard from "./components/PokemonDetails/pokemon-stats-card.tsx";
 import PokemonMovesCard from "./components/PokemonDetails/learnable-moves-card.tsx";
 import PokemonVariantCard from "./components/PokemonDetails/pokemon-variant-card.tsx";
+import AbilityCard from "./components/PokemonDetails/ability-card.tsx";
 
 const PokemonDetail = () => {
     const { id: pID } = useParams<{ id: string}>();
     const [pokemon, setPokemonDetail] = useState<PokedexPokemon | null>(null);
+    const [abilities, setAbilities] = useState<Ability[]>([]);
     const [evolutions, setEvolutions] = useState<Evolution[]>([]);
     const [variants, setVariants] = useState<CardPokemon[]>([]);
+    const [tabCols, setTabCols] = useState<string>('grid-cols-3');
+
+    const fetchAbilities = async () => {
+        const abilityRes = await fetch(`http://localhost:8081/pokemon/abilities/${pID}/'${pokemon?.name}'`);
+        const abilityData = await abilityRes.json();
+        console.log("fetched ability data");
+        setAbilities(abilityData);
+    }
      
     useEffect(() => {
         const fetchData = async () => {
@@ -41,6 +51,7 @@ const PokemonDetail = () => {
                 console.log("fetched evolution data");
                 setEvolutions(evolutionData);
 
+                fetchAbilities();
 
                 // 3. Fetch variant data
                 const variantRes = await fetch(`http://localhost:8081/pokemon/variants/${pID}`);
@@ -85,6 +96,14 @@ const PokemonDetail = () => {
         fetchData();
     }, [pID])
 
+    useEffect(() => {fetchAbilities()}, [pokemon])
+
+    useEffect(() => {
+      if (abilities.length > 0 && variants.length > 1) setTabCols('grid-cols-5');
+      else if (abilities.length < 1 && variants.length <= 1) setTabCols('grid-cols-3');
+      else setTabCols('grid-cols-4');
+    }, [abilities, variants])
+
     if (!pokemon) return <div>Loading...first {pID}</div>;
 
     return (
@@ -94,11 +113,12 @@ const PokemonDetail = () => {
         <PokemonTitleCard pokemon={pokemon} />
 
         {/* Main Content Tabs */}
-        <Tabs defaultValue="stats" className="space-y-4">
-          <TabsList className={`grid w-full grid-cols-${variants.length > 1 ? '4' : '3'}`}>
+        <Tabs defaultValue="stats" className="space-y-3">
+          <TabsList className={`grid w-full ${tabCols}`}>
             <TabsTrigger value="stats">Stats</TabsTrigger>
-            <TabsTrigger value="evolution">Evolution</TabsTrigger>
             <TabsTrigger value="moves">Moves</TabsTrigger>
+            {abilities.length > 0 ? <TabsTrigger value="abilities">Abilities</TabsTrigger> : ""}
+            <TabsTrigger value="evolution">Evolution</TabsTrigger>
             {variants.length > 1 ? <TabsTrigger value="variants">Variants</TabsTrigger> : ""}
           </TabsList>
 
@@ -106,14 +126,18 @@ const PokemonDetail = () => {
             <PokemonStatsCard pokemon={pokemon} />
           </TabsContent>
 
-          <EvolutionTab 
-            pokemon={pokemon}
-            evolutions={evolutions}
-          />
+          <TabsContent value="abilities" className="space-y-3">
+            <AbilityCard abilities={abilities}/>
+          </TabsContent>
 
           <TabsContent value="moves" className="space-y-4">
             <PokemonMovesCard pokemon={pokemon} />
           </TabsContent>
+
+          <EvolutionTab 
+            pokemon={pokemon}
+            evolutions={evolutions}
+          />
 
           <TabsContent value="variants">
             <PokemonVariantCard variants={variants} updatePokemonDetail={setPokemonDetail} currentForm={pokemon.form}/>

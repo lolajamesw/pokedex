@@ -128,9 +128,9 @@ export default function MyPokedex() {
                       e.stopPropagation();
                       ReleasePokemon(pokemon.id);
                     }}
-                    className={`p-2 rounded-full transition-all duration-200 hover:scale-110 ${
-                      "bg-black/5 text-black/75 hover:bg-black/2"
-                    }`}
+                    className={`p-2 rounded-full transition-all duration-200 hover:scale-110 
+                      bg-black/5 text-black/75 hover:bg-black/2
+                    `}
                     title="Release this Pokemon"
                   >
                     <LogOut className="h-6 w-6" />

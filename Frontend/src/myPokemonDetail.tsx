@@ -18,12 +18,13 @@ import MyPokemonMovesCard from "./components/PokemonDetails/known-moves-card.tsx
 import PokemonVariantCard from "./components/PokemonDetails/pokemon-variant-card.tsx";
 
 // types
-import { Evolution, MyPokemon, CardPokemon, Item } from "./types/pokemon-details.ts"
+import { Evolution, MyPokemon, CardPokemon, Item, Ability } from "./types/pokemon-details.ts"
 
 // Styles
 import "./css/pokedex.css";
 import "./css/details.css";
 import "./css/profile.css";
+import AbilityCard from "./components/PokemonDetails/ability-card.tsx";
 
 /* ---------- Main Component ---------- */
 
@@ -33,10 +34,18 @@ const MyPokeDetail = () => {
 
   // State
   const [pokemon, setPokemonDetail] = useState<MyPokemon | null>(null);
+  const [abilities, setAbilities] = useState<Ability[]>([]);
   const [variants, setVariants] = useState<CardPokemon[]>([]);
   const [evolutions, setEvolutions] = useState<Evolution[]>([]);
   const [items, setItems] = useState<Item[]>([]);
+  const [tabCols, setTabCols] = useState<string>('grid-cols-3');
 
+  const fetchAbilities = async () => {
+      const abilityRes = await fetch(`http://localhost:8081/pokemon/abilities/${pID}/'${pokemon?.name}'`);
+      const abilityData = await abilityRes.json();
+      console.log("fetched ability data");
+      setAbilities(abilityData);
+  }
   /**
    * Fetch Pokémon details, evolutions, and trade history from backend.
    */
@@ -64,6 +73,8 @@ const MyPokeDetail = () => {
           knownAttacks: knownData,
         };
         setPokemonDetail(combined);
+
+        fetchAbilities();
 
         // 4. Fetch evolution data
         const evolutionRes = await fetch(`http://localhost:8081/pokemon/evolutions/${pID}`);
@@ -124,9 +135,15 @@ const MyPokeDetail = () => {
     fetchData();
   }, [id]);
 
-  if (!pokemon) return <div>Loading...first {id}</div>;
+  useEffect(() => {fetchAbilities()}, [pokemon])
 
-  
+  useEffect(() => {
+    if (abilities.length > 0 && variants.length > 1) setTabCols('grid-cols-5');
+    else if (abilities.length < 1 && variants.length <= 1) setTabCols('grid-cols-3');
+    else setTabCols('grid-cols-4');
+  }, [abilities, variants])
+
+  if (!pokemon) return <div>Loading...first {id}</div>;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-red-50 p-4">
@@ -141,11 +158,12 @@ const MyPokeDetail = () => {
         />
 
         {/* Main Content Tabs */}
-        <Tabs defaultValue="stats" className="space-y-4">
-          <TabsList className={`grid w-full ${variants.length > 1 ? 'grid-cols-4' : 'grid-cols-3'}`}>
+        <Tabs defaultValue="stats" className="space-y-3">
+          <TabsList className={`grid w-full ${tabCols}`}>
             <TabsTrigger value="stats">Stats</TabsTrigger>
-            <TabsTrigger value="evolution">Evolution</TabsTrigger>
             <TabsTrigger value="moves">Moves</TabsTrigger>
+            {abilities.length > 0 ? <TabsTrigger value="abilities">Abilities</TabsTrigger> : ""}
+            <TabsTrigger value="evolution">Evolution</TabsTrigger>
             {variants.length > 1 ? <TabsTrigger value="variants">Variants</TabsTrigger> : ""}
           </TabsList>
 
@@ -160,6 +178,10 @@ const MyPokeDetail = () => {
 
           <TabsContent value="moves" className="space-y-4">
             <MyPokemonMovesCard pokemon={pokemon} updatePokemonDetail={setPokemonDetail}/>
+          </TabsContent>
+
+          <TabsContent value="abilities" className="space-y-3">
+            <AbilityCard abilities={abilities} instanceID={id} selectedAbility={pokemon.ability}/>
           </TabsContent>
 
           <TabsContent value="variants" className="space-y-4">

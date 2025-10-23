@@ -239,6 +239,7 @@ module.exports = (app, db) => {
             mp.pID,
             mp.form,
             mp.nature,
+            mp.ability,
             p.name,
             nickname,
             level,
@@ -273,6 +274,7 @@ module.exports = (app, db) => {
                 nickname: row.nickname,
                 level: row.level,
                 nature: row.nature,
+                ability: row.ability,
                 favourite: row.favourite[0]===1,
                 onTeam: row.onteam[0]===1,
                 types: row.type2 ? [row.type1, row.type2] : [row.type1],
@@ -365,6 +367,30 @@ module.exports = (app, db) => {
                 TM: row.tm[0]===1
             }))
             return res.json(formatted);
+        });
+    });
+    
+    /**
+     * GET /pokemon/abilities/:pID/:variant
+     * Returns all abilities associated with the given pID and variant (default 'original').
+     */
+    app.get(`/pokemon/abilities/:pID/:variant`, (req, res) => {
+        const pID = req.params.pID;
+        const variant = req.params.variant;
+        const sql = `
+            with aNames as (
+                SELECT DISTINCT(ability) FROM PokemonAbilities
+                WHERE pID=${pID} AND (variant=${variant} || variant='original')
+            )
+            SELECT a.name, a.effect, a.description
+            FROM aNames n JOIN Abilities a ON n.ability=a.name;
+        `
+        db.query(sql, (err, results) => {
+            if (err) {
+                console.error("Error fetching pokemon's data", err);
+                return res.status(500).json({error: "Database error"});
+            }
+            return res.json(results);
         });
     });
 

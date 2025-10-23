@@ -61,6 +61,13 @@ export interface MyCardPokemon {
     item: string | null;
 };
 
+export interface Ability {
+    name: string;
+    effect: string;
+    description: string;
+
+};
+
 export interface PokedexPokemon {
     pID: number;
     name: string;
@@ -82,6 +89,7 @@ export interface MyPokemon {
     nickname: string;
     level: number;
     nature: string;
+    ability: string;
     onTeam: boolean;
     favourite: boolean;
     types: string[];
