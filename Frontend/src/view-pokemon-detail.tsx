@@ -29,7 +29,7 @@ import "./css/profile.css";
 
 /* ---------- Main Component ---------- */
 
-const MyPokeDetail = () => {
+const ViewPokeDetail = () => {
   // Grab Pokémon instance and species IDs from URL params
   const { id, pID } = useParams<{ id: string; pID: string }>();
 
@@ -152,6 +152,7 @@ const MyPokeDetail = () => {
           items={items}
           variants={variants}
           pokemon={pokemon}
+          editable={false}
           updatePokemonDetail={setPokemonDetail}
         />
 
@@ -167,7 +168,7 @@ const MyPokeDetail = () => {
           </TabsList>
 
           <TabsContent value="stats" className="space-y-3">
-            <MyPokemonStatsCard pokemon={pokemon} updatePokemon={setPokemonDetail}/>
+            <MyPokemonStatsCard pokemon={pokemon} updatePokemon={setPokemonDetail} editable={false}/>
           </TabsContent>
 
           <EvolutionTab
@@ -176,11 +177,16 @@ const MyPokeDetail = () => {
           />
 
           <TabsContent value="moves" className="space-y-4">
-            <MyPokemonMovesCard pokemon={pokemon} updatePokemonDetail={setPokemonDetail}/>
+            <MyPokemonMovesCard pokemon={pokemon} updatePokemonDetail={setPokemonDetail} editable={false}/>
           </TabsContent>
 
           <TabsContent value="abilities" className="space-y-3">
-            <AbilityCard abilities={abilities} instanceID={id} selectedAbility={pokemon.ability}/>
+            <AbilityCard 
+              abilities={abilities} 
+              instanceID={id} 
+              selectedAbility={pokemon.ability}
+              editable={false}
+            />
           </TabsContent>
 
           <TabsContent value="variants" className="space-y-4">
@@ -189,6 +195,7 @@ const MyPokeDetail = () => {
                 currentForm={pokemon.form} 
                 updatePokemonDetail={setPokemonDetail}
                 instanceID={pokemon.id}
+                editable={false}
               />
           </TabsContent>
 
@@ -200,6 +207,7 @@ const MyPokeDetail = () => {
               heldItem={pokemon.heldItem}
               instanceID={pokemon.id}
               updatePokemonDetail={setPokemonDetail}
+              editable={false}
             />
           </TabsContent>
         </Tabs>
@@ -210,4 +218,4 @@ const MyPokeDetail = () => {
 
 
 
-export default MyPokeDetail;
+export default ViewPokeDetail;

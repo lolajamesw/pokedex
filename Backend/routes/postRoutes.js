@@ -199,6 +199,22 @@ module.exports = (app) => {
         }
     })
 
+        // Set selected ability of Pokemon
+    app.post("/setTeraType", async (req, res) => {
+        const { instanceID, type } = req.body;
+        console.log("POST /setTeraType:", req.body);
+        try {
+            await runQuery(
+                "UPDATE MyPokemon SET teraType=? WHERE instanceID=?",
+                [type, instanceID]
+            );
+            res.send("Pokémon tera type set successfully.");
+        } catch (err) {
+            console.error("Error in /setTeraType:", err);
+            res.status(500).send("Server error updating tera type.");
+        }
+    })
+
     // Mark Pokémon as showcased
     app.post("/setShowcased", async (req, res) => {
         const { instanceIDs, user } = req.body;

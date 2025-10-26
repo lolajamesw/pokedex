@@ -9,10 +9,11 @@ import Input from "@mui/material/Input";
 
 type Inputs = {
     pokemon: MyPokemon,
-    updatePokemon: React.Dispatch<React.SetStateAction<MyPokemon | null>>
+    updatePokemon: React.Dispatch<React.SetStateAction<MyPokemon | null>>,
+    editable?: boolean,
 }
 
-export default function MyPokemonStatsCard({pokemon, updatePokemon}: Inputs) {
+export default function MyPokemonStatsCard({ pokemon, updatePokemon, editable=true }: Inputs) {
     const [nature, setNature] = useState<Nature>(natures.filter((n) => n.nature === pokemon.nature)[0]);
     const [evs, setEvs] = useState<PokemonStats>({hp: 0, atk: 0, def: 0, spAtk: 0, spDef: 0, speed: 0})
     const [ivs, setIvs] = useState<PokemonStats>({hp: 0, atk: 0, def: 0, spAtk: 0, spDef: 0, speed: 0})
@@ -149,26 +150,37 @@ export default function MyPokemonStatsCard({pokemon, updatePokemon}: Inputs) {
                     <SlidersHorizontal className="h-5 w-5" />
                     Stats
                 </CardTitle>
-                <Select value={nature.nature} onValueChange={(selected) => updateNature(selected)}>
-                    <SelectTrigger className="w-50">
-                        <div className="flex items-center gap-2">
-                            <div className="text-green-500">{getStatIcon(nature.strength)}</div>
-                            <div className="text-red-500">{getStatIcon(nature.weakness)}</div>
-                            <span>{nature.nature}</span>
-                        </div>
-                    </SelectTrigger>
-                    <SelectContent>
-                        {natures.map((nature) => (
-                        <SelectItem key={nature.nature} value={nature.nature}>
+                {editable ? 
+                    <Select value={nature.nature} onValueChange={(selected) => updateNature(selected)}>
+                        <SelectTrigger className="w-50">
                             <div className="flex items-center gap-2">
                                 <div className="text-green-500">{getStatIcon(nature.strength)}</div>
                                 <div className="text-red-500">{getStatIcon(nature.weakness)}</div>
                                 <span>{nature.nature}</span>
                             </div>
-                        </SelectItem>
-                        ))}
-                    </SelectContent>
-                </Select>
+                        </SelectTrigger>
+                        <SelectContent>
+                            {natures.map((nature) => (
+                            <SelectItem key={nature.nature} value={nature.nature}>
+                                <div className="flex items-center gap-2">
+                                    <div className="text-green-500">{getStatIcon(nature.strength)}</div>
+                                    <div className="text-red-500">{getStatIcon(nature.weakness)}</div>
+                                    <span>{nature.nature}</span>
+                                </div>
+                            </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select> 
+                    : 
+                    <Card className="w-50 h-10 p-2 px-4 rounded-md">
+                        <div className="flex items-center gap-2">
+                            <div className="text-green-500">{getStatIcon(nature.strength)}</div>
+                            <div className="text-red-500">{getStatIcon(nature.weakness)}</div>
+                            <span>{nature.nature}</span>
+                        </div>
+                    </Card>
+                }
+                
             </div>
             <CardDescription>The current statistical values for this Pokémon</CardDescription>
             </CardHeader>
@@ -197,72 +209,102 @@ export default function MyPokemonStatsCard({pokemon, updatePokemon}: Inputs) {
                             <span className="font-bold">{value}</span>
                             </div>
                             <Progress value={(value / 500) * 100} color={getStatColor(value)} className="h-2" />
-                            <div className="flex">
-                                <div className="w-2/3 flex">
+                            <div className="md:flex">
+                                {/* EV */}
+                                <div className="w-full md:w-2/3 flex">
                                     <span className="font-medium mr-2">EV:</span>
+                                    {editable ? 
+                                        <Input
+                                            className="w-14 md:w-13 mr-2"
+                                            value={evs[stat as keyof PokemonStats]}
+                                            size="small"
+                                            disableUnderline={true}
+                                            onChange={(event) => handleInputChange(stat as keyof PokemonStats, Number(event.target.value), setEvs, 0, Math.min(252, evPool+evs[stat as keyof PokemonStats]))}
+                                            inputProps={{
+                                            step: 1,
+                                            min: 0,
+                                            max: Math.min(252, evPool+evs[stat as keyof PokemonStats]),
+                                            type: 'number',
+                                            'aria-labelledby': 'input-slider',
+                                            }}
+                                        />
+                                        :
+                                        <span className="w-12 md:w-11 mr-2">
+                                            {evs[stat as keyof PokemonStats]}
+                                        </span>
+                                    }
+                                    {editable ? 
+                                        <Slider 
+                                            size="small"
+                                            min={0}
+                                            max={252}
+                                            step={1}
+                                            onChange={(event, ev) => handleInputChange(stat as keyof PokemonStats, Math.min(ev, evPool+evs[stat as keyof PokemonStats]), setEvs, 0, Math.min(252, evPool+evs[stat as keyof PokemonStats]))}
+                                            onChangeCommitted={commitSliderChange}
+                                            value={evs[stat as keyof PokemonStats]}
+                                            sx={{
+                                                color: "#7a8ae6ff"
+                                            }}
+                                        />
+                                        :
+                                        <Progress 
+                                            className="my-auto"
+                                            value={evs[stat as keyof PokemonStats] * 100 / 252} 
+                                            color="bg-indigo-400"
+                                        />
+                                    }
+                                </div>
+                                {/* IV */}
+                                <div className="w-full md:w-1/3 flex">
+                                <span className="font-medium md:ml-4 mr-2">IV:</span>
+                                {editable ? 
                                     <Input
-                                        className="w-13 mr-2"
-                                        value={evs[stat as keyof PokemonStats]}
+                                        className="w:15 md:w-14 mr-1"
+                                        value={ivs[stat as keyof PokemonStats]}
                                         size="small"
                                         disableUnderline={true}
-                                        onChange={(event) => handleInputChange(stat as keyof PokemonStats, Number(event.target.value), setEvs, 0, Math.min(252, evPool+evs[stat as keyof PokemonStats]))}
+                                        onChange={(event) => handleInputChange(stat as keyof PokemonStats, Number(event.target.value), setIvs, 0, 31)}
                                         inputProps={{
                                         step: 1,
                                         min: 0,
-                                        max: Math.min(252, evPool+evs[stat as keyof PokemonStats]),
+                                        max: 31,
                                         type: 'number',
                                         'aria-labelledby': 'input-slider',
                                         }}
                                     />
+                                    :
+                                    <span className="w-14 md:w-13 mr-2">
+                                        {ivs[stat as keyof PokemonStats]}
+                                    </span>
+                                }
+                                {editable ?
                                     <Slider 
+                                        className="mr-2"
                                         size="small"
                                         min={0}
-                                        max={252}
+                                        max={31}
                                         step={1}
-                                        onChange={(event, ev) => handleInputChange(stat as keyof PokemonStats, Math.min(ev, evPool+evs[stat as keyof PokemonStats]), setEvs, 0, Math.min(252, evPool+evs[stat as keyof PokemonStats]))}
+                                        onChange={(event, iv) => handleInputChange(stat as keyof PokemonStats, iv, setIvs, 0, 31)}
                                         onChangeCommitted={commitSliderChange}
-                                        value={evs[stat as keyof PokemonStats]}
+                                        value={ivs[stat as keyof PokemonStats]}
                                         sx={{
-                                            color: "silver"
+                                            color: "#7a8ae6ff"
                                         }}
                                     />
-                                </div>
-                                <div className="w-1/3 flex">
-                                <span className="font-medium ml-4 mr-2">IV:</span>
-                                <Input
-                                    className="w-11 mr-1"
-                                    value={ivs[stat as keyof PokemonStats]}
-                                    size="small"
-                                    disableUnderline={true}
-                                    onChange={(event) => handleInputChange(stat as keyof PokemonStats, Number(event.target.value), setIvs, 0, 31)}
-                                    inputProps={{
-                                    step: 1,
-                                    min: 0,
-                                    max: 31,
-                                    type: 'number',
-                                    'aria-labelledby': 'input-slider',
-                                    }}
-                                />
-                                <Slider 
-                                    className="mr-2"
-                                    size="small"
-                                    min={0}
-                                    max={31}
-                                    step={1}
-                                    onChange={(event, iv) => handleInputChange(stat as keyof PokemonStats, iv, setIvs, 0, 31)}
-                                    onChangeCommitted={commitSliderChange}
-                                    value={ivs[stat as keyof PokemonStats]}
-                                    sx={{
-                                        color: "silver"
-                                    }}
-                                />
+                                    :
+                                    <Progress 
+                                        className="my-auto"
+                                        value={ivs[stat as keyof PokemonStats] * 100 / 31} 
+                                        color="bg-indigo-400"
+                                    />
+                                }
                             </div>
                             </div>
                         </div>
                     </Card>
                 ))}
             </div>
-            <Card className="p-3 border-gray-200">
+            <Card className={`p-3 border-gray-200 ${!evPool ? 'bg-muted':''}`}>
                 <div className="flex justify-between mb-2">
                     <div className="font-medium flex gap-2">
                         <Sparkles className="h-4 w-4 mt-1"/> 

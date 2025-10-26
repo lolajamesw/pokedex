@@ -7,9 +7,10 @@ import PokemonMovesCard from "./learnable-moves-card";
 type Inputs = {
     pokemon: MyPokemon,
     updatePokemonDetail: React.Dispatch<React.SetStateAction<MyPokemon | null>>
+    editable?: boolean,
 }
 
-export default function MyPokemonMovesCard({ pokemon, updatePokemonDetail }: Inputs) {
+export default function MyPokemonMovesCard({ pokemon, updatePokemonDetail, editable=true }: Inputs) {
 
     const learnMove = async (moveToLearn: AttackDetails) => {
         try {
@@ -96,7 +97,7 @@ export default function MyPokemonMovesCard({ pokemon, updatePokemonDetail }: Inp
                     {pokemon.knownAttacks.map((move, index) => (
                     <div
                         key={index}
-                        className="flex flex-col sm:flex-row sm:items-center justify-between p-3 border rounded-lg bg-green-50/50 border-green-200 hover:bg-muted/50"
+                        className="flex flex-col sm:flex-row sm:items-center justify-between p-3 border rounded-lg hover:shadow-md"
                     >
                         <div className="flex-1">
                         <div className="flex items-center gap-2 mb-1">
@@ -117,13 +118,15 @@ export default function MyPokemonMovesCard({ pokemon, updatePokemonDetail }: Inp
                                 {move.effect}
                             </span> : <span></span>
                         }
-                        <button
-                            onClick={() => forgetMove(move)}
-                            className="p-1 rounded-full bg-red-100 text-red-600 hover:bg-red-200 transition-colors"
-                            title="Forget this move"
-                        >
-                            <X className="h-4 w-4" />
-                        </button>
+                        {editable && 
+                            <button
+                                onClick={() => forgetMove(move)}
+                                className="p-1 rounded-full bg-red-100 text-red-600 hover:bg-red-200 transition-colors"
+                                title="Forget this move"
+                            >
+                                <X className="h-4 w-4" />
+                            </button>
+                        }
                         </div>
                     </div>
                     ))}
@@ -131,36 +134,38 @@ export default function MyPokemonMovesCard({ pokemon, updatePokemonDetail }: Inp
                 )}
                 </div>
             </div>
-            <PokemonMovesCard pokemon={pokemon} knownMoves={pokemon.knownAttacks.map((move) => move.name)} learnButton={(move) => 
-                isMoveKnown(move) ? (
-                    <button
-                    onClick={() => forgetMove(move)}
-                    className="p-1 rounded-full bg-red-100 text-red-600 hover:bg-red-200 transition-colors"
-                    title="Forget this move"
-                    >
-                    <X className="h-4 w-4" />
-                    </button>
-                ) : (
-                    <button
-                    onClick={() => learnMove(move)}
-                    disabled={pokemon.knownAttacks.length>=4}
-                    className={`p-1 rounded-full transition-colors ${
-                        pokemon.knownAttacks.length<4
-                        ? "bg-green-100 text-green-600 hover:bg-green-200"
-                        : "bg-gray-100 text-gray-400 cursor-not-allowed"
-                    }`}
-                    title={
-                        pokemon.knownAttacks.length < 4
-                        ? "Learn this move"
-                        : pokemon.knownAttacks.length >= 4
-                            ? "Cannot learn more moves (4/4 slots full)"
-                            : "Move already known"
-                    }
-                    >
-                    <Plus className="h-4 w-4" />
-                    </button>
-                )
-            }/>
+            {editable && 
+                <PokemonMovesCard pokemon={pokemon} knownMoves={pokemon.knownAttacks.map((move) => move.name)} learnButton={(move) => 
+                    isMoveKnown(move) ? (
+                        <button
+                        onClick={() => forgetMove(move)}
+                        className="p-1 rounded-full bg-red-100 text-red-600 hover:bg-red-200 transition-colors"
+                        title="Forget this move"
+                        >
+                        <X className="h-4 w-4" />
+                        </button>
+                    ) : (
+                        <button
+                        onClick={() => learnMove(move)}
+                        disabled={pokemon.knownAttacks.length>=4}
+                        className={`p-1 rounded-full transition-colors ${
+                            pokemon.knownAttacks.length<4
+                            ? "bg-green-100 text-green-600 hover:bg-green-200"
+                            : "bg-gray-100 text-gray-400 cursor-not-allowed"
+                        }`}
+                        title={
+                            pokemon.knownAttacks.length < 4
+                            ? "Learn this move"
+                            : pokemon.knownAttacks.length >= 4
+                                ? "Cannot learn more moves (4/4 slots full)"
+                                : "Move already known"
+                        }
+                        >
+                        <Plus className="h-4 w-4" />
+                        </button>
+                    )
+                }/>
+            }
         </div>
     )
 }

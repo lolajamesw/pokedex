@@ -6,10 +6,11 @@ type Inputs<T extends PokedexPokemon> = {
     variants: CardPokemon[],
     currentForm: string,
     instanceID?: number,
+    editable?: boolean,
     updatePokemonDetail: React.Dispatch<React.SetStateAction<T | null>>,
 }
 
-export default function PokemonVariantCard<T extends PokedexPokemon>({ variants, currentForm, instanceID, updatePokemonDetail }: Inputs<T>) {
+export default function PokemonVariantCard<T extends PokedexPokemon>({ variants, currentForm, instanceID, editable=true, updatePokemonDetail }: Inputs<T>) {
     const updateVariantDisplay = (variant: CardPokemon) => {
         updatePokemonDetail((prev) => ({
             ...prev,
@@ -96,7 +97,7 @@ export default function PokemonVariantCard<T extends PokedexPokemon>({ variants,
                     {Object.entries(variants).map(([key, variant]: [string, CardPokemon]) => 
                         <PokeCard
                         pokemon={variant}
-                        onClick={selectVariant}
+                        onClick={() => {if (editable) selectVariant}}
                         cornerVisible={currentForm === variant.form}
                         cornerElement = {
                             <div className="pokemon-badges">

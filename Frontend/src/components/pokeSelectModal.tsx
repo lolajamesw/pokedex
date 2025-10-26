@@ -55,6 +55,7 @@ export default function PokeSelectionModal({ isOpen, onClose, userPokemon, selec
               <PokeTile
                 key={pokemon.id}
                 pokemon={pokemon}
+                targetPage=""
                 isSelected={tempSelected.some((p) => p.id === pokemon.id)}
                 onSelect={handlePokemonSelect}
                 simplified={true}

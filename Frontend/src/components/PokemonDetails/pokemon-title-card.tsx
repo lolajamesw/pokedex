@@ -5,13 +5,13 @@ type InputType = {
     pokemon: PokedexPokemon | MyPokemon;
     topRight?: React.ReactNode;
     statusIndicators?: React.ReactNode;
-    itemElement?: React.ReactNode;
+    teraType?: React.ReactNode;
     nickname?: string;
     level?: number;
 }
 
 
-export default function PokemonTitleCard({ pokemon, nickname, level, topRight, statusIndicators, itemElement }: InputType) {
+export default function PokemonTitleCard({ pokemon, nickname, level, topRight, statusIndicators, teraType: itemElement }: InputType) {
     return (
         <div>
             <div className="card overflow-hidden">
@@ -33,9 +33,7 @@ export default function PokemonTitleCard({ pokemon, nickname, level, topRight, s
                                     #{pokemon.pID.toString().padStart(3, "0")}
                                 </Badge>
                                 {/* Status Indicators on Pokemon Image */}
-                                <div className="absolute -bottom-2 -right-2 flex gap-1">
-                                    {statusIndicators}
-                                </div>
+                                {statusIndicators}
                             </div>
                             <div className="flex-1 text-center md:text-left">
                                 <div className="flex flex-col md:flex-row md:items-baseline md:gap-3 mb-2">

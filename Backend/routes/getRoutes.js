@@ -142,6 +142,22 @@ module.exports = (app, db) => {
         });
     });
 
+    app.get('/types', (req, res)=> {
+        const sql = "SELECT * FROM Types";
+        db.query(sql, (err, data)=> {
+            if (err) return res.json(err);
+            return res.json(data);
+        })
+    })
+
+    app.get('/teraType/:id', (req, res)=> {
+        const id = req.params.id;
+        const sql = `SELECT teraType FROM MyPokemon WHERE instanceID=${id}`;
+        db.query(sql, (err, data)=> {
+            if (err) return res.json(err);
+            return res.json(data[0]);
+        })
+    })
     
     /**
      * GET /pokemon/items/:pID
@@ -575,51 +591,51 @@ module.exports = (app, db) => {
                 )
 
             SELECT atk.type, atkSum, defSum FROM (
-            SELECT type, SUM(effect)/(SELECT COUNT(*) FROM MyPokemon WHERE uID=95 AND onteam=1) as defSum FROM (
+            SELECT type, SUM(effect)/(SELECT COUNT(*) FROM MyPokemon WHERE uID=${uID} AND onteam=1) as defSum FROM (
                 SELECT type1 type, effect*(
                     SELECT COUNT(*) from Pokedex p WHERE pID IN (
-                        SELECT pID FROM MyPokemon WHERE uID=95 AND onteam=1
+                        SELECT pID FROM MyPokemon WHERE uID=${uID} AND onteam=1
                     )
                                                         AND p.type1=typeA AND p.type2=typeB
                 ) as effect
                 FROM crossed2 WHERE typeA IN (
                     SELECT p.type1 from Pokedex p WHERE pID IN (
-                        SELECT pID FROM MyPokemon WHERE uID=95 AND onteam=1
+                        SELECT pID FROM MyPokemon WHERE uID=${uID} AND onteam=1
                     )
                                                     AND p.type2=typeB
                 ) UNION ALL
                 SELECT type1 type, effect*(
                     SELECT COUNT(*) from Pokedex p WHERE pID IN (
-                        SELECT pID FROM MyPokemon WHERE uID=95 AND onteam=1
+                        SELECT pID FROM MyPokemon WHERE uID=${uID} AND onteam=1
                     )
                                                         AND p.type1=full.type2 AND p.type2=""
                 ) as effect FROM full WHERE type2 IN (
                     SELECT p.type1 FROM Pokedex p WHERE pID IN (
-                        SELECT pID FROM MyPokemon WHERE uID=95 AND onteam=1
+                        SELECT pID FROM MyPokemon WHERE uID=${uID} AND onteam=1
                     )AND p.type2="")
             )as subDef GROUP BY type
-            ) as def, (SELECT type, SUM(effect)/(SELECT COUNT(*) FROM MyPokemon WHERE uID=95 AND onteam=1)
+            ) as def, (SELECT type, SUM(effect)/(SELECT COUNT(*) FROM MyPokemon WHERE uID=${uID} AND onteam=1)
                 as atkSum FROM (
                                    SELECT type2 as type, effect*(
                                        SELECT COUNT(*) from Pokedex p WHERE pID IN (
-                                           SELECT pID FROM MyPokemon WHERE uID=95 AND onteam=1
+                                           SELECT pID FROM MyPokemon WHERE uID=${uID} AND onteam=1
                                        )
                                                                         AND p.type1=typeA AND p.type2=typeB
                                    ) as effect
                                    FROM crossed1 WHERE typeA IN (
                                        SELECT type1 from Pokedex p WHERE pID IN (
-                                           SELECT pID FROM MyPokemon WHERE uID=95 AND onteam=1
+                                           SELECT pID FROM MyPokemon WHERE uID=${uID} AND onteam=1
                                        )
                                                                      AND p.type2=typeB
                                    ) UNION ALL
                                    SELECT type2 type, effect*(
                                        SELECT COUNT(*) from Pokedex p WHERE pID IN (
-                                           SELECT pID FROM MyPokemon WHERE uID=95 AND onteam=1
+                                           SELECT pID FROM MyPokemon WHERE uID=${uID} AND onteam=1
                                        )
                                                                         AND p.type1=full.type1 AND p.type2=""
                                    ) as effect FROM full WHERE type1 IN (
                                        SELECT type1 FROM Pokedex p WHERE pID IN (
-                                           SELECT pID FROM MyPokemon WHERE uID=95 AND onteam=1
+                                           SELECT pID FROM MyPokemon WHERE uID=${uID} AND onteam=1
                                        )
                                                                      AND p.type2=""
                                    )) as subAtk GROUP BY type
@@ -1391,6 +1407,126 @@ WHERE
             console.error("Search error:", err);
             res.status(500).json({ error: "Server error while searching" });
         }
+    });
+
+    function formatEVIV(stats, base) {
+        stats = Object.entries(stats).filter(([stat, value]) => value !== base)
+        stats = stats.map(([stat, value]) => value + " " + stat)
+        return stats.join(" / ")
+    }
+
+    function toTitleCase(str) {
+        return str.replace(
+            /[\w+]*/g,
+            text => text.charAt(0).toUpperCase() + text.substring(1).toLowerCase()
+        );
+    }
+
+    app.get(`/pokemon/teamExport/:uID`, async (req, res) => {
+        const uID = req.params.uID;
+        const sql = `
+            WITH ids as (
+                SELECT instanceID FROM MyPokemon
+                WHERE uID=${uID} AND onTeam=1
+            ), variants as (
+                (SELECT ids.instanceID, mp.form
+                FROM ids 
+                LEFT JOIN MyPokemon mp ON ids.instanceID=mp.instanceID
+                JOIN PokemonVariants v ON mp.form=v.name)
+                UNION
+                (SELECT ids.instanceID, p.name as form
+                FROM ids
+                LEFT JOIN MyPokemon mp ON ids.instanceID=mp.instanceID
+                LEFT JOIN Pokedex p ON mp.pID=p.pID
+                WHERE mp.form NOT IN (SELECT name FROM PokemonVariants))
+            ), numbered_attacks AS (
+                SELECT 
+                    ca.instanceID,
+                    a.attack_name,
+                    ROW_NUMBER() OVER (PARTITION BY ca.instanceID ORDER BY a.aID) AS attack_num
+                FROM ids
+                LEFT JOIN CurrentAttacks ca ON ca.instanceID = ids.instanceID
+                LEFT JOIN Attacks a ON a.aID = ca.aID
+            ), attacks AS (
+                SELECT 
+                    ids.instanceID,
+                    MAX(CASE WHEN na.attack_num = 1 THEN na.attack_name END) AS atk1,
+                    MAX(CASE WHEN na.attack_num = 2 THEN na.attack_name END) AS atk2,
+                    MAX(CASE WHEN na.attack_num = 3 THEN na.attack_name END) AS atk3,
+                    MAX(CASE WHEN na.attack_num = 4 THEN na.attack_name END) AS atk4
+                FROM ids LEFT JOIN numbered_attacks na ON na.instanceID = ids.instanceID
+                GROUP BY ids.instanceID
+            )
+            SELECT mp.instanceID,
+                mp.nickname,
+                mp.teraType,
+                p.type1,
+                v.form,
+                i.item,
+                mp.ability,
+                mp.hpEV,
+                mp.atkEV,
+                mp.defEV,
+                mp.spAtkEV,
+                mp.spDefEV,
+                mp.speedEV,
+                mp.hpIV,
+                mp.atkIV,
+                mp.defIV,
+                mp.spAtkIV,
+                mp.spDefIV,
+                mp.speedIV,
+                mp.nature,
+                a.atk1,
+                a.atk2,
+                a.atk3,
+                a.atk4
+            FROM ids
+            LEFT JOIN MyPokemon mp ON ids.instanceID=mp.instanceID
+            LEFT JOIN variants v ON ids.instanceID=v.instanceID
+            LEFT JOIN heldItems i ON ids.instanceID=i.instanceID
+            LEFT JOIN attacks a ON ids.instanceID=a.instanceID
+            LEFT JOIN Pokedex p ON mp.pID=p.pID;
+        `
+        db.query(sql, (err, results) => {
+            if (err) {
+                console.error("Error fetching pokemon's data", err);
+                return res.status(500).json({error: "Database error"});
+            } 
+            results = results.map((row) => ({...row, evs: formatEVIV({
+                    HP: row.hpEV, 
+                    Atk: row.atkEV, 
+                    Def: row.defEV,
+                    SpA: row.spAtkEV, 
+                    SpD: row.spDefEV, 
+                    Spe: row.speedEV
+                }, 0), ivs: formatEVIV({
+                    HP: row.hpIV, 
+                    Atk: row.atkIV,
+                    Def: row.defIV,
+                    SpA: row.spAtkIV, 
+                    SpD: row.spDefIV, 
+                    Spe: row.speedIV}, 31
+                )
+            }))
+            const mon = results.map((row) =>`${
+                    row.nickname !== null ? `${row.nickname} (${row.form})` : row.form
+                }${
+                    row.item !== null ? ` @ ${toTitleCase(row.item)}`:''
+                } ${
+                    row.ability !== null ? `\nAbility: ${toTitleCase(row.ability)}` : ''
+                }${
+                    row.teraType !== null ? `\nTera Type: ${row.teraType}` : `\nTera Type: ${row.type1}`
+                }${ row.evs !== '' ? `\nEVs: ${row.evs}` : '' }${
+                    row.nature !== null ? `\n${row.nature} Nature` : ''
+                }${ row.ivs !== '' ? `\nIVs: ${row.ivs}` : '' }${
+                    [row.atk1, row.atk2, row.atk3, row.atk4]
+                    .filter((atk) => atk !== null)
+                    .map((a) => '\n- ' + a).join('')
+                }`
+            )
+            return res.json(mon.join('\n\n'));
+        });
     });
 
 

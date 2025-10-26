@@ -4,18 +4,20 @@ import pokeIcon from "./../assets/pokeIcon.png";
 
 type Inputs = {
     pokemon: PokemonSummary;
+    targetPage: string;
     isSelected?: boolean;
     onSelect?: (pokemon: PokemonSummary) => void;
     simplified?: boolean;
 }
 
-export default function PokeTile({ pokemon, isSelected=false, onSelect, simplified=false }: Inputs) {
+export default function PokeTile({ pokemon, targetPage, isSelected=false, onSelect, simplified=false }: Inputs) {
   return (
-    <div className={"showcase-card"}>
+    <div className={"w-full rounded-lg border border-gray-100 shadow-[0_1px_2px_rgba(0,0,0,0.05)] cursor-arrow"}>
         <Link
-            to={`/my-pokemon/${pokemon.pID}/${pokemon.id}`}
+            to={`/${targetPage}/${pokemon.pID}/${pokemon.id}`}
             key={pokemon.id}
             style={{ textDecoration:"none", color: "inherit" }}
+            onClick={(e) => {if (simplified) e.preventDefault()}}
         >
             <div className="showcase-card-header">
                 {!simplified && 
@@ -39,7 +41,7 @@ export default function PokeTile({ pokemon, isSelected=false, onSelect, simplifi
                 {simplified && 
                     <button
                         className={`select-button ${isSelected ? "select-button-selected" : ""}`}
-                        onClick={() => onSelect?.(pokemon)}
+                        onClick={(e) => {onSelect?.(pokemon)}}
                     >
                         {isSelected ? "Selected" : "Select"}
                     </button>

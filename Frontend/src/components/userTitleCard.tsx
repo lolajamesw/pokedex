@@ -2,15 +2,19 @@ import { useState, useEffect } from "react"
 import { Save, X, Edit2 } from "lucide-react"
 import { User } from "../types/pokemon-details"
 
-type Input = {pokemonCaught: number}
+type Input = {
+  pokemonCaught: number;
+  uID: string;
+  editable: boolean;
+}
 
-export default function UserTitleCard({pokemonCaught}: Input) {
-    const [user, setUser] = useState<User>({id: parseInt(localStorage.getItem("uID") ?? "0"), tradeCount: 0, displayName: "", username: "" })
+export default function UserTitleCard({ pokemonCaught, uID, editable }: Input) {
+    const [user, setUser] = useState<User>({id: parseInt(uID), tradeCount: 0, displayName: "", username: "" })
     const [isEditingName, setIsEditingName] = useState(false)
     const [editedDisplayName, setEditedDisplayName] = useState(user.displayName)
 
     useEffect(() => {
-        fetch("http://localhost:8081/user/" + localStorage.getItem("uID"))
+        fetch("http://localhost:8081/user/" + uID)
           .then((res) => res.json())
           .then((data) => setUser(data))
           .catch((err) => console.error("Failed to fetch user: ", err));
@@ -22,7 +26,7 @@ export default function UserTitleCard({pokemonCaught}: Input) {
         const response = await fetch("http://localhost:8081/updateUserDisplayName", {
         method: "POST",
         headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({uID: localStorage.getItem("uID"), name: editedDisplayName})
+        body: JSON.stringify({uID: uID, name: editedDisplayName})
         })
     } catch (err) {
         console.error("Error updating user's name: ", err);
@@ -67,9 +71,14 @@ export default function UserTitleCard({pokemonCaught}: Input) {
                   ) : (
                     <div className="name-display">
                       <h1 className="profile-name">{user.displayName}</h1>
-                      <button className="edit-button edit-button-ghost" onClick={() => setIsEditingName(true)}>
-                        <Edit2 className="edit-icon" />
-                      </button>
+                      {editable && 
+                        <button   
+                          className="edit-button edit-button-ghost" 
+                          onClick={() => setIsEditingName(true)}
+                        >
+                          <Edit2 className="edit-icon" />
+                        </button>
+                      }
                     </div>
                   )}
                   <p className="profile-username">@{user.username}</p>

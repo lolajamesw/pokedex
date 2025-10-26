@@ -8,7 +8,6 @@ import "./navbar.css"
 const navigationItems = [
   { name: "Pokédex", href: "/pokedex", icon: BookOpen },
   { name: "My Pokémon", href: "/my-pokemon", icon: User },
-  { name: "Market", href: "/market", icon: ShoppingCart },
   { name: "Battle", href: "/battle", icon: Sword},
   { name: "Search User", href: "/search-user", icon: UserSearch }
 ]

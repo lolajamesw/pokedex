@@ -6,10 +6,11 @@ import { useEffect, useState } from "react";
 type Inputs = {
     abilities: Ability[],
     instanceID?: string,
-    selectedAbility?: string
+    selectedAbility?: string,
+    editable?: boolean
 }
 
-export default function AbilityCard({ abilities, instanceID, selectedAbility }: Inputs) {
+export default function AbilityCard({ abilities, instanceID, selectedAbility, editable=true }: Inputs) {
     const [expanded, setExpanded] = useState<string[]>([])
     const [setAbility, setSetAbility] = useState<string | undefined>(selectedAbility)
 
@@ -65,7 +66,7 @@ export default function AbilityCard({ abilities, instanceID, selectedAbility }: 
                         className={`flex flex-col sm:flex-row sm:items-center justify-between p-3 pl-5 pr-5 border
                             rounded-lg transition-colors hover:shadow-[0_4px_12px_rgba(0,0,0,0.15)]
                             ${ability.name === setAbility ? "border-black bg-muted" : "border-gray-300"}`}
-                        onClick={!!instanceID ? 
+                        onClick={!!instanceID && editable ? 
                             () => {selectAbility(ability.name)} : 
                             (e: React.MouseEvent) => {toggleExpanded(e, ability.name)}}
                     >

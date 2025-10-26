@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Edit2, Save, X, Plus } from "lucide-react"
+import { Edit2, Save, X, Plus, SaveIcon, DownloadIcon, ReceiptText } from "lucide-react"
 import "./css/profile.css"
 import "./css/details.css"
 import { PokemonSummary, EffectType, User } from "./types/pokemon-details"
@@ -9,10 +9,12 @@ import PokeTile from "./components/pokeTile"
 import PokeSelectionModal from "./components/pokeSelectModal"
 import TypeSummary from "./components/typeSummary"
 import UserTitleCard from "./components/userTitleCard"
+import TeamExportModal from "./components/team-export-modal"
 
 export default function Profile() {
   const [pokemonList, setPokemonList] = useState<PokemonSummary[]>([]);
-  const [isTeamModalOpen, setIsTeamModalOpen] = useState(false)
+  const [isEditTeamModalOpen, setIsEditTeamModalOpen] = useState(false)
+  const [isExportTeamModalOpen, setIsExportTeamModalOpen] = useState(false)
   const [myTeam, setMyTeam] = useState<PokemonSummary[]>([])
   const [teamSummary, setTeamSummary] = useState<EffectType[]>([])
 
@@ -61,27 +63,33 @@ export default function Profile() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-red-50">
       <div className="profile-container">
-        <UserTitleCard pokemonCaught={pokemonList.length} />
+        <UserTitleCard pokemonCaught={pokemonList.length} uID={localStorage.getItem("uID") ?? '0'} editable={true}/>
     
         {/* Pokemon on my Team */} 
-        <div className="showcase-section">
+        <div className="flex flex-col gap-[1rem] p-4 bg-white rounded-lg shadow-[0_4px_12px_rgba(0,0,0,0.15)]">
           <div className="showcase-header">
             <h2 className="showcase-title">My Team</h2>
-            <button className="edit-showcase-button" onClick={() => setIsTeamModalOpen(true)}>
-              <Edit2 className="edit-showcase-icon" />
-              Edit Team
-            </button>
+            <div className="space-x-3">
+              <button className="edit-showcase-button" onClick={() => setIsExportTeamModalOpen(true)}>
+                <ReceiptText className="edit-showcase-icon" />
+                Export Team
+              </button>
+              <button className="edit-showcase-button" onClick={() => setIsEditTeamModalOpen(true)}>
+                <Edit2 className="edit-showcase-icon" />
+                Edit Team
+              </button>
+            </div>
           </div>
           {/* still working */}
           {myTeam.length > 0 ? (
-            <div className="showcase-grid">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-[1rem]">
               {myTeam.map((pokemon, index) => (
-                <PokeTile key={`${pokemon.nickname}-${index}`} pokemon={pokemon} />
+                <PokeTile key={`${pokemon.nickname}-${index}`} pokemon={pokemon} targetPage="my-pokemon"/>
               ))}
               {/* Empty slots */}
               {Array.from({ length: 6 - myTeam.length }).map((_, index) => (
                 <div key={`empty-${index}`} className="empty-slot">
-                  <button className="empty-slot-button" onClick={() => {setIsTeamModalOpen(true)}}>
+                  <button className="empty-slot-button" onClick={() => {setIsEditTeamModalOpen(true)}}>
                     <Plus className="empty-slot-icon" />
                   </button>
                 </div>
@@ -90,7 +98,7 @@ export default function Profile() {
           ) : (
             <div className="no-showcase">
               <p className="no-showcase-text">No Pokémon are on your team yet</p>
-              <button className="add-showcase-button" onClick={() => setIsTeamModalOpen(true)}>
+              <button className="add-showcase-button" onClick={() => setIsEditTeamModalOpen(true)}>
                 <Plus className="add-showcase-icon" />
                 Add Pokémon to Showcase
               </button>
@@ -100,10 +108,15 @@ export default function Profile() {
         
         <TypeSummary teamSummary={teamSummary}/>
 
+        <TeamExportModal 
+          isOpen={isExportTeamModalOpen}
+          onClose={() => setIsExportTeamModalOpen(false)}
+        />
+
         {/* Pokemon Team Selection Modal */}
         <PokeSelectionModal
-          isOpen={isTeamModalOpen}
-          onClose={() => setIsTeamModalOpen(false)}
+          isOpen={isEditTeamModalOpen}
+          onClose={() => setIsEditTeamModalOpen(false)}
           userPokemon={pokemonList}
           selectedPokemon={myTeam}
           onSelectionChange={handleTeamChange}

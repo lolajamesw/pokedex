@@ -45,7 +45,7 @@ export default function SearchUserPage() {
         {Array.isArray(results) &&
             results.map((user) => (
             <Link
-                to={`/search-profile/${user.uID}`}
+                to={`/view-profile/${user.uID}`}
                 key={user.uID}
                 className="user-card-link"
             >

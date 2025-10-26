@@ -1,23 +1,46 @@
 import { Heart, X, Plus, Star, LogOut } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import ItemSelectorModal from "./item-selector-modal";
 
 import pokeIcon from "./../../assets/pokeIcon.png";
 import { MyPokemon, CardPokemon, Item } from "../../types/pokemon-details";
 import PokemonTitleCard from "./pokemon-title-card";
+import { Select, SelectContent, SelectItem, SelectTrigger } from "../ui/select";
 
 type InputType = {
     items: Item[];
     variants: CardPokemon[];
     pokemon: MyPokemon;
-    fromPokedex: boolean;
+    editable?: boolean;
     updatePokemonDetail: React.Dispatch<React.SetStateAction<MyPokemon | null>>;
 }
 
 
-export default function MyPokemonTitleCard({items, variants, pokemon, fromPokedex=false, updatePokemonDetail}: InputType) {
+export default function MyPokemonTitleCard({items, variants, pokemon, editable=true, updatePokemonDetail}: InputType) {
     // Item-relevant states
-    const [showItemSelector, setShowItemSelector] = useState(false);
+    const [teraType, setTeraType] = useState(pokemon.types[0]);
+    const [types, setTypes] = useState<string[]>([])
+
+    useEffect(() => {
+        const fetchTypes = async () => {
+            const typeRes = await fetch('http://localhost:8081/types');
+            const typeData = await typeRes.json();
+            console.log("fetched type data");
+            setTypes(typeData.map((type: {type: string}) => type.type));
+        }
+        fetchTypes();
+    }, [])
+
+    useEffect(() => {
+        const fetchType = async () => {
+            const typeRes = await fetch(`http://localhost:8081/teraType/${pokemon.id}`);
+            const typeData = await typeRes.json();
+            console.log("fetched type data");
+            if (typeData.teraType !== null)
+                setTeraType(typeData.teraType);
+        }
+        fetchType();
+    }, [])
     
     /* ---------- Release Pokemon Call ---------- */
 
@@ -63,57 +86,21 @@ export default function MyPokemonTitleCard({items, variants, pokemon, fromPokede
     }
     };
 
-    const updateVariant = async(form: string, findFunc: (variant: CardPokemon) => boolean) => {
-        const response = await fetch("http://localhost:8081/setVariant", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ instanceID: pokemon.id, form: form }),
-        });
-        if (response.ok) {
-            const variant = variants.find(findFunc);
-            updatePokemonDetail((prev) => ({
-                ...prev,
-                name: variant?.name,
-                form: variant?.form,
-                types: variant?.types,
-                description: variant?.description,
-                stats: variant?.stats,
-                imgID: variant?.imgID,
-            } as MyPokemon))
-        } else {
-            const errMsg = await response.text();
-            console.error("Failed to update Pokémon variant:", errMsg);
-            alert("Failed to update Pokémon variant. See console for details.");
-        }
-        
-    }
-
-    const removeItem = async () => {
+    const setType = async (type: string) => {
         try {
-        const response = await fetch("http://localhost:8081/setHeldItem", {
+            const response = await fetch("http://localhost:8081/setTeraType", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ instanceID: pokemon.id, item: null }),
-        });
-
-        if (response.ok) {
-            const prevItem = items.find((item) => item.name === pokemon.heldItem);
-            if (prevItem && prevItem.variant === pokemon.name) {
-                updateVariant(
-                    variants.find((variant) => variant.form === 'original')?.name ?? "", 
-                    (variant) => variant.form === 'original'
-                );
-            }
-            updatePokemonDetail((prev) => ({ ...prev, heldItem: null, heldItemIcon: null } as MyPokemon));
-            setShowItemSelector(false);
-        } else {
-            const errMsg = await response.text();
-            console.error("Failed to update Pokémon moveset:", errMsg);
-            alert("Failed to update Pokémon moveset. See console for details.");
-        }
+            body: JSON.stringify({
+                instanceID: pokemon.id,
+                type: type,
+            }),
+            });
+            if (response.ok) setTeraType(type);
+            else console.error("Error setting tera type")
         } catch (err) {
-        console.error("Error updating Pokémon item:", err);
-        alert("Something went wrong updating Pokémon heldItem.");
+            console.error("Error setting tera type: ", err);
+            alert("Something went wrong setting the Pokémon's tera type.");
         }
     }
 
@@ -124,7 +111,7 @@ export default function MyPokemonTitleCard({items, variants, pokemon, fromPokede
                 nickname = {pokemon.nickname}
                 level = {pokemon.level}
 
-                topRight = {
+                topRight = {editable ? 
                     <div className="absolute top-4 right-4 flex items-center gap-3">
                         {/* Favorite Button */}
                         <button
@@ -148,6 +135,7 @@ export default function MyPokemonTitleCard({items, variants, pokemon, fromPokede
                             <LogOut className="h-6 w-6" />
                         </button>
                     </div>
+                    : undefined
                 }
 
                 statusIndicators = {
@@ -162,61 +150,50 @@ export default function MyPokemonTitleCard({items, variants, pokemon, fromPokede
                             <Star className="h-3 w-3 text-green-800 fill-current" />
                         </div>
                         )}
+                        {pokemon.heldItemIcon && 
+                            <img
+                                src={pokemon.heldItemIcon==="null" || !(pokemon.heldItemIcon) ? pokeIcon : pokemon.heldItemIcon}
+                                alt={'what'}
+                                width={25}
+                                height={25}
+                                className="mx-auto bg-blue-400 rounded-full"
+                            />
+                        }
                     </div>
                 }
-
-                itemElement = {
-                    <div>
-                        {/* Held Item Display */}
-                        {pokemon.heldItem && !fromPokedex && (
-                            <div className="flex items-center gap-2 justify-center md:justify-start mb-3">
-                                <span className="text-sm text-white/75">Holding:</span>
-                                <div className="flex items-center gap-2 bg-white/20 rounded-lg px-3 py-1">
-                                    <span className="text-lg">
-                                        <img
-                                            src={pokemon.heldItemIcon==="null" || !(pokemon.heldItemIcon) ? pokeIcon : pokemon.heldItemIcon}
-                                            alt={pokemon.heldItem}
-                                            width={25}
-                                            height={25}
-                                            className="mx-auto"
-                                        />
-                                    </span>
-                                    <span className="text-sm font-medium text-white">{pokemon.heldItem}</span>
-                                    <button
-                                        onClick={removeItem}
-                                        className="p-1 rounded-full bg-white/20 text-white/60 hover:bg-white/30 hover:text-white transition-colors"
-                                        title="Remove held item"
-                                    >
-                                        <X className="h-3 w-3" />
-                                    </button>
-                                </div>
-                            </div>
-                        )}
-
-                        {/* Give Item Button */}
-                        <div className="flex justify-center md:justify-start mb-3">
-                            <button
-                                onClick={() => setShowItemSelector(true)}
-                                className="flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white/90 hover:text-white px-4 py-2 rounded-lg transition-colors"
-                                >
-                                <Plus className="h-4 w-4" />
-                                {pokemon.heldItem ? "Change Item" : "Give Item"}
-                            </button>
-                        </div>
+                teraType={
+                    <div className="mx-auto md:mx-0 mb-2 py-1 w-3/5 flex space-x-2 justify-center items-center md:justify-start">
+                        <span>Tera type:</span>
+                        {editable ? 
+                            <Select value={teraType} onValueChange={setType}>
+                                <SelectTrigger className={`w-30 h-7 border-white/50 type-${teraType.toLowerCase()} rounded-xl`}>
+                                    <div className="flex items-center font-semibold gap-2">
+                                        <span>{teraType}</span>
+                                    </div>
+                                </SelectTrigger>
+                                <SelectContent align="center" className="border-transparent shadow-none bg-transparent w-30">
+                                    {types.map((type) => (
+                                    <SelectItem key={type} value={type} 
+                                        className={`my-1 px-3 py-1 w-auto h-7 rounded-full flex justify-center 
+                                            type-${type.toLowerCase()} border border-white/75 shadow-md
+                                            hover:scale-105 active:scale-95 data-[state=checked]:text-white 
+                                            `}
+                                        >
+                                        <div className="text-white font-semibold">
+                                            <span>{type}</span>
+                                        </div>
+                                    </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                            :
+                            <span key={teraType} className={`badge badge-type type-${teraType.toLowerCase()}`}>
+                                {teraType}
+                            </span>
+                        }
                     </div>
                 }
             />
-            {/* Item Selector Modal */}
-            {showItemSelector && <ItemSelectorModal 
-                items={items}
-                variants={variants}
-                heldItem={pokemon.heldItem}
-                instanceID={pokemon.id}
-                updatePokemonDetail={updatePokemonDetail}
-                setShowItemSelector={setShowItemSelector}
-                removeItem={removeItem}
-                updateVariant={updateVariant}
-            />}
         </div>
     )
 }

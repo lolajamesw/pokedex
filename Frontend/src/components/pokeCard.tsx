@@ -39,7 +39,7 @@ export default function PokeCard({pokemon, nature, defaultDescription="", onClic
         className={`border bg-white rounded-lg cursor-pointer transition-all duration-200 hover:shadow-md ${
         cornerVisible
             ? "border-primary ring-2 ring-primary/20"
-            : "border-border hover:border-muted-foreground"
+            : "border-border "
         }`}
         onClick={() => {onClick ? onClick(pokemon) : () => {}}}
     >
