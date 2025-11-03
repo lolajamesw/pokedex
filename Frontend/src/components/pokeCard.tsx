@@ -51,12 +51,12 @@ export default function PokeCard({pokemon, nature, defaultDescription="", onClic
             </h3>
             <div className="pokemon-badges">{cornerVisible && cornerElement}</div>
         </div>
-        <div className="pokemon-image w-[200px] h-[200px] flex items-center justify-center overflow-hidden">
-        <img
-            src={`https://www.serebii.net/pokemon/art/${pokemon.imgID}.png`}
-            alt={pokemon.name}
-            // width={200}
-            className="rounded-lg bg-white/20 p-2 h-[100%]"
+        <div className="pokemon-image h-[150px] flex items-center justify-center overflow-hidden">
+            <img
+                src={`https://www.serebii.net/pokemon/art/${pokemon.imgID}.png`}
+                alt={pokemon.name}
+                // width={200}
+                className="rounded-lg bg-white/20 p-2 h-[100%]"
             />
         </div>
         <div className="flex flex-row items-center justify-between">

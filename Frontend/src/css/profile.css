@@ -238,7 +238,7 @@
   color: #111827;
 }
 
-.edit-showcase-button {
+.team-button {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
@@ -249,15 +249,15 @@
   transition: all 0.2s;
   border: none;
   cursor: pointer;
-  background: #3b82f6;
+  background-color: var(--color-indigo-500);
   color: white;
 }
 
-.edit-showcase-button:hover {
-  background: #1d4ed8;
+.team-button:hover {
+  background-color: var(--color-indigo-600);
 }
 
-.edit-showcase-icon {
+.button-icon {
   height: 1rem;
   width: 1rem;
 }
@@ -417,13 +417,13 @@
   transition: all 0.2s;
   border: none;
   cursor: pointer;
-  background: #3b82f6;
+  background: var(--color-indigo-500);
   color: white;
   align-self: center;
 }
 
 .add-showcase-button:hover {
-  background: #1d4ed8;
+  background: var(--color-indigo-600);
 }
 
 .add-showcase-icon {

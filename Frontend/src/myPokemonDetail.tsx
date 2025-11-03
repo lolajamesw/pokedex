@@ -67,11 +67,15 @@ const MyPokeDetail = () => {
         const knownRes = await fetch(`http://localhost:8081/pokemon/knownAttacks/${id}`);
         const knownData = await knownRes.json();
 
+        const teamRes = await fetch(`http://localhost:8081/pokemon/onTeams/${id}`);
+        const teamData = await teamRes.json();
+
         // Combine into Pokémon detail object
         const combined: MyPokemon = {
           ...overviewData,
           attacks: attackData,
           knownAttacks: knownData,
+          tIDs: teamData,
         };
         setPokemonDetail(combined);
 

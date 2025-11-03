@@ -90,7 +90,7 @@ export interface MyPokemon {
     level: number;
     nature: string;
     ability: string;
-    onTeam: boolean;
+    tIDs: number[];
     favourite: boolean;
     types: string[];
     stats: PokemonStats;
@@ -109,7 +109,7 @@ export interface PokemonSummary {
   name: string;
   nickname?: string;
   item?: string;
-  onTeam?: boolean;
+  tID?: number | null;
   imgID: string;
 };
 
@@ -126,6 +126,13 @@ export interface User {
   username: string;
 }
 
+export interface Team {
+  id: number;
+  name: string;
+  pokemon: PokemonSummary[];
+  typeSummary: EffectType[];
+  showTypeSummary: boolean;
+}
 
 export interface Nature {
   nature: string;

@@ -86,14 +86,16 @@ async function updateDatabase() {
 
 async function updateLinks() {
   const connection = await mysqlPromise.createConnection(dbConfig);
-  for (let pID=152; pID<=721; pID++) {
+  for (let pID=898; pID<=898; pID++) {
     console.log(pID);
     const res = await  axios.get(`https://pokeapi.co/api/v2/pokemon-species/${pID}`);
     const varieties = res.data.varieties; 
     for (const variety of varieties) {
       const details = await connectAbility(variety.pokemon.url);
       if (details) {
+        console.log(details)
         for (const ability of details.abilities) {
+          console.log(ability)
           try {
             await connection.execute(
               `INSERT INTO PokemonAbilities(pID, variant, ability) VALUES (${pID}, '${details.variant}', '${ability}');`
@@ -105,11 +107,7 @@ async function updateLinks() {
       } else {
         console.warn(`Issue fetching pokemon detials`);
       }
-    }
-    // 20, 25, 36, 71, 105
-    // https://pokeapi.co/api/v2/pokemon/10093/  https://pokeapi.co/api/v2/pokemon/10158/ https://pokeapi.co/api/v2/pokemon/10278/ https://pokeapi.co/api/v2/pokemon/10279/
-    // https://pokeapi.co/api/v2/pokemon/10149/, https://pokeapi.co/api/v2/pokemon/10159/, https://pokeapi.co/api/v2/pokemon/10283/,
-    // https://pokeapi.co/api/v2/pokemon/10284/, 
+    } // 898
   }
   
 

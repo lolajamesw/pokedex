@@ -244,8 +244,8 @@ module.exports = (app, db) => {
      * GET /userPokemon/:id
      * URL params:
      *  - id (number): instanceID from MyPokemon
-     * Response: single object { id, pID, name, nickname, level, favourite, onTeam, types, stats, legendary, description }
-     * NOTE: `favourite` and `onteam` are read with `[0] === 1` pattern which should be made explicit.
+     * Response: single object { id, pID, name, nickname, level, favourite, tID, types, stats, legendary, description }
+     * NOTE: `favourite` is read with `[0] === 1` pattern which should be made explicit.
      */
     app.get(`/userPokemon/:id`, (req, res) => {
         const id = req.params.id;
@@ -260,7 +260,6 @@ module.exports = (app, db) => {
             nickname,
             level,
             favourite,
-            onteam,
             type1,
             type2,
             hp, atk, def, spAtk, spDef, speed,
@@ -292,7 +291,7 @@ module.exports = (app, db) => {
                 nature: row.nature,
                 ability: row.ability,
                 favourite: row.favourite[0]===1,
-                onTeam: row.onteam[0]===1,
+                tIDs: [],
                 types: row.type2 ? [row.type1, row.type2] : [row.type1],
                 stats: {
                     hp: row.hp,
@@ -555,14 +554,14 @@ module.exports = (app, db) => {
     });
 
     /**
-     * GET /teamSummary/:id
+     * GET /teamSummary/:ids
      * Returns attack/defense averages per type for the user's team.
      * WARNING: the SQL below hardcodes `uID=95` in many places. That is almost certainly
      * a bug. It should use the `uID` from the route param (e.g. via a `?` placeholder).
      * The SQL is fairly complex and may be slow; consider precomputing or simplifying.
      */
-    app.get('/teamSummary/:id', (req,res) => {
-        const uID = req.params.id;
+    app.get('/teamSummary/:ids', (req, res) => {
+        const ids = req.params.ids;
         const sql = `
             WITH FX as (
                 SELECT type1, type2, (
@@ -591,51 +590,51 @@ module.exports = (app, db) => {
                 )
 
             SELECT atk.type, atkSum, defSum FROM (
-            SELECT type, SUM(effect)/(SELECT COUNT(*) FROM MyPokemon WHERE uID=${uID} AND onteam=1) as defSum FROM (
+            SELECT type, SUM(effect)/(SELECT COUNT(*) FROM MyPokemon WHERE instanceID IN ${ids}) as defSum FROM (
                 SELECT type1 type, effect*(
                     SELECT COUNT(*) from Pokedex p WHERE pID IN (
-                        SELECT pID FROM MyPokemon WHERE uID=${uID} AND onteam=1
+                        SELECT pID FROM MyPokemon WHERE instanceID IN ${ids}
                     )
                                                         AND p.type1=typeA AND p.type2=typeB
                 ) as effect
                 FROM crossed2 WHERE typeA IN (
                     SELECT p.type1 from Pokedex p WHERE pID IN (
-                        SELECT pID FROM MyPokemon WHERE uID=${uID} AND onteam=1
+                        SELECT pID FROM MyPokemon WHERE instanceID IN ${ids}
                     )
                                                     AND p.type2=typeB
                 ) UNION ALL
                 SELECT type1 type, effect*(
                     SELECT COUNT(*) from Pokedex p WHERE pID IN (
-                        SELECT pID FROM MyPokemon WHERE uID=${uID} AND onteam=1
+                        SELECT pID FROM MyPokemon WHERE instanceID IN ${ids}
                     )
                                                         AND p.type1=full.type2 AND p.type2=""
                 ) as effect FROM full WHERE type2 IN (
                     SELECT p.type1 FROM Pokedex p WHERE pID IN (
-                        SELECT pID FROM MyPokemon WHERE uID=${uID} AND onteam=1
+                        SELECT pID FROM MyPokemon WHERE instanceID IN ${ids}
                     )AND p.type2="")
             )as subDef GROUP BY type
-            ) as def, (SELECT type, SUM(effect)/(SELECT COUNT(*) FROM MyPokemon WHERE uID=${uID} AND onteam=1)
+            ) as def, (SELECT type, SUM(effect)/(SELECT COUNT(*) FROM MyPokemon WHERE instanceID IN ${ids})
                 as atkSum FROM (
                                    SELECT type2 as type, effect*(
                                        SELECT COUNT(*) from Pokedex p WHERE pID IN (
-                                           SELECT pID FROM MyPokemon WHERE uID=${uID} AND onteam=1
+                                           SELECT pID FROM MyPokemon WHERE instanceID IN ${ids}
                                        )
                                                                         AND p.type1=typeA AND p.type2=typeB
                                    ) as effect
                                    FROM crossed1 WHERE typeA IN (
                                        SELECT type1 from Pokedex p WHERE pID IN (
-                                           SELECT pID FROM MyPokemon WHERE uID=${uID} AND onteam=1
+                                           SELECT pID FROM MyPokemon WHERE instanceID IN ${ids}
                                        )
                                                                      AND p.type2=typeB
                                    ) UNION ALL
                                    SELECT type2 type, effect*(
                                        SELECT COUNT(*) from Pokedex p WHERE pID IN (
-                                           SELECT pID FROM MyPokemon WHERE uID=${uID} AND onteam=1
+                                           SELECT pID FROM MyPokemon WHERE instanceID IN ${ids}
                                        )
                                                                         AND p.type1=full.type1 AND p.type2=""
                                    ) as effect FROM full WHERE type1 IN (
                                        SELECT type1 FROM Pokedex p WHERE pID IN (
-                                           SELECT pID FROM MyPokemon WHERE uID=${uID} AND onteam=1
+                                           SELECT pID FROM MyPokemon WHERE instanceID IN ${ids}
                                        )
                                                                      AND p.type2=""
                                    )) as subAtk GROUP BY type
@@ -664,7 +663,7 @@ module.exports = (app, db) => {
      * GET /userPokemon?uID=123
      * Returns all MyPokemon rows for a user, joined to Pokedex for stats.
      * Uses parameterized `?` placeholder so this route is safer than many others above.
-     * Response: [ { id, number, name, types, stats, level, nickname, showcase, onTeam } ]
+     * Response: [ { id, number, name, types, stats, level, nickname, showcase, tID } ]
      */
     app.get('/userPokemon', (req, res) => {
         const uID = req.query.uID;
@@ -708,7 +707,7 @@ module.exports = (app, db) => {
             mp.showcase,
             mp.form,
             mp.nature,
-            mp.onteam,
+            mp.tID,
             icon,
             v.imgID
             FROM MyPokemon mp
@@ -766,7 +765,7 @@ module.exports = (app, db) => {
                 nature: row.nature,
                 nickname: row.nickname,
                 showcase: row.showcase[0]===1,
-                onTeam: row.onteam[0]===1,
+                tID: row.tID,
                 item: row.icon,
                 imgID: row.imgID ?? row.pID.toString().padStart(3, '0')
             }));
@@ -1409,6 +1408,40 @@ WHERE
         }
     });
 
+    app.get('/pokemon/onTeams/:id', async (req, res) => {
+        const id = req.params.id;
+        const sql = `SELECT tID FROM Teams WHERE 
+        p1=${id} OR p2=${id} OR p3=${id} OR p4=${id} OR p5=${id} OR p6=${id}
+        `
+        db.query(sql, (err, results) => {
+            if (err) {
+                console.error("Error fetching pokemon's data", err);
+                return res.status(500).json({error: "Database error"});
+            } 
+            results = results.map((row) => (row.tID))
+            return res.json(results);
+        })
+    })
+
+    app.get('/pokemon/teams/:uID', async (req, res) => {
+        const uID = req.params.uID;
+        const sql = `SELECT * FROM Teams WHERE uID=${uID}`
+        db.query(sql, (err, results) => {
+            if (err) {
+                console.error("Error fetching pokemon's data", err);
+                return res.status(500).json({error: "Database error"});
+            } 
+            results = results.map((row) => ({
+                id: row.tID,
+                name: row.name,
+                pokemon: [row.p1, row.p2, row.p3, row.p4, row.p5, row.p6]
+                    .filter((p) => p !== null)
+                    .map((p) => ({id: p}))
+            }))
+            return res.json(results);
+        })
+    })
+
     function formatEVIV(stats, base) {
         stats = Object.entries(stats).filter(([stat, value]) => value !== base)
         stats = stats.map(([stat, value]) => value + " " + stat)
@@ -1422,23 +1455,27 @@ WHERE
         );
     }
 
-    app.get(`/pokemon/teamExport/:uID`, async (req, res) => {
-        const uID = req.params.uID;
+    app.get(`/pokemon/teamExport/:ids`, async (req, res) => {
+        const ids = req.params.ids;
         const sql = `
-            WITH ids as (
+            WITH  ids as (
                 SELECT instanceID FROM MyPokemon
-                WHERE uID=${uID} AND onTeam=1
-            ), variants as (
-                (SELECT ids.instanceID, mp.form
-                FROM ids 
-                LEFT JOIN MyPokemon mp ON ids.instanceID=mp.instanceID
-                JOIN PokemonVariants v ON mp.form=v.name)
+                WHERE instanceID IN ${ids}
+            ), variants as ((
+                    SELECT ids.instanceID, mp.form
+                    FROM ids 
+                    LEFT JOIN MyPokemon mp ON ids.instanceID=mp.instanceID
+                    JOIN PokemonVariants v ON mp.form=v.name
+                )
                 UNION
-                (SELECT ids.instanceID, p.name as form
-                FROM ids
-                LEFT JOIN MyPokemon mp ON ids.instanceID=mp.instanceID
-                LEFT JOIN Pokedex p ON mp.pID=p.pID
-                WHERE mp.form NOT IN (SELECT name FROM PokemonVariants))
+                (
+                    SELECT ids.instanceID, p.name as form
+                    FROM ids
+                    LEFT JOIN MyPokemon mp ON ids.instanceID=mp.instanceID
+                    LEFT JOIN Pokedex p ON mp.pID=p.pID
+                    WHERE mp.form NOT IN (SELECT name FROM PokemonVariants)
+                        OR mp.form IS NULL
+                )
             ), numbered_attacks AS (
                 SELECT 
                     ca.instanceID,

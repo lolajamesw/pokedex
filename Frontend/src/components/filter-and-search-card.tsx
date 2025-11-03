@@ -1,6 +1,7 @@
-import { Search, SortAsc, SortDesc } from "lucide-react";
+import { Search, SortAsc, SortDesc, SquaresIntersect, SquaresUnite } from "lucide-react";
 import { useEffect, useState } from "react";
 import { CardPokemon, PokemonStats } from "../types/pokemon-details";
+import { Checkbox, ListItemText, MenuItem, Select, SelectChangeEvent, ToggleButton, ToggleButtonGroup, Tooltip } from "@mui/material";
 
 type Inputs<T extends CardPokemon> = {
     pokemonList: T[],
@@ -11,10 +12,11 @@ type Inputs<T extends CardPokemon> = {
 
 export default function FilterAndSearchCard<T extends CardPokemon>({ pokemonList, setSortedPokemon, extraFilterLabel, extraFilterAttr } : Inputs<T>) {
     const [searchTerm, setSearchTerm] = useState("");
-    const [filterType, setFilterType] = useState("all");
-    const [sortBy, setSortBy] = useState("number");
+    const [filteredTypes, setFilteredTypes] = useState<string[]>([]);
+    const [sortBy, setSortBy] = useState("pID");
     const [sortOrder, setSortOrder] = useState("asc");
     const [allTypes, setAllTypes] = useState<string[]>([]);
+    const [exactType, setExactType] = useState(false)
     const [extraFilter, setExtraFilter] = useState<boolean>(false);
 
     useEffect(() => {
@@ -25,15 +27,28 @@ export default function FilterAndSearchCard<T extends CardPokemon>({ pokemonList
         );
     }, [pokemonList])
 
+    const eqSet = (xs: Set<string>, ys: Set<string>) =>
+    xs.size === ys.size &&
+    [...xs].every((x) => ys.has(x));
+
     useEffect(() => {
         // Filter pokemon that match the search bar
+        const typeSet = new Set(filteredTypes);
+        console.log(filteredTypes)
+        console.log(typeSet)
         const filtered = pokemonList.filter((pokemon) => {
           const matchesSearch =
             pokemon.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
             pokemon.pID.toString().includes(searchTerm) ||
             ('nickname' in pokemon && !!pokemon.nickname && 
                 String(pokemon.nickname).toLowerCase().includes(searchTerm.toLowerCase()));
-          const matchesType = filterType === "all" || pokemon.types.includes(filterType);
+          const matchesType = typeSet.size===0 ? true : exactType ? (
+            eqSet(new Set(pokemon.types), typeSet)
+          ) : (
+            typeSet.has(pokemon.types[0]) || (
+              pokemon.types.length===2 && typeSet.has(pokemon.types[1])
+            )
+          );
           const matchesExtraFilter = !extraFilterAttr || !extraFilter || !!(pokemon[extraFilterAttr])
     
           return matchesSearch && matchesType && matchesExtraFilter
@@ -67,7 +82,17 @@ export default function FilterAndSearchCard<T extends CardPokemon>({ pokemonList
         })
         // Return the filtered and sorted pokemon
         setSortedPokemon(filtered);
-      }, [searchTerm, sortBy, sortOrder, filterType, extraFilter, pokemonList])
+      }, [searchTerm, sortBy, sortOrder, filteredTypes, extraFilter, exactType, pokemonList])
+
+      const updateFilteredTypes = (event: SelectChangeEvent<string[]>) => {
+        const { target: { value } } = event;
+        const newTypes = typeof value === 'string' ? value.split(',') : value;
+        setFilteredTypes(
+          newTypes,
+        );
+        if (newTypes.length === 0 || newTypes.length > 2)
+          setExactType(false);
+      };
 
     return (
         <div className="filters-card">
@@ -76,6 +101,7 @@ export default function FilterAndSearchCard<T extends CardPokemon>({ pokemonList
           </div>
           <div className="filters-content">
             <div className="search-row">
+
               <div className="search-input-container">
                 <Search className="search-icon" />
                 <input
@@ -85,17 +111,39 @@ export default function FilterAndSearchCard<T extends CardPokemon>({ pokemonList
                   className="search-input"
                 />
               </div>
-              <select value={filterType} onChange={(e) => setFilterType(e.target.value)} className="type-select">
-                <option value="all">All Types</option>
+
+              <ToggleButtonGroup 
+                value={exactType} 
+                onChange={(e, val) => {if (val !== null) setExactType(val)}} 
+                size="small" exclusive
+                disabled={filteredTypes.length === 0 || filteredTypes.length > 2}
+              >
+                <Tooltip title="types include">
+                  <ToggleButton value={false}><SquaresUnite/></ToggleButton>
+                </Tooltip>
+                <Tooltip title="types match">
+                  <ToggleButton value={true}><SquaresIntersect/></ToggleButton>
+                </Tooltip>              
+              </ToggleButtonGroup>
+
+              <Select
+                multiple
+                value={filteredTypes}
+                onChange={updateFilteredTypes}
+                renderValue={(types) => types.length < 1 ? "All types" : [...types].join(', ')}
+                className="type-select"
+              >
                 {allTypes.map((type) => (
-                  <option key={type} value={type}>
-                    {type}
-                  </option>
+                  <MenuItem key={type} value={type}>
+                    <Checkbox checked={filteredTypes.includes(type)} />
+                    <ListItemText primary={type} />
+                  </MenuItem>
                 ))}
-              </select>
+              </Select>
             </div>
 
             <div className="controls-row">
+
               <div className="sort-controls">
                 <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} className="sort-select">
                   <option value="pID">Number</option>
@@ -107,9 +155,11 @@ export default function FilterAndSearchCard<T extends CardPokemon>({ pokemonList
                   <option value="spDef">Sp. Defense</option>
                   <option value="speed">Speed</option>
                 </select>
+
                 <button onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")} className="sort-button">
                   {sortOrder === "asc" ? <SortAsc className="sort-icon" /> : <SortDesc className="sort-icon" />}
                 </button>
+
                 {!!extraFilter &&
                     <div className="checkbox-container">
                         <input

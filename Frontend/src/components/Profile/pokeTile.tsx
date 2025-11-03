@@ -1,6 +1,6 @@
-import { PokemonSummary } from "../types/pokemon-details"
+import { PokemonSummary } from "../../types/pokemon-details"
 import { Link } from "react-router-dom"
-import pokeIcon from "./../assets/pokeIcon.png";
+import pokeIcon from "./../../assets/pokeIcon.png";
 
 type Inputs = {
     pokemon: PokemonSummary;

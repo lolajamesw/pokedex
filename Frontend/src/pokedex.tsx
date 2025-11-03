@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useMemo } from "react"
-import { Search, SortAsc, SortDesc } from "lucide-react"
+import { Pagination } from '@mui/material'
 import { Link } from "react-router-dom"
 import "./css/pokedex.css"
 import PokeCard from './components/pokeCard.js'
@@ -29,13 +29,26 @@ type Pokemon = {
 export default function Pokedex() {
   const [pokemonList, setPokemonList] = useState<Pokemon[]>([])
   const [filteredAndSortedPokemon, setSortedPokemon] = useState<Pokemon[]>([])
+  const [displayedPokemon, setDisplayed] = useState<Pokemon[]>([])
+  const [page, setPage] = useState(1);
+  const pageSize = 40
+  
   useEffect(() => {
     fetch(`http://localhost:8081/pokemon?uID=${localStorage.getItem("uID")}`)
       .then((res) => res.json())
       .then((data) => setPokemonList(data))
       .catch((err) => console.error("Failed to fetch Pokémon:", err));
   }, [])
-  console.log(pokemonList.filter((pokemon) => pokemon['caught']))
+
+  useEffect(() => {setPage(1)}, [filteredAndSortedPokemon])
+
+  useEffect(() => {
+    setDisplayed(filteredAndSortedPokemon.slice((page-1)*pageSize, page*pageSize));
+  }, [filteredAndSortedPokemon, page])
+
+  const handlePageChange = (event: React.ChangeEvent<unknown>, value: number) => {
+    setPage(value);
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-red-50">
@@ -55,12 +68,22 @@ export default function Pokedex() {
 
         {/* Results Count */}
         <div className="results-count">
-          Showing {filteredAndSortedPokemon.length} of {pokemonList.length} Pokémon
+          Showing {(page-1)*pageSize+1}-{Math.min(page*pageSize, filteredAndSortedPokemon.length)} of {filteredAndSortedPokemon.length} Pokémon
+          {filteredAndSortedPokemon.length >  pageSize &&  
+            <Pagination 
+              page={page}
+              count={Math.ceil(filteredAndSortedPokemon.length / pageSize)}
+              onChange={handlePageChange}
+              size="small"
+              hideNextButton
+              hidePrevButton
+            />
+          }
         </div>
 
         {/* Pokemon Grid */}
         <div className="pokemon-grid">
-          {filteredAndSortedPokemon.map((pokemon) => (
+          {displayedPokemon.map((pokemon) => (
             // <PokemonCard key={pokemon.id} pokemon={pokemon} />
             <Link
               to={`/pokedex/${pokemon.pID}`}
@@ -70,6 +93,16 @@ export default function Pokedex() {
               <PokeCard pokemon={pokemon} numberVisible={true}/>
             </Link>
           ))}
+        </div>
+
+        <div className="mx-auto">
+          <Pagination 
+            page={page}
+            count={Math.ceil(filteredAndSortedPokemon.length / pageSize)}
+            siblingCount={2}
+            onChange={handlePageChange}
+            size="large"
+          />
         </div>
 
         {filteredAndSortedPokemon.length === 0 && (

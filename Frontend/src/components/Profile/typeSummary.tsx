@@ -1,4 +1,4 @@
-import { EffectType } from "../types/pokemon-details";
+import { EffectType } from "../../types/pokemon-details";
 
 
 type Inputs = {

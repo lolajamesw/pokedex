@@ -1,6 +1,5 @@
-import { Heart, X, Plus, Star, LogOut } from "lucide-react";
+import { Heart, Star, LogOut } from "lucide-react";
 import { useEffect, useState } from "react";
-import ItemSelectorModal from "./item-selector-modal";
 
 import pokeIcon from "./../../assets/pokeIcon.png";
 import { MyPokemon, CardPokemon, Item } from "../../types/pokemon-details";
@@ -145,7 +144,7 @@ export default function MyPokemonTitleCard({items, variants, pokemon, editable=t
                             <Heart className="h-3 w-3 text-yellow-800 fill-current" />
                         </div>
                         )}
-                        {pokemon.onTeam && (
+                        {pokemon.tIDs.length > 0 && (
                         <div className="bg-green-400 rounded-full p-1.5 shadow-lg">
                             <Star className="h-3 w-3 text-green-800 fill-current" />
                         </div>

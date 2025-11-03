@@ -93,7 +93,7 @@ export default function PokemonVariantCard<T extends PokedexPokemon>({ variants,
                 return (
                 <div className="space-y-4">
                     <div className={`grid grid-cols-1 md:grid-cols-2 
-                    lg:grid-cols-${!(variants.length%3) ? "3" : (variants.length % 4) ? "2" : "4"} gap-4`}>
+                    lg:grid-cols-3 gap-4 justify-center`}>
                     {Object.entries(variants).map(([key, variant]: [string, CardPokemon]) => 
                         <PokeCard
                         pokemon={variant}

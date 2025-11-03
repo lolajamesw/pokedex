@@ -91,10 +91,24 @@ CREATE TABLE MyPokemon(
     nickname VARCHAR(30),
     level INT,
     favourite BIT DEFAULT 0,
-    onteam BIT DEFAULT 0,
+    tID INT REFERENCES Teams(tID),
     showcase BIT DEFAULT 0,
     dateAdded DATETIME DEFAULT '2000-01-01',
     CHECK (level>0)
+);
+
+DROP TABLE Teams;
+
+CREATE TABLE Teams(
+	tID INT AUTO_INCREMENT PRIMARY KEY,
+	name VARCHAR(30) NOT NULL,
+    uID INT NOT NULL REFERENCES User(uID)-- ,
+--     p1 INT REFERENCES MyPokemon(instanceID),
+--     p2 INT REFERENCES MyPokemon(instanceID),
+--     p3 INT REFERENCES MyPokemon(instanceID),
+--     p4 INT REFERENCES MyPokemon(instanceID),
+--     p5 INT REFERENCES MyPokemon(instanceID),
+--     p6 INT REFERENCES MyPokemon(instanceID)
 );
 
 CREATE TABLE Items(

@@ -215,6 +215,49 @@ module.exports = (app) => {
         }
     })
 
+    app.post("/addTeam", async (req, res) => {
+        const { name, user } = req.body;
+        console.log("POST /addTeam:", req.body);
+        try {
+            await runQuery(
+                "INSERT INTO Teams(name, uID) VALUES (?, ?)",
+                [name, user]
+            );
+            res.send("Pokémon team added successfully.");
+        } catch (err) {
+            console.error("Error in /addTeam:", err);
+            res.status(500).send("Server error adding new team.");
+        }
+    })
+
+    app.post("/dropTeam", async (req, res) => {
+        const { tID } = req.body;
+        console.log("POST /dropTeam:", req.body);
+        try {
+            await runQuery(
+                "DELETE FROM Teams WHERE tID=?", [tID]
+            );
+            res.send("Pokémon team deleted successfully.");
+        } catch (err) {
+            console.error("Error in /dropTeam:", err);
+            res.status(500).send("Server error forgetting team.");
+        }
+    })
+
+    app.post("/setTeamName", async (req, res) => {
+        const { tID, name } = req.body;
+        console.log("POST /setTeamName:", req.body);
+        try {
+            await runQuery(
+                "UPDATE Teams SET name=? WHERE tID=?", [name, tID]
+            );
+            res.send("Pokémon team deleted successfully.");
+        } catch (err) {
+            console.error("Error in /setTeamName:", err);
+            res.status(500).send("Server error changing team name.");
+        }
+    })
+
     // Mark Pokémon as showcased
     app.post("/setShowcased", async (req, res) => {
         const { instanceIDs, user } = req.body;
@@ -302,8 +345,9 @@ module.exports = (app) => {
 
     // Set user's active team
     app.post("/setTeam", async (req, res) => {
-        const { instanceIDs, user } = req.body;
+        const { instanceIDs, user, team } = req.body;
         console.log("POST /setTeam:", req.body);
+        const ids = [...instanceIDs, null, null, null, null, null, null]
 
         try {
             // Reset all team flags
@@ -312,8 +356,13 @@ module.exports = (app) => {
             // Set new team members
             if (instanceIDs.length > 0) {
                 await runQuery(
-                    "UPDATE MyPokemon SET onteam=1 WHERE instanceID IN (?) AND uID=?",
-                    [instanceIDs, user]
+                    "UPDATE Teams SET \
+                    p1=?, p2=?, p3=?, p4=?, p5=?, p6=? \
+                    WHERE tID=? AND uID=?",
+                    [
+                        ids[0], ids[1], ids[2], ids[3], ids[4], ids[5],
+                        team, user
+                    ]
                 );
             }
 

@@ -275,30 +275,32 @@
 .results-count {
   font-size: 0.875rem;
   color: #6b7280;
+  display: flex;
+  justify-content: space-between;
 }
 
 /* Pokemon Grid */
 .pokemon-grid {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: repeat(2, 1fr);
   gap: 1rem;
 }
 
-@media (min-width: 768px) {
-  .pokemon-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (min-width: 1024px) {
+@media (min-width: 640px) {
   .pokemon-grid {
     grid-template-columns: repeat(3, 1fr);
   }
 }
 
-@media (min-width: 1280px) {
+@media (min-width: 1024px) {
   .pokemon-grid {
     grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (min-width: 1280px) {
+  .pokemon-grid {
+    grid-template-columns: repeat(5, 1fr);
   }
 }
 
@@ -444,6 +446,7 @@
   grid-template-columns: repeat(2, 1fr);
   gap: 0.5rem;
   font-size: 0.875rem;
+  line-height: 0.5rem;
 }
 
 .stat-row {

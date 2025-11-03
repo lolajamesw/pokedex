@@ -1,4 +1,4 @@
-import { PokemonSummary } from "../types/pokemon-details";
+import { PokemonSummary, Team } from "../../types/pokemon-details";
 import { useState, useEffect } from "react"
 import PokeTile from "./pokeTile";
 
@@ -6,19 +6,18 @@ type Inputs = {
     isOpen: boolean,
     onClose: () => void,
     userPokemon: PokemonSummary[],
-    selectedPokemon: PokemonSummary[],
+    teams: Team[],
+    currentTeam: number,
     onSelectionChange: (p: PokemonSummary[]) => Promise<void>,
     title: string,
     filterFunc: (p: PokemonSummary) => void,
 }
 
-export default function PokeSelectionModal({ isOpen, onClose, userPokemon, selectedPokemon, onSelectionChange, title, filterFunc }: Inputs) {
-  const [tempSelected, setTempSelected] = useState(selectedPokemon);
+export default function PokeSelectionModal({ isOpen, onClose, userPokemon, teams, currentTeam, onSelectionChange, title, filterFunc }: Inputs) {
+  const [tempSelected, setTempSelected] = useState<PokemonSummary[]>([]);
   useEffect(() => {
-    setTempSelected(userPokemon.filter(
-      filterFunc,
-    ));
-  }, [userPokemon])
+    setTempSelected(teams.find((team) => team.id === currentTeam)?.pokemon ?? []);
+  }, [currentTeam])
 
   const handlePokemonSelect = (pokemon: PokemonSummary) => {
     const isAlreadySelected = tempSelected.some((p) => p.id === pokemon.id)
@@ -36,7 +35,7 @@ export default function PokeSelectionModal({ isOpen, onClose, userPokemon, selec
   }
 
   const handleCancel = () => {
-    setTempSelected(selectedPokemon)
+    setTempSelected(teams.filter((team) => team.id === currentTeam)[0].pokemon)
     onClose()
   }
 

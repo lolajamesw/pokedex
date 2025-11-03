@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react"
 import { Save, X, Edit2 } from "lucide-react"
-import { User } from "../types/pokemon-details"
+import { User } from "../../types/pokemon-details"
 
 type Input = {
   pokemonCaught: number;
