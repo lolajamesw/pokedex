@@ -102,13 +102,13 @@ DROP TABLE Teams;
 CREATE TABLE Teams(
 	tID INT AUTO_INCREMENT PRIMARY KEY,
 	name VARCHAR(30) NOT NULL,
-    uID INT NOT NULL REFERENCES User(uID)-- ,
---     p1 INT REFERENCES MyPokemon(instanceID),
---     p2 INT REFERENCES MyPokemon(instanceID),
---     p3 INT REFERENCES MyPokemon(instanceID),
---     p4 INT REFERENCES MyPokemon(instanceID),
---     p5 INT REFERENCES MyPokemon(instanceID),
---     p6 INT REFERENCES MyPokemon(instanceID)
+    uID INT NOT NULL REFERENCES User(uID),
+    p1 INT REFERENCES MyPokemon(instanceID),
+    p2 INT REFERENCES MyPokemon(instanceID),
+    p3 INT REFERENCES MyPokemon(instanceID),
+    p4 INT REFERENCES MyPokemon(instanceID),
+    p5 INT REFERENCES MyPokemon(instanceID),
+    p6 INT REFERENCES MyPokemon(instanceID)
 );
 
 CREATE TABLE Items(

@@ -4,6 +4,8 @@ import { useState, useRef, useEffect } from "react"
 import { useLocation, Link, useNavigate } from "react-router-dom"
 import { Menu, User, LogOut, BookOpen, ShoppingCart, Sword, UserSearch } from "lucide-react"
 import "./navbar.css"
+import { USER_API_URL } from "../constants"
+import { User as UserType } from "../types/pokemon-details"
 
 const navigationItems = [
   { name: "Pokédex", href: "/pokedex", icon: BookOpen },
@@ -13,10 +15,10 @@ const navigationItems = [
 ]
 
 export default function Navbar({ currentPage, setCurrentPage }) {
-  const [user, setUser] = useState({id: localStorage.getItem("uID"), tradeCount: 0, displayName: "", username: "" })
+  const [user, setUser] = useState<UserType>({id: Number(localStorage.getItem("uID")), tradeCount: 0, displayName: "", username: "" })
   const navigate = useNavigate();
   useEffect(() => {
-    fetch("http://localhost:8081/user/" + localStorage.getItem("uID"))
+    fetch(USER_API_URL + '?uID=' + localStorage.getItem("uID"))
       .then((res) => res.json())
       .then((data) => setUser(data))
       .catch((err) => console.error("Failed to fetch user:", err));

@@ -2,6 +2,7 @@ import { Swords, X, Plus } from "lucide-react"
 import { CardTitle } from "../ui/card";
 import { MyPokemon, AttackDetails } from "../../types/pokemon-details"
 import PokemonMovesCard from "./learnable-moves-card";
+import { POKEMON_API_URL, USER_POKEMON_API_URL } from "../../constants";
 
 
 type Inputs = {
@@ -14,19 +15,18 @@ export default function MyPokemonMovesCard({ pokemon, updatePokemonDetail, edita
 
     const learnMove = async (moveToLearn: AttackDetails) => {
         try {
-        const response = await fetch("http://localhost:8081/learnMove", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ instanceID: pokemon.id, aID: moveToLearn.id }),
-        });
+        const response = await fetch(
+            USER_POKEMON_API_URL + pokemon.id + '/moves/' + moveToLearn.id, 
+            { method: "POST" }
+        );
 
         if (response.ok) {
             // Refresh details after update
-            const overviewRes = await fetch(`http://localhost:8081/userPokemon/${pokemon.id}`);
+            const overviewRes = await fetch(USER_POKEMON_API_URL + pokemon.id);
             const overviewData = await overviewRes.json();
-            const attackRes = await fetch(`http://localhost:8081/pokemon/attacks/${pokemon.pID}`);
+            const attackRes = await fetch(POKEMON_API_URL + pokemon.pID + '/moves');
             const attackData = await attackRes.json();
-            const knownRes = await fetch(`http://localhost:8081/pokemon/knownAttacks/${pokemon.id}`);
+            const knownRes = await fetch(USER_POKEMON_API_URL + pokemon.id + '/moves');
             const knownData = await knownRes.json();
 
             const combined: MyPokemon = { ...overviewData, attacks: attackData, knownAttacks: knownData };
@@ -44,19 +44,18 @@ export default function MyPokemonMovesCard({ pokemon, updatePokemonDetail, edita
 
     const forgetMove = async (moveToForget: AttackDetails) => {
         try {
-        const response = await fetch("http://localhost:8081/unlearnMove", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ instanceID: pokemon.id, aID: moveToForget.id }),
-        });
+        const response = await fetch(
+            USER_POKEMON_API_URL + pokemon.id + '/moves/' + moveToForget.id, 
+            { method: "DELETE" }
+        );
 
         if (response.ok) {
             // Refresh details after update
-            const overviewRes = await fetch(`http://localhost:8081/userPokemon/${pokemon.id}`);
+            const overviewRes = await fetch(USER_POKEMON_API_URL + pokemon.id);
             const overviewData = await overviewRes.json();
-            const attackRes = await fetch(`http://localhost:8081/pokemon/attacks/${pokemon.pID}`);
+            const attackRes = await fetch(POKEMON_API_URL + pokemon.pID + '/moves');
             const attackData = await attackRes.json();
-            const knownRes = await fetch(`http://localhost:8081/pokemon/knownAttacks/${pokemon.id}`);
+            const knownRes = await fetch(USER_POKEMON_API_URL + pokemon.id + '/moves');
             const knownData = await knownRes.json();
 
             const combined: MyPokemon = { ...overviewData, attacks: attackData, knownAttacks: knownData };

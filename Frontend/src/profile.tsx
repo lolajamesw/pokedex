@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, act } from "react"
-import { ChevronDown, ChevronUp, Edit2, Plus, ReceiptText, Trash2 } from "lucide-react"
+import { Plus } from "lucide-react"
 import "./css/profile.css"
 import "./css/details.css"
 import { PokemonSummary, EffectType, User, Team } from "./types/pokemon-details"
@@ -9,6 +9,7 @@ import PokeSelectionModal from "./components/Profile/pokeSelectModal"
 import UserTitleCard from "./components/Profile/userTitleCard"
 import TeamExportModal from "./components/Profile/team-export-modal"
 import TeamCard from "./components/Profile/team-card"
+import { ANALYTICS_API_URL, TEAM_API_URL, USER_API_URL } from "./constants"
 
 export default function Profile() {
   const [pokemonList, setPokemonList] = useState<PokemonSummary[]>([]);
@@ -20,12 +21,12 @@ export default function Profile() {
   const [newName, setNewName] = useState("");
 
   useEffect(() => {
-    fetch(`http://localhost:8081/pokemon/teams/${localStorage.getItem("uID")}`)
+    fetch(TEAM_API_URL + '/' + localStorage.getItem("uID"))
       .then((res) => res.json())
       .then((data) => setRawTeams(data))
       .catch((err) => console.error("Failed to fetch team summary:", err));
 
-    fetch(`http://localhost:8081/userPokemon?uID=${localStorage.getItem("uID")}`)
+    fetch(USER_API_URL + '/pokemon?uID=' + localStorage.getItem("uID"))
         .then((res) => res.json())
         .then((data) => setPokemonList(data))
         .catch((err) => console.error("Failed to fetch Pokémon:", err));
@@ -38,11 +39,10 @@ export default function Profile() {
       for (const team of rawTeams) {
         typeSummaries.push({
           tID: team.id,
-          summary: await (await fetch(`http://localhost:8081/teamSummary/(${
-            team.pokemon.map((p) => p.id).join(',')
-          })`)).json()
+          summary: await (await fetch(
+            ANALYTICS_API_URL + '/teams/type-summary/' + team.id
+          )).json()
         })
-        console.log(typeSummaries)
       }
       setTeams(rawTeams.map((team) => ({
         id: team.id,
@@ -61,57 +61,59 @@ export default function Profile() {
   const handleTeamChange = async (selectedPokemon: PokemonSummary[]) => {
     try {
       console.log("Marking Pokemon: ", selectedPokemon.map((p)=>(p.nickname)));
-      const response = await fetch("http://localhost:8081/setTeam", {
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({instanceIDs: selectedPokemon.map((p)=>(p.id)), user: localStorage.getItem("uID"), team: activeTeam}),
-      });
-
-      setTeams(teams.map((prev) => ({
-        ...prev,
-        pokemon: prev.id===activeTeam ? selectedPokemon : prev.pokemon
-      })));
-      console.log(pokemonList)
-
-      const teamSum = await fetch(`http://localhost:8081/teamSummary/(${
-        teams.filter((t) => t.id===activeTeam)[0].pokemon.map((p) => p.id).join(',')
-      })`)
-      const teamSumData = await teamSum.json();
-      setTeams(teams.map((prev) => ({
-        ...prev,
-        typeSummary: prev.id === activeTeam ? teamSumData : prev.typeSummary,
-      })));
-
+      const response = await fetch(
+        TEAM_API_URL + '/' + activeTeam + '?instanceIDs=' 
+        + JSON.stringify(selectedPokemon.map((p)=>(p.id))), 
+        { method: "PATCH" }
+      );
+      console.log(activeTeam);
+      console.log(selectedPokemon)
+      if (response.ok) {
+        const teamSum = await fetch(ANALYTICS_API_URL + '/teams/type-summary/' + activeTeam)
+        const teamSumData = await teamSum.json();
+        setTeams(teams.map((prev) => ({
+          ...prev,
+          pokemon: prev.id===activeTeam ? selectedPokemon : prev.pokemon,
+          typeSummary: prev.id === activeTeam ? teamSumData : prev.typeSummary
+        })));
+        console.log(teams);
+      }
     } catch (err) {
       console.error("Error showcasing Pokémon: ", err);
       alert("Something went wrong adding the Pokémon.")
     }
   }
 
+  const testFunc = async () => {
+    fetch("http://localhost:8081/api/users/team/47/Team%205", { method: "POST" })
+      .then(async r => { console.log('FETCH OK', r.status, r.statusText); console.log('headers:', [...r.headers]); console.log('body:', await r.text()); })
+      .catch(err => console.error('FETCH ERROR', err));
+  }
+
   const addTeam = async () => {
     try {
       console.log("Adding Team:", newName);
-      const response = await fetch("http://localhost:8081/addTeam", {
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({
-          name: (newName === "" ? 'Team ' + (teams.length + 1) : newName),
-          user: localStorage.getItem("uID")
-        }),
-      });
+      const uID = localStorage.getItem("uID") || '';
+      const teamName = newName === "" ? `Team ${teams.length + 1}` : newName;
+      const encodedUrl = `${TEAM_API_URL}/${encodeURIComponent(uID)}/${encodeURIComponent(teamName)}`;
+      const response = await fetch(encodedUrl, { method: "POST" });
+
       if (response.ok) {
-        fetch(`http://localhost:8081/pokemon/teams/${localStorage.getItem("uID")}`)
-          .then((res) => res.json())
-          .then((data) => setTeams((prev) => [...prev, ...data.filter((team: Team) => !prev.includes(team))]))
-          .then(() => console.log("aligned"))
-          .catch((err) => console.error("Failed to fetch team summary:", err));
+        const ans = await response.json()
+        setTeams((prev) => [...prev, ({
+          id: Number(ans.tID),
+          name: teamName,
+          pokemon: [],
+          typeSummary: [],
+          showTypeSummary: false
+        }) as Team])
       }
       else {
         throw(response)
       }
     } catch (err) {
-      console.error("Error showcasing Pokémon: ", err);
-      alert("Something went wrong adding the Pokémon.")
+      console.error("Error adding team:", err);
+      alert("Something went wrong adding the team. See console for details.");
     }
   }
 
@@ -134,19 +136,19 @@ export default function Profile() {
           />
         )} 
 
-        <form className="mx-auto card flex p-2 space-x-2 items-center">
+        <div className="mx-auto card flex p-2 space-x-2 items-center">
           <input 
             className="border border-gray-200 rounded-md p-2"
             type="text"
             value={newName}
             onChange={(e) => setNewName(e.target.value)} 
-            placeholder={'Team ' + (teams.length + 1)}
+            placeholder={'Team ' + (teams.length + 1) + '...'}
           />
           <button className="team-button" onClick={addTeam}>
             <Plus className="button-icon" />
             New Team
           </button>
-        </form>
+        </div>
 
         <TeamExportModal 
           isOpen={isExportTeamModalOpen}

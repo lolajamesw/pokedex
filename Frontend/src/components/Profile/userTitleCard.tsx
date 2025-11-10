@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react"
 import { Save, X, Edit2 } from "lucide-react"
 import { User } from "../../types/pokemon-details"
+import { USER_API_URL } from "../../constants";
 
 type Input = {
   pokemonCaught: number;
@@ -14,7 +15,7 @@ export default function UserTitleCard({ pokemonCaught, uID, editable }: Input) {
     const [editedDisplayName, setEditedDisplayName] = useState(user.displayName)
 
     useEffect(() => {
-        fetch("http://localhost:8081/user/" + uID)
+        fetch(USER_API_URL + '?uID=' + uID)
           .then((res) => res.json())
           .then((data) => setUser(data))
           .catch((err) => console.error("Failed to fetch user: ", err));
@@ -23,11 +24,10 @@ export default function UserTitleCard({ pokemonCaught, uID, editable }: Input) {
     const handleSaveDisplayName = async () => {
     try {
         console.log("Updating user's name");
-        const response = await fetch("http://localhost:8081/updateUserDisplayName", {
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({uID: uID, name: editedDisplayName})
-        })
+        const response = await fetch(
+          USER_API_URL + '?uID=' + uID + '&name=' + editedDisplayName, 
+          { method: "PATCH" }
+        )
     } catch (err) {
         console.error("Error updating user's name: ", err);
         alert("Something went wrong updating your name.")

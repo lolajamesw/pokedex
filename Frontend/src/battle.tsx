@@ -11,6 +11,7 @@ import { Input } from "./components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./components/ui/card"
 import { Badge } from "./components/ui/badge"
 import { Search, Zap, Shield, Sword } from "lucide-react"
+import { ANALYTICS_API_URL, POKEMON_API_URL } from "./constants"
 
 interface CounterPokemon {
   id: number
@@ -36,7 +37,7 @@ export default function PokemonCounterPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   useEffect(() => {
-      fetch(`http://localhost:8081/pokemonNames`)
+      fetch(POKEMON_API_URL + 'names')
         .then((res) => res.json())
         .then((data) => setPokemonNames(data))
         .catch((err) => console.error("Failed to fetch Pokémon:", err));
@@ -51,7 +52,9 @@ export default function PokemonCounterPage() {
     setError("")
 
     try {
-      const response = await fetch(`http://localhost:8081/opponent/${pokemonName.trim().toLowerCase()}/${localStorage.getItem("uID")}`)
+      const uID = localStorage.getItem("uID");
+      const name = pokemonName.trim().toLowerCase();
+      const response = await fetch(ANALYTICS_API_URL + `/opponents/${name}/${uID}`)
       if (!response.ok) {
         throw new Error("Failed to find counters")
       }

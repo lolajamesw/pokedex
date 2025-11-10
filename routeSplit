@@ -1,0 +1,62 @@
+POKEMON
+| Original                             | Updated                              |
+| ------------------------------------ | ------------------------------------ |
+| GET /pokemon                         | GET /pokemon                         |
+| GET /pokemonNames                    | GET /pokemon/names                   |
+| GET /types                           | GET /types                           |
+| GET /pokemon/items/:pID              | GET /pokemon/:pID/items              |
+| GET /pokemon/:id                     | GET /pokemon/:pID                    |
+| GET /pokemon/attacks/:id             | GET /pokemon/:pID/attacks            |
+| GET /pokemon/abilities/:pID/:variant | GET /pokemon/:pID/abilities/:variant |
+| GET /pokemon/variants/:id            | GET /pokemon/:pID/variants           |
+| GET /pokemon/evolutions/:id          | GET /pokemon/:pID/evolutions         |
+
+USER & AUTHENTICATION
+| Original                    | Updated                  |
+| --------------------------- | ------------------------ |
+| GET /searchUser             | GET /users/search        |
+| GET /user/:id               | GET /users/:uID          |
+| GET /userPokemon            | GET /users/:uID/pokemon  |
+| POST /createAccount         | POST /users/create       |
+| POST /updateUserDisplayName | POST /users/display-name |
+| POST /userLogin             | POST /users/login        |
+
+USER POKEMON
+| Original                      | Updated                                         |
+| ----------------------------- | ----------------------------------------------- |
+| GET /userPokemon/:id          | GET /users/pokemon/:instanceID                  |
+| GET /teraType:id              | GET /users/pokemon/:instanceID/tera-type        |
+| GET /EVsIVs/:instanceID       | GET /users/pokemon/:instanceID/evs-ivs          |
+| GET /pokemon/knownAttacks/:id | GET /users/pokemon/:instanceID/known-attacks    |
+| GET /pokemon/onTeams/:id      | GET /users/pokemon/:instanceID/teams            |
+
+MANAGE USER POKEMON
+| Original           | Updated                                        |
+| ------------------ | ---------------------------------------------- |
+| POST /addPokemon   | POST /users/pokemon/:uID                       |
+| POST /dropPokemon  | DELETE /users/pokemon/:pokemonId               |
+| POST /learnMove    | POST /users/pokemon/:pokemonId/moves           |
+| POST /unlearnMove  | DELETE /users/pokemon/:pokemonId/moves         |
+| POST /setTeraType  | PATCH /users/pokemon/:pokemonId/tera-type      |
+| POST /setEVsIVs    | PATCH /users/pokemon/:pokemonId/evs-ivs        |
+| POST /setNature    | PATCH /users/pokemon/:pokemonId/nature         |
+| POST /setAbility   | PATCH /users/pokemon/:pokemonId/ability        |
+| POST /setVariant   | PATCH /users/pokemon/:pokemonId/variant        |
+| POST /setFavourite | PATCH /users/pokemon/:pokemonId/favourite      |
+| POST /setHeldItem  | PATCH /users/pokemon/:pokemonId/item           |
+
+COMPLEX QUERIES
+| Original                     | Updated                            |
+| ---------------------------- | ---------------------------------- |
+| GET /teamSummary/:ids        | GET /teams/summary?ids=1,2,3       |
+| GET /opponent/:name/:uID     | GET /opponents/:name/:userId       |
+| GET /pokemon/teamExport/:ids | GET /pokemon/team-export?ids=1,2,3 |
+
+TEAMS
+| Original                | Updated                         |
+| ----------------------- | ------------------------------- |
+| GET /pokemon/teams/:uID | GET /users/teams/:uID           |
+| POST /addTeam           | POST /users/teams               |
+| POST /dropTeam          | DELETE /users/teams/:teamId     |
+| POST /setTeam           | PATCH /users/teams/:teamId      |
+| POST /setTeamName       | PATCH /users/teams/:teamId/name |

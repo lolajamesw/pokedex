@@ -6,6 +6,7 @@ import { Link } from "react-router-dom"
 import "./css/pokedex.css"
 import PokeCard from './components/pokeCard.js'
 import FilterAndSearchCard from "./components/filter-and-search-card.js"
+import { POKEMON_API_URL } from "./constants.js"
 
 type PokemonStats = {
   hp: number,
@@ -34,7 +35,7 @@ export default function Pokedex() {
   const pageSize = 40
   
   useEffect(() => {
-    fetch(`http://localhost:8081/pokemon?uID=${localStorage.getItem("uID")}`)
+    fetch(POKEMON_API_URL + localStorage.getItem("uID"))
       .then((res) => res.json())
       .then((data) => setPokemonList(data))
       .catch((err) => console.error("Failed to fetch Pokémon:", err));

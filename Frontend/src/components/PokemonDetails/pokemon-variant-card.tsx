@@ -1,6 +1,7 @@
 import { Sparkles } from "lucide-react"
 import { CardPokemon, MyPokemon, PokedexPokemon } from "../../types/pokemon-details.ts"
 import PokeCard from "./../pokeCard.tsx";
+import { USER_POKEMON_API_URL } from "../../constants.ts";
 
 type Inputs<T extends PokedexPokemon> = {
     variants: CardPokemon[],
@@ -24,13 +25,9 @@ export default function PokemonVariantCard<T extends PokedexPokemon>({ variants,
     }
 
     const setMegaStone = async(variant: CardPokemon) => {
-        const response = await fetch("http://localhost:8081/setHeldItem", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ instanceID: instanceID, mega: true }),
-        })
+        const response = await fetch(USER_POKEMON_API_URL + instanceID + '/item/megaStone', { method: "PATCH" })
         if (response.ok) {
-            const overviewRes = await fetch(`http://localhost:8081/userPokemon/${instanceID}`);
+            const overviewRes = await fetch(USER_POKEMON_API_URL + instanceID);
             const overviewData: MyPokemon = await overviewRes.json();
             updatePokemonDetail((prev) => {
                 if (prev && 'heldItem' in prev && 'heldItemIcon' in prev) {
@@ -52,11 +49,10 @@ export default function PokemonVariantCard<T extends PokedexPokemon>({ variants,
     const selectVariant = async (variant: CardPokemon) => {
         if (instanceID) {
             try {
-                const response = await fetch("http://localhost:8081/setVariant", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ instanceID: instanceID, form: variant.name }),
-                });
+                const response = await fetch(
+                    USER_POKEMON_API_URL + instanceID + '/variant/' + variant.name, 
+                    { method: "PATCH" }
+                );
                 if (variant.mega) {
                     setMegaStone(variant);
                 }
@@ -96,8 +92,9 @@ export default function PokemonVariantCard<T extends PokedexPokemon>({ variants,
                     lg:grid-cols-3 gap-4 justify-center`}>
                     {Object.entries(variants).map(([key, variant]: [string, CardPokemon]) => 
                         <PokeCard
+                        key={key}
                         pokemon={variant}
-                        onClick={() => {if (editable) selectVariant}}
+                        onClick={() => {selectVariant(variant)}}
                         cornerVisible={currentForm === variant.form}
                         cornerElement = {
                             <div className="pokemon-badges">

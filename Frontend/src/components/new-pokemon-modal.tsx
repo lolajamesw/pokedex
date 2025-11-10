@@ -2,6 +2,7 @@ import Autocomplete from "@mui/material/Autocomplete"
 import { FormEvent, useEffect, useState } from "react";
 import { MyCardPokemon } from "../types/pokemon-details";
 import TextField from "@mui/material/TextField";
+import { POKEMON_API_URL, USER_API_URL, USER_POKEMON_API_URL } from "../constants";
 
 type Inputs = {
     setPokemonList: React.Dispatch<React.SetStateAction<MyCardPokemon[]>>,
@@ -15,7 +16,7 @@ export default function NewPokemonModal({ setPokemonList, setBannerMessage, setI
     const [newLevel, setNewLevel] = useState("100");
     const [pokemonNames, setPokemonNames] = useState<string[]>([]);
     useEffect(() => {
-        fetch(`http://localhost:8081/pokemonNames`)
+        fetch(POKEMON_API_URL + 'names')
           .then((res) => res.json())
           .then((data) => setPokemonNames(data))
           .catch((err) => console.error("Failed to fetch Pokémon:", err));
@@ -30,14 +31,13 @@ export default function NewPokemonModal({ setPokemonList, setBannerMessage, setI
         }
     
         try {
-          const response = await fetch("http://localhost:8081/addPokemon", {
+          const response = await fetch(USER_POKEMON_API_URL + localStorage.getItem("uID"), {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-              pokemonName: newPokemonName,
+              name: newPokemonName,
               nickname: newNickname,
               level: parseInt(newLevel),
-              uID: localStorage.getItem("uID")
             }),
           });
     
@@ -53,7 +53,9 @@ export default function NewPokemonModal({ setPokemonList, setBannerMessage, setI
             setNewNickname("");
             setNewLevel("100");
     
-            const updated = await fetch(`http://localhost:8081/userPokemon?uID=${localStorage.getItem("uID")}`).then((r) => r.json());
+            const updated = await fetch(
+              USER_API_URL + '/pokemon?uID=' + localStorage.getItem("uID")
+            ).then((r) => r.json());
             setPokemonList(updated);
           } else {
             const errMsg = await response.text();

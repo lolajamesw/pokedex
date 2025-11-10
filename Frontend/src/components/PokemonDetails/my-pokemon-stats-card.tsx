@@ -6,6 +6,7 @@ import { Heart, Shield, ShieldHalf, SlidersHorizontal, Sparkle, Sparkles, Sword,
 import { Select, SelectTrigger, SelectContent, SelectItem } from "../ui/select.tsx"
 import Slider from "@mui/material/Slider";
 import Input from "@mui/material/Input";
+import { USER_POKEMON_API_URL } from "../../constants.ts";
 
 type Inputs = {
     pokemon: MyPokemon,
@@ -69,11 +70,9 @@ export default function MyPokemonStatsCard({ pokemon, updatePokemon, editable=tr
     const [stats, setStats] = useState<PokemonStats>(mapStats());
 
     const updateNature = async (newNature: string) => {
-        const response = await fetch("http://localhost:8081/setNature", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ instanceID: pokemon.id, nature: newNature }),
-        });
+        const response = await fetch(
+            USER_POKEMON_API_URL + pokemon.id + '/nature/' + newNature, { method: "PATCH" }
+        );
         if (response.ok) {
             updatePokemon((prev) => ({
                 ...prev,
@@ -104,8 +103,8 @@ export default function MyPokemonStatsCard({ pokemon, updatePokemon, editable=tr
     };
 
     const commitSliderChange = () => {
-        fetch("http://localhost:8081/setEVsIVs", {
-            method: "POST",
+        fetch(USER_POKEMON_API_URL + pokemon.id + '/evs-ivs', {
+            method: "PATCH",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ instanceID: pokemon.id, hpEV: evs.hp, atkEV: evs.atk, defEV: evs.def,
                 spAtkEV: evs.spAtk, spDefEV: evs.spDef, speedEV: evs.speed, hpIV: ivs.hp, atkIV: ivs.atk, defIV: ivs.def,
@@ -117,7 +116,7 @@ export default function MyPokemonStatsCard({ pokemon, updatePokemon, editable=tr
     useEffect(() => setStats(mapStats()), [nature, evs, ivs])
     useEffect(() => {
         const setEVsIVs = async () => {
-            const EVsIVsRes = await fetch(`http://localhost:8081/EVsIVs/${pokemon.id}`);
+            const EVsIVsRes = await fetch(USER_POKEMON_API_URL + pokemon.id + '/evs-ivs');
             const EVsIVsData = await EVsIVsRes.json();
             console.log("fetched EV / IV data");
             const newEVs = ({
@@ -187,7 +186,7 @@ export default function MyPokemonStatsCard({ pokemon, updatePokemon, editable=tr
             <CardContent className="space-y-3">
             <div className="grid gap-3">
                 {Object.entries(stats).map(([stat, value]) => (
-                    <Card className="p-3 border-gray-200 bg-white hover:!bg-muted hover:shadow-[0_4px_12px_rgba(0,0,0,0.15)]">
+                    <Card key={stat} className="p-3 border-gray-200 bg-white hover:!bg-muted hover:shadow-[0_4px_12px_rgba(0,0,0,0.15)]">
                         <div key={stat} className="space-y-2">
                             <div className="flex justify-between items-center">
                             <div className="flex justify-left">

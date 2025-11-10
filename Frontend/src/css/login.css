@@ -5,21 +5,28 @@
 }
 
 .auth-container {
-    display: flex;
-    flex-direction: column;
-  max-width: 400px;
-  margin: 40px auto;
-  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  max-width: 800px;
+  min-width: 400px;
+  width: 33%;
+  margin: auto;
+  padding: 50px;
   border: 1px solid #ddd;
   border-radius: 8px;
+  background: #FFF;
   text-align: left;
+}
+
+.username:focus-within .icon {
+  color: var(--color-black);
 }
 
 .auth-container h2 {
     text-align: center;
     margin-bottom: 24px;
     font-weight: bold;
-    font-size: 1.5rem;
+    font-size: 1.75rem;
     font-family: "Poppins", sans-serif;
 }
 
@@ -30,32 +37,80 @@
 }
 
 .input-group input {
-  padding: 8px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
+  padding: 14px;
+  border-width: 0px;
+  border-bottom: 1px solid #ccc;
+  border-radius: 0px;
   width: 100%;
   margin-bottom: 1rem;
 }
 
+.input-group input:focus {
+  outline: none;
+  border-bottom: 1px solid #000;
+}
+
+.password-reset {
+  display: block;
+  text-align: right;
+  width: 100%;
+  font-size: 0.8rem;
+  margin-top: -15px;
+}
+
 button[type="submit"] {
   padding: 10px;
-  background-color: #000000;
+  background: linear-gradient(to bottom right, #ffd19d, #ffaaaa);
   color: white;
   font-weight: bold;
   border: none;
-  border-radius: 4px;
+  border-radius: 100000px;
+  width: 100%;
   cursor: pointer;
   transition: all 0.2s;
   margin-block: 10px;
+  margin-top: 30px;
+}
+
+.google {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding-left: 12px;
+  padding-right: 12px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  border-radius: 1000px;
+  border: 1px solid #ccc;
+  width: auto;
+  max-width: max-content;
+  margin: 10px auto 0;
+  transition: all 0.2s;
+}
+
+.google:hover {
+  background: var(--color-gray-100);
+  scale: 102%;
+}
+
+.google:active {
+  background: var(--color-gray-200)
 }
 
 button[type="submit"]:hover {
-  background: #f9fafb;
-  color: #111827;
+  background: linear-gradient(to bottom right, #ffce96, #ffa3a3);
+  scale: 102%;
+  box-shadow: #000;
+  box-shadow: var(--shadow-sm);
 }
 
 .create-account {
-  margin-top: 16px;
+  margin-top: 30px;
   text-align: center;
-  text-decoration: underline;
+  font-size: 0.8rem;
+  /* text-decoration: underline; */
+}
+
+a {
+  color: var(--color-indigo-500)
 }

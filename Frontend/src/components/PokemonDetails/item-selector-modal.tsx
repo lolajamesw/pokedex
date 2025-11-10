@@ -3,6 +3,7 @@ import { X, Star } from "lucide-react";
 
 import pokeIcon from "./../../assets/pokeIcon.png";
 import { MyPokemon, Item, CardPokemon } from "../../types/pokemon-details";
+import { USER_POKEMON_API_URL } from "../../constants";
 
 
 type InputType = {
@@ -25,11 +26,10 @@ export default function ItemSelectorModal({
 
     const giveItem = async (item: Item) => {
         try {
-        const response = await fetch("http://localhost:8081/setHeldItem", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ instanceID: instanceID, item: item.name }),
-        });
+        const response = await fetch(
+            USER_POKEMON_API_URL + instanceID + '/item/' + item.name, 
+            { method: "PATCH" }
+        );
 
         if (response.ok) {
             updatePokemonDetail((prev) => {

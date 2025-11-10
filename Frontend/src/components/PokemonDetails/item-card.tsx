@@ -5,6 +5,7 @@ import pokeIcon from "./../../assets/pokeIcon.png";
 import { CardPokemon, Item, MyPokemon } from "../../types/pokemon-details";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
 import { giveItem, removeItem } from "../../item-functions";
+import { POKEMON_API_URL } from "../../constants";
 
 type Inputs = {
     variants: CardPokemon[];
@@ -25,7 +26,7 @@ export default function ItemCard({
     
     useEffect (() => {
         const fetchItems = async () => {
-            const itemsRes = await fetch(`http://localhost:8081/pokemon/items/${pID}`);
+            const itemsRes = await fetch(POKEMON_API_URL + pID + '/items');
             const itemData = await itemsRes.json();
             console.log("fetched item data");
             setItems(itemData);

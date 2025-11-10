@@ -34,8 +34,6 @@ export default function FilterAndSearchCard<T extends CardPokemon>({ pokemonList
     useEffect(() => {
         // Filter pokemon that match the search bar
         const typeSet = new Set(filteredTypes);
-        console.log(filteredTypes)
-        console.log(typeSet)
         const filtered = pokemonList.filter((pokemon) => {
           const matchesSearch =
             pokemon.name.toLowerCase().includes(searchTerm.toLowerCase()) ||

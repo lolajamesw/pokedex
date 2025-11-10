@@ -10,6 +10,7 @@ import PokeCard from "./components/pokeCard";
 import { MyCardPokemon, Nature, natures, PokemonStats } from "./types/pokemon-details";
 import FilterAndSearchCard from "./components/filter-and-search-card";
 import NewPokemonModal from "./components/new-pokemon-modal";
+import { USER_API_URL, USER_POKEMON_API_URL } from "./constants";
 
 export default function MyPokedex() {
   const [pokemonList, setPokemonList] = useState<MyCardPokemon[]>([])
@@ -20,15 +21,8 @@ export default function MyPokedex() {
     const ReleasePokemon = async (instanceID: number) => {
     try {
       console.log("Releasing Pokemon: ", instanceID);
-      await fetch("http://localhost:8081/dropPokemon", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          instanceID: instanceID,
-        }),
-      });
+      await fetch(USER_POKEMON_API_URL + instanceID, {method: "DELETE"});
       setPokemonList(pokemonList.filter((pokemon) => pokemon.id !=instanceID));
-      console.log(pokemonList);
     } catch (err) {
       console.error("Error releasing Pokémon: ", err);
       alert("Something went wrong releasing the Pokémon.");
@@ -49,10 +43,9 @@ export default function MyPokedex() {
 
   // Fetch pokemon details and update stats with getNewStat
   useEffect(() => {
-    fetch(`http://localhost:8081/userPokemon?uID=${localStorage.getItem("uID")}`)
+    fetch(USER_API_URL + '/pokemon?uID=' + localStorage.getItem("uID"))
       .then((res) => res.json())
       .then((data) => setPokemonList(data.map((p: any) => {
-        console.log(p);
         p.stats = Object.fromEntries(
           Object.entries(p.stats).map(([stat, value]) => [
             stat,
@@ -66,7 +59,6 @@ export default function MyPokedex() {
             )
           ])
         )
-        console.log(p);
         return p as MyCardPokemon
       })))
       .catch((err) => console.error("Failed to fetch Pokémon:", err));

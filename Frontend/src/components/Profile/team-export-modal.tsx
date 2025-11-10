@@ -1,6 +1,7 @@
 import { CopyIcon, Download } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Team } from "../../types/pokemon-details";
+import { ANALYTICS_API_URL } from "../../constants";
 
 
 type Inputs = {
@@ -14,9 +15,7 @@ export default function TeamExportModal({ isOpen, onClose, team }: Inputs) {
 
     useEffect(() => {
         if (!team) return;
-        fetch(`http://localhost:8081/pokemon/teamExport/(${
-            team.pokemon.map((t) => t.id).join(',')
-        })`)
+        fetch(ANALYTICS_API_URL + '/teams/export/' + team.id)
             .then((res) => res.json())
             .then((data) => {setTeamText(data); console.log(data)})
             .catch((err) => console.error("Failed to fetch team summary:", err));

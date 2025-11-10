@@ -5,6 +5,7 @@ import pokeIcon from "./../../assets/pokeIcon.png";
 import { MyPokemon, CardPokemon, Item } from "../../types/pokemon-details";
 import PokemonTitleCard from "./pokemon-title-card";
 import { Select, SelectContent, SelectItem, SelectTrigger } from "../ui/select";
+import { POKEMON_API_URL, USER_POKEMON_API_URL } from "../../constants";
 
 type InputType = {
     items: Item[];
@@ -22,17 +23,16 @@ export default function MyPokemonTitleCard({items, variants, pokemon, editable=t
 
     useEffect(() => {
         const fetchTypes = async () => {
-            const typeRes = await fetch('http://localhost:8081/types');
-            const typeData = await typeRes.json();
-            console.log("fetched type data");
-            setTypes(typeData.map((type: {type: string}) => type.type));
+            const typeRes = await fetch(POKEMON_API_URL + 'types');
+            const typeData: {type: string}[] = await typeRes.json();
+            setTypes(typeData.map((type) => type.type));
         }
         fetchTypes();
     }, [])
 
     useEffect(() => {
         const fetchType = async () => {
-            const typeRes = await fetch(`http://localhost:8081/teraType/${pokemon.id}`);
+            const typeRes = await fetch(USER_POKEMON_API_URL + pokemon.id + '/tera-type');
             const typeData = await typeRes.json();
             console.log("fetched type data");
             if (typeData.teraType !== null)
@@ -46,13 +46,7 @@ export default function MyPokemonTitleCard({items, variants, pokemon, editable=t
     const ReleasePokemon = async () => {
     try {
         console.log("Releasing Pokemon: ", pokemon.nickname);
-        await fetch("http://localhost:8081/dropPokemon", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-            instanceID: pokemon.id,
-        }),
-        });
+        await fetch(USER_POKEMON_API_URL + pokemon.id, { method: "DELETE" });
         // Navigate back to myPokemon since this pokemon doesn't 
         // exist anymore and hence lacks a detail page
         location.href = '/my-pokemon'
@@ -67,15 +61,9 @@ export default function MyPokemonTitleCard({items, variants, pokemon, editable=t
     const toggleFavorite = async () => {
     try {
         console.log("Marking Pokemon: ", pokemon.nickname);
-        await fetch("http://localhost:8081/setFavourite", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-            instanceID: pokemon.id,
-            user: localStorage.getItem("uID"),
-            value: Number(!pokemon.favourite),
-        }),
-        });
+        await fetch(
+            USER_POKEMON_API_URL + pokemon.id + '/favourite/' + Number(!pokemon.favourite), 
+            { method: "PATCH" });
 
         // Update state optimistically
         updatePokemonDetail((prev) => (prev ? { ...prev, favourite: !prev.favourite } : prev));
@@ -87,14 +75,10 @@ export default function MyPokemonTitleCard({items, variants, pokemon, editable=t
 
     const setType = async (type: string) => {
         try {
-            const response = await fetch("http://localhost:8081/setTeraType", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                instanceID: pokemon.id,
-                type: type,
-            }),
-            });
+            const response = await fetch(
+                USER_POKEMON_API_URL + pokemon.id + '/tera-type/' + type, 
+                { method: "PATCH" }
+            );
             if (response.ok) setTeraType(type);
             else console.error("Error setting tera type")
         } catch (err) {

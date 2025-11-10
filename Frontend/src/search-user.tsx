@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import "./css/search-user.css";
+import { USER_API_URL } from "./constants";
 
 export default function SearchUserPage() {
   const [query, setQuery] = useState("");
@@ -13,7 +14,7 @@ export default function SearchUserPage() {
         return;
       }
 
-      fetch(`http://localhost:8081/searchUser?query=${encodeURIComponent(query)}`)
+      fetch(USER_API_URL + '/search?prompt=' + encodeURIComponent(query))
         .then((res) => res.json())
         .then((data) => setResults(data))
         .catch((err) => {

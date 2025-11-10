@@ -3,6 +3,7 @@ import { Team } from "../../types/pokemon-details";
 import PokeTile from "./pokeTile";
 import TypeSummary from "./typeSummary";
 import { useState } from "react";
+import { TEAM_API_URL } from "../../constants";
 
 
 type Inputs = {
@@ -28,19 +29,15 @@ export default function TeamCard(props: Inputs) {
         if (!props.editable) return
         try {
         console.log("Forgetting Team");
-        const response = await fetch("http://localhost:8081/dropTeam", {
-            method: "POST",
-            headers: {"Content-Type": "application/json"},
-            body: JSON.stringify({ tID: id }),
-        });
+        const response = await fetch(TEAM_API_URL + '/' + id, { method: "DELETE" });
+        console.log('response: ' + response.ok)
         if (response.ok) {
-            props.setTeams((teams) => teams.filter((team) => team.id !== id));
-            props.setRawTeams((rawTeams) => rawTeams.filter((team) => team.id !== id));
+          props.setTeams((teams) => teams.filter((team) => team.id !== props.team.id));
         }
         else throw(response.statusText)
         } catch (err) {
         console.error("Error showcasing Pokémon: ", err);
-        alert("Something went wrong adding the Pokémon.")
+        alert("Something went wrong deleting the team.")
         }
     }
 
@@ -48,11 +45,10 @@ export default function TeamCard(props: Inputs) {
         if (!props.editable) return
         try {
             console.log("Updating user's name");
-            const response = await fetch("http://localhost:8081/setTeamName", {
-            method: "POST",
-            headers: {"Content-Type": "application/json"},
-            body: JSON.stringify({tID: props.team.id, name: editedName})
-            })
+            await fetch(
+              TEAM_API_URL + props.team.id + '/name/' + editedName, 
+              { method: "POST" }
+            );
         } catch (err) {
             console.error("Error updating user's name: ", err);
             alert("Something went wrong updating your name.")
@@ -132,7 +128,11 @@ export default function TeamCard(props: Inputs) {
             {props.team.pokemon.length > 0 ? (
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-[1rem]">
                 {props.team.pokemon.map((pokemon, index) => (
-                  <PokeTile key={`${pokemon.nickname}-${index}`} pokemon={pokemon} targetPage="my-pokemon"/>
+                  <PokeTile 
+                    key={`${pokemon.nickname}-${index}`} 
+                    pokemon={pokemon} 
+                    targetPage={props.editable ? "my-pokemon" : 'view-pokemon'}
+                  />
                 ))}
                 {/* Empty slots */}
                 {props.editable ? Array.from({ length: 6 - props.team.pokemon.length }).map((_, index) => 
@@ -149,7 +149,9 @@ export default function TeamCard(props: Inputs) {
               </div>
             ) : (
               <div className="no-showcase">
-                <p className="no-showcase-text">No Pokémon are on your team yet</p>
+                <p className="no-showcase-text">{
+                `No Pokémon are on ${props.editable ? 'your' : 'this'} team yet`
+                }</p>
                 {props.editable && 
                     <button className="add-showcase-button" onClick={() => {
                     props.setIsEditTeamModalOpen(true);
@@ -161,14 +163,18 @@ export default function TeamCard(props: Inputs) {
                 }
               </div>
             )}
-            <button className="mx-auto hover:bg-gray-100 p-3 rounded-full active:bg-gray-200 active:scale-90"
-              onClick={() => props.setTeams((teams) => teams.map((prev) => ({
-                ...prev,
-                showTypeSummary: prev.id === props.team.id ? !prev.showTypeSummary : prev.showTypeSummary
-              })))}>
-              {props.team.showTypeSummary ? <ChevronUp/> : <ChevronDown/>}
-            </button>
-            {props.team.showTypeSummary && <TypeSummary teamSummary={props.team.typeSummary}/>}
+            {props.team.pokemon.length > 0 &&
+              <button className="mx-auto hover:bg-gray-100 p-3 rounded-full active:bg-gray-200 active:scale-90"
+                onClick={() => props.setTeams((teams) => teams.map((prev) => ({
+                  ...prev,
+                  showTypeSummary: prev.id === props.team.id ? !prev.showTypeSummary : prev.showTypeSummary
+                })))}>
+                {props.team.showTypeSummary ? <ChevronUp/> : <ChevronDown/>}
+              </button>
+            }
+            {props.team.pokemon.length > 0 &&props.team.showTypeSummary && 
+              <TypeSummary teamSummary={props.team.typeSummary}/>
+            }
         </div>
     )
 }

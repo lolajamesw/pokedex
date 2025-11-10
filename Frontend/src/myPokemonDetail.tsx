@@ -26,6 +26,7 @@ import { Evolution, MyPokemon, CardPokemon, Item, Ability } from "./types/pokemo
 import "./css/pokedex.css";
 import "./css/details.css";
 import "./css/profile.css";
+import { POKEMON_API_URL, USER_POKEMON_API_URL } from "./constants.ts";
 
 /* ---------- Main Component ---------- */
 
@@ -42,10 +43,10 @@ const MyPokeDetail = () => {
   const [tabCols, setTabCols] = useState<string>('grid-cols-3');
 
   const fetchAbilities = async () => {
-      const abilityRes = await fetch(`http://localhost:8081/pokemon/abilities/${pID}/'${pokemon?.name}'`);
-      const abilityData = await abilityRes.json();
-      console.log("fetched ability data");
-      setAbilities(abilityData);
+    const abilityRes = await fetch(POKEMON_API_URL + `${pID}/abilities/${pokemon?.name}`);
+    const abilityData = await abilityRes.json();
+    console.log("fetched ability data");
+    setAbilities(abilityData);
   }
   /**
    * Fetch Pokémon details, evolutions, and trade history from backend.
@@ -53,21 +54,19 @@ const MyPokeDetail = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        console.log("id:", id, "pID:", pID);
-
         // 1. Fetch overview info
-        const overviewRes = await fetch(`http://localhost:8081/userPokemon/${id}`);
+        const overviewRes = await fetch(USER_POKEMON_API_URL + id);
         const overviewData = await overviewRes.json();
 
         // 2. Fetch learnable attacks
-        const attackRes = await fetch(`http://localhost:8081/pokemon/attacks/${pID}`);
+        const attackRes = await fetch(POKEMON_API_URL + pID + '/moves');
         const attackData = await attackRes.json();
 
         // 3. Fetch known attacks
-        const knownRes = await fetch(`http://localhost:8081/pokemon/knownAttacks/${id}`);
+        const knownRes = await fetch(USER_POKEMON_API_URL + id + '/moves');
         const knownData = await knownRes.json();
 
-        const teamRes = await fetch(`http://localhost:8081/pokemon/onTeams/${id}`);
+        const teamRes = await fetch(USER_POKEMON_API_URL + id + '/teams');
         const teamData = await teamRes.json();
 
         // Combine into Pokémon detail object
@@ -82,19 +81,19 @@ const MyPokeDetail = () => {
         fetchAbilities();
 
         // 4. Fetch evolution data
-        const evolutionRes = await fetch(`http://localhost:8081/pokemon/evolutions/${pID}`);
+        const evolutionRes = await fetch(POKEMON_API_URL + pID + '/evolutions');
         const evolutionData = await evolutionRes.json();
         console.log("fetched evolution data");
         setEvolutions(evolutionData);
 
         // 5. Fetch item data
-        const itemsRes = await fetch(`http://localhost:8081/pokemon/items/${pID}`);
+        const itemsRes = await fetch(POKEMON_API_URL + pID + '/items');
         const itemData = await itemsRes.json();
         console.log("fetched item data");
         setItems(itemData);
 
         // 6. Fetch variant data
-        const variantRes = await fetch(`http://localhost:8081/pokemon/variants/${pID}`);
+        const variantRes = await fetch(POKEMON_API_URL + pID + '/variants');
         const variantData = await variantRes.json();
         variantData.map((data: CardPokemon) => {
           data.description = data.description ?? combined.description;

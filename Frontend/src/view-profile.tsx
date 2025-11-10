@@ -4,12 +4,10 @@ import { useState, useEffect } from "react"
 import "./css/profile.css"
 import "./css/details.css"
 import { PokemonSummary, EffectType, Team } from "./types/pokemon-details"
-import PokeTile from "./components/Profile/pokeTile"
-import TypeSummary from "./components/Profile/typeSummary"
 import UserTitleCard from "./components/Profile/userTitleCard"
 import { useParams } from "react-router-dom"
-import { ChevronDown, ChevronUp } from "lucide-react"
 import TeamCard from "./components/Profile/team-card"
+import { ANALYTICS_API_URL, TEAM_API_URL, USER_API_URL } from "./constants"
 
 export default function ViewProfile() {
   const { uID, } = useParams<{ uID: string }>();
@@ -18,12 +16,13 @@ export default function ViewProfile() {
   const [teams, setTeams] = useState<Team[]>([]);
 
   useEffect(() => {
-    fetch(`http://localhost:8081/pokemon/teams/${localStorage.getItem("uID")}`)
+    fetch(TEAM_API_URL + '/' + uID)
       .then((res) => res.json())
+      .then((data) => {console.log(data);return data;})
       .then((data) => setRawTeams(data))
       .catch((err) => console.error("Failed to fetch team summary:", err));
 
-    fetch(`http://localhost:8081/userPokemon?uID=${uID}`)
+    fetch(USER_API_URL + '/pokemon?uID=' + uID)
       .then((res) => res.json())
       .then((data) => setPokemonList(data))
       .catch((err) => console.error("Failed to fetch Pokémon:", err));
@@ -35,11 +34,10 @@ export default function ViewProfile() {
       for (const team of rawTeams) {
         typeSummaries.push({
           tID: team.id,
-          summary: await (await fetch(`http://localhost:8081/teamSummary/(${
-            team.pokemon.map((p) => p.id).join(',')
-          })`)).json()
+          summary: await (await fetch(
+            ANALYTICS_API_URL + '/teams/type-summary/' + team.id
+          )).json()
         })
-        console.log(typeSummaries)
       }
       setTeams(rawTeams.map((team) => ({
         id: team.id,

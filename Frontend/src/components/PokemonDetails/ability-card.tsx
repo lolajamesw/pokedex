@@ -2,6 +2,7 @@ import { ChevronsDownUpIcon, ChevronsUpDownIcon } from "lucide-react";
 import { Ability } from "../../types/pokemon-details";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
 import { useEffect, useState } from "react";
+import { USER_POKEMON_API_URL } from "../../constants";
 
 type Inputs = {
     abilities: Ability[],
@@ -34,11 +35,10 @@ export default function AbilityCard({ abilities, instanceID, selectedAbility, ed
     const selectAbility = async (ability: string) => {
         const newAbility = ability === setAbility ? undefined : ability;
         try {
-            const response = await fetch("http://localhost:8081/setAbility", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ instanceID: instanceID, ability: newAbility ?? null }),
-            });
+            const response = await fetch(
+                USER_POKEMON_API_URL + instanceID + '/ability/' + (newAbility ?? null),
+                { method: "PATCH" }
+            );
             if (response.ok) {
                 setSetAbility(newAbility)
             } else {

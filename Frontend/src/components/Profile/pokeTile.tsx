@@ -17,6 +17,7 @@ export default function PokeTile({ pokemon, targetPage, isSelected=false, onSele
             to={`/${targetPage}/${pokemon.pID}/${pokemon.id}`}
             key={pokemon.id}
             style={{ textDecoration:"none", color: "inherit" }}
+            className="flex h-full flex-col"
             onClick={(e) => {if (simplified) e.preventDefault()}}
         >
             <div className="showcase-card-header">
@@ -49,28 +50,29 @@ export default function PokeTile({ pokemon, targetPage, isSelected=false, onSele
                 
             </div>
             <div className="showcase-card-content">
-            {!simplified &&
-                <div className="pokemon-image">
-                    <img
-                    src={`https://www.serebii.net/pokemon/art/${pokemon.imgID}.png`}
-                    alt={pokemon.name}
-                    width={100}
-                    height={100}
-                    className="rounded-lg bg-white/20 p-0"
-                    />
-                </div>
-            }
-            <h3 className="showcase-nickname">{pokemon.nickname}</h3>
-            <p className="showcase-species">{pokemon.name}</p>
-            {simplified && 
-                <div className="flex flex-wrap gap-1 justify-center">
-                    {pokemon.types.map((type) => (
-                    <span key={type} className={`badge badge-type type-${type.toLowerCase()}  text-white`}>
-                        {type}
-                    </span>
-                    ))}
-                </div>
-            }
+                {!simplified &&
+                    <div className="pokemon-image">
+                        <img
+                        src={`https://www.serebii.net/pokemon/art/${pokemon.imgID}.png`}
+                        alt={pokemon.name}
+                        width={100}
+                        height={100}
+                        className="rounded-lg bg-white/20 p-0"
+                        />
+                    </div>
+                }
+                <h3 className="showcase-nickname">{pokemon.nickname}</h3>
+                {!pokemon.nickname && <div className="m-1"></div> }
+                <p className="showcase-species">{pokemon.name}</p>
+                {simplified && 
+                    <div className="flex flex-wrap gap-1 justify-center">
+                        {pokemon.types.map((type) => (
+                        <span key={type} className={`badge badge-type type-${type.toLowerCase()}  text-white`}>
+                            {type}
+                        </span>
+                        ))}
+                    </div>
+                }
             </div>
         </Link>
     </div>

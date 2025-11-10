@@ -1,3 +1,4 @@
+import { USER_POKEMON_API_URL } from "./constants";
 import { CardPokemon, Item, MyPokemon } from "./types/pokemon-details";
 
 export async function removeItem(
@@ -9,11 +10,10 @@ export async function removeItem(
     updatePokemonDetail: React.Dispatch<React.SetStateAction<MyPokemon | null>>
 ) {
     try {
-        const response = await fetch("http://localhost:8081/setHeldItem", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ instanceID: instanceID, item: null }),
-        });
+        const response = await fetch(
+            USER_POKEMON_API_URL + instanceID + '/item/null', 
+            {method: "PATCH"}
+        );
 
         if (response.ok) {
             const prevItem = items.find((item) => item.name === heldItem);
@@ -45,11 +45,10 @@ export async function giveItem(
     updatePokemonDetail: React.Dispatch<React.SetStateAction<MyPokemon | null>>
 ) {
     try {
-    const response = await fetch("http://localhost:8081/setHeldItem", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ instanceID: instanceID, item: item.name }),
-    });
+    const response = await fetch(
+        USER_POKEMON_API_URL + instanceID + '/item/' + item.name, 
+        {method: "PATCH"}
+    );
 
     if (response.ok) {
         updatePokemonDetail((prev) => {
@@ -86,11 +85,10 @@ const updateVariant = async(
     updatePokemonDetail: React.Dispatch<React.SetStateAction<MyPokemon | null>>,
     findFunc: (variant: CardPokemon) => boolean
 ) => {
-    const response = await fetch("http://localhost:8081/setVariant", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ instanceID: instanceID, form: form }),
-    });
+    const response = await fetch(
+        USER_POKEMON_API_URL + instanceID + '/variant/' + form, 
+        {method: "PATCH"}
+    );
     if (response.ok) {
         const variant = variants.find(findFunc);
         updatePokemonDetail((prev) => ({
