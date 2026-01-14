@@ -1,6 +1,24 @@
 # Pokedex
-
-## test-sample
+## Project Preview
+#### Pokedex Home Page
+![Pokedex Home Page](./ProjectPreviewPics/Pokedex.png)
+##### With type filtering
+![Pokedex Home Page](./ProjectPreviewPics/Filters.png)
+#### Pokedex Detail Page (Eevee)
+![Pokedex Detail Page](./ProjectPreviewPics/Eevee.png)
+#### My Pokemon Detail Page (Delphox)
+![My Pokemon Detail Page](./ProjectPreviewPics/Keiko.png)
+#### My Pokemon Page
+![My Pokemon Page](./ProjectPreviewPics/MyPokemon.png)
+##### To add Pokemon
+![My Pokemon Add Modal](./ProjectPreviewPics/AddPokemon.png)
+#### Team Manipulation
+![Team Builder](./ProjectPreviewPics/TeamBuilder.png)
+#### Team Analysis
+![Team Analysis](./ProjectPreviewPics/Team.png)
+#### Pokemon Battle Page
+![Pokemon Counter Finder Page](./ProjectPreviewPics/Counters.png)
+<!-- ## test-sample
 The file test-sample/sampleDump.sql is a MySQL dump file for our sample database. To create and load this database,
 1. downlad the dump file or clone this repo
 2. Open MySQL Workbench
@@ -25,7 +43,7 @@ assumption the database is in the state equivalent to that immediately after imp
 from multiple sources, this is much simpler than re-running all the scripts we used to set up the database.
 
 If you would like to rerun any of the tests here, be sure to reset the database after testing any query that modifies it,
-otherwise, the results for some queries may differ from our expected output.
+otherwise, the results for some queries may differ from our expected output. -->
 
 ## ProductionData
 This folder contains everything used to set up the production dataset. You can see the results
@@ -50,7 +68,7 @@ To get the project running, you need to separately run the backend and frontend
 1. Make sure you have Node.js and npm installed
 2. Navigate to the Frontend folder and run "npm install"
 3. Navigate to the Backend folder and run "npm install"
-4. Start up the database in MySQL Workbench if it isn't already running
+4. Make sure the database has been successfully imported
 5. Create a .env file in the Backend folder that contains your database's details. It should look like this with your_smth replaced with the detail relevant to you:
 DB_HOST=localhost
 DB_USER=root
@@ -62,16 +80,4 @@ DB_PORT=your_port_number
 8. Open a new terminal (don't close the previous one), navigate to the Frontend folder and run "npm run dev"
 9. You can find the site running at the address http://localhost:5173/
 
-## Project Preview
-#### Pokedex Home Page
-![Pokedex Home Page](./ProjectPreviewPics/Pokedex.png)
-#### My Pokemon Page
-![My Pokemon Page](./ProjectPreviewPics/MyPokemon.png)
-#### Pokemon Battle Page
-![Pokemon Counter Finder Page](./ProjectPreviewPics/Counters.png)
-#### User Team View
-![User Team View](./ProjectPreviewPics/Team.png)
-#### Pokedex Detail Page (Eevee)
-![Pokedex Detail Page](./ProjectPreviewPics/Eevee.png)
-#### My Pokemon Detail Page (Zoroark)
-![My Pokemon Detail Page](./ProjectPreviewPics/Zoroark.png)
+
