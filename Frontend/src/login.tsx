@@ -18,16 +18,16 @@ export default function LoginPage() {
     }
 
     try {
-      const response = await fetch(
-        USER_API_URL + `/login?username=${username}&password=${password}`, 
-        { method: "POST"}
-      );
+      const response = await fetch(USER_API_URL + `login`, { 
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            username: username,
+            password: password,
+          }),
+      });
+      console.log(response);
       if (response.ok) {
-        const data = await response.json();
-        const user = data.user;
-        setUsername("");
-        setPassword("");
-        localStorage.setItem("uID", user.uID);
         navigate("/pokedex");
       } else {
         const errMsg = await response.text();
@@ -75,7 +75,7 @@ export default function LoginPage() {
             </div>
           </div>
           <Link to="/create-account" className="password-reset">Forgot password?</Link>
-          <button type="submit">Login</button>
+          <button className="login" type="submit">Login</button>
         </form>
         <div className='flex items-center mt-5'>
           <div className="flex-grow h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent0"></div>

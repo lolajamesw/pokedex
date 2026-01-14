@@ -1,5 +1,11 @@
 const pool = require('../db');
 
+exports.validate = async(instanceID, uID) => {
+    const sql = 'SELECT * FROM MyPokemon WHERE instanceID=?'
+    const [rows] = await pool.query(sql, [instanceID]);
+    return rows[0].uID === uID;
+}
+
 exports.pokemon = async (instanceID) => {
     const sql = '\
     SELECT \
@@ -44,31 +50,6 @@ exports.pokemon = async (instanceID) => {
         imgID: row.pID.toString().padStart(3, '0')
     }));
     return formatted[0];
-}
-
-exports.addPokemon = async (uID, name, nickname, level) => {
-    const pIDsql = 'SELECT pID FROM Pokedex WHERE LOWER(name) = LOWER(?)'
-    const [ pIDs ] = await pool.query(pIDsql, name);
-    if (pIDs.length === 0) 
-        return res.status(400).send("Pokémon not found in Pokedex.");
-    const pID = pIDs[0].pID;
-
-    const sql = 'INSERT INTO MyPokemon(\
-        pID, uID, nickname, form, nature, level, dateAdded, \
-        hpEV, atkEV, defEV, spAtkEV, spDefEV, speedEV, \
-        hpIV, atkIV, defIV, spAtkIV, spDefIV, speedIV \
-    ) \
-    VALUES (\
-        ?, ?, ?, ?, ?, ?, NOW(), \
-        ?, ?, ?, ?, ?, ?, \
-        ?, ?, ?, ?, ?, ?\
-    )';
-    await pool.query(sql, [
-        pID, uID, nickname || null, 'original', 'Hardy', level, 
-        0, 0, 0, 0, 0, 0,
-        31, 31, 31, 31, 31, 31
-    ]);
-    return "Pokémon added successfully.";
 }
 
 exports.delPokemon = async (instanceID) => {

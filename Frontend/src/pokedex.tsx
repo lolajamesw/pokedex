@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from "react"
 import { Pagination } from '@mui/material'
-import { Link } from "react-router-dom"
+import { Link, useSearchParams } from "react-router-dom"
 import "./css/pokedex.css"
 import PokeCard from './components/pokeCard.js'
 import FilterAndSearchCard from "./components/filter-and-search-card.js"
@@ -30,25 +30,30 @@ type Pokemon = {
 export default function Pokedex() {
   const [pokemonList, setPokemonList] = useState<Pokemon[]>([])
   const [filteredAndSortedPokemon, setSortedPokemon] = useState<Pokemon[]>([])
-  const [displayedPokemon, setDisplayed] = useState<Pokemon[]>([])
-  const [page, setPage] = useState(1);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [page, setPage] = useState(Number(searchParams.get('page')) || 1);
   const pageSize = 40
+
+  const displayedPokemon = useMemo(() => {
+    const cut = filteredAndSortedPokemon.slice((page - 1) * pageSize, page * pageSize);
+    return cut;
+  }, [filteredAndSortedPokemon, page]);
   
   useEffect(() => {
-    fetch(POKEMON_API_URL + localStorage.getItem("uID"))
+    fetch(POKEMON_API_URL, {credentials: 'include'})
       .then((res) => res.json())
       .then((data) => setPokemonList(data))
       .catch((err) => console.error("Failed to fetch Pokémon:", err));
   }, [])
 
-  useEffect(() => {setPage(1)}, [filteredAndSortedPokemon])
+  useEffect(() => setPage(Number(searchParams.get('page'))), [searchParams])
 
-  useEffect(() => {
-    setDisplayed(filteredAndSortedPokemon.slice((page-1)*pageSize, page*pageSize));
-  }, [filteredAndSortedPokemon, page])
-
-  const handlePageChange = (event: React.ChangeEvent<unknown>, value: number) => {
+  const handlePageChange = (event: React.ChangeEvent<unknown> | null, value: number) => {
     setPage(value);
+    setSearchParams((prev) => {
+      prev.set("page", String(value));
+      return prev
+    })
   };
 
   return (

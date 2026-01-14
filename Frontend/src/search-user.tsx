@@ -14,7 +14,7 @@ export default function SearchUserPage() {
         return;
       }
 
-      fetch(USER_API_URL + '/search?prompt=' + encodeURIComponent(query))
+      fetch(USER_API_URL + 'search?prompt=' + encodeURIComponent(query))
         .then((res) => res.json())
         .then((data) => setResults(data))
         .catch((err) => {

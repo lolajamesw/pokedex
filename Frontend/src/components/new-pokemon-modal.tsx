@@ -1,5 +1,5 @@
 import Autocomplete from "@mui/material/Autocomplete"
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useEffect, useState, useRef } from "react";
 import { MyCardPokemon } from "../types/pokemon-details";
 import TextField from "@mui/material/TextField";
 import { POKEMON_API_URL, USER_API_URL, USER_POKEMON_API_URL } from "../constants";
@@ -15,12 +15,31 @@ export default function NewPokemonModal({ setPokemonList, setBannerMessage, setI
     const [newNickname, setNewNickname] = useState("");
     const [newLevel, setNewLevel] = useState("100");
     const [pokemonNames, setPokemonNames] = useState<string[]>([]);
+    const pokemonInputRef = useRef<HTMLInputElement>(null);
+    const pokemonNamesRef = useRef<HTMLDataListElement>(null);
+
     useEffect(() => {
         fetch(POKEMON_API_URL + 'names')
           .then((res) => res.json())
           .then((data) => setPokemonNames(data))
           .catch((err) => console.error("Failed to fetch Pokémon:", err));
-      }, [])
+    }, [])
+
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+      if (e.key === "Tab" && pokemonInputRef.current && pokemonNamesRef.current) {
+        const value = pokemonInputRef.current.value.toLowerCase();
+        const options = Array.from(pokemonNamesRef.current.options) as HTMLOptionElement[];
+
+        // Find first option that starts with the input
+        const match = options.find(opt => opt.value.toLowerCase().startsWith(value));
+
+        if (match) {
+          e.preventDefault(); // prevent default tab behavior
+          pokemonInputRef.current.value = match.value;
+          setNewPokemonName(match.value);
+        }
+      }
+    };
 
     const handleAddPokemon = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -31,8 +50,9 @@ export default function NewPokemonModal({ setPokemonList, setBannerMessage, setI
         }
     
         try {
-          const response = await fetch(USER_POKEMON_API_URL + localStorage.getItem("uID"), {
+          const response = await fetch(USER_POKEMON_API_URL, {
             method: "POST",
+            credentials: "include",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               name: newPokemonName,
@@ -42,10 +62,6 @@ export default function NewPokemonModal({ setPokemonList, setBannerMessage, setI
           });
     
           if (response.ok) {
-            const displayNickname = newNickname || newPokemonName;
-            setBannerMessage(
-              `Congratulations! You caught a level ${newLevel} ${newPokemonName} named ${displayNickname}!`
-            );
             setTimeout(() => setBannerMessage(""), 4000);
     
             setIsModalOpen(false);
@@ -53,9 +69,8 @@ export default function NewPokemonModal({ setPokemonList, setBannerMessage, setI
             setNewNickname("");
             setNewLevel("100");
     
-            const updated = await fetch(
-              USER_API_URL + '/pokemon?uID=' + localStorage.getItem("uID")
-            ).then((r) => r.json());
+            const updated = await fetch(USER_API_URL + 'pokemon', {credentials: "include"})
+              .then((r) => r.json());
             setPokemonList(updated);
           } else {
             const errMsg = await response.text();
@@ -74,59 +89,27 @@ export default function NewPokemonModal({ setPokemonList, setBannerMessage, setI
             <div className="modal-content large">
                 <div className="modal-header">
                 <h2>Add New Pokémon</h2>
-                <button className="close-button" onClick={() => setIsModalOpen(false)}>
-                    &times;
-                </button>
                 </div>
 
                 <form className="pokemon-form" onSubmit={handleAddPokemon}>
                 <div className="input-row">
-                    <div className="input-group">
+                  <div className="input-group">
                     <label>Pokemon</label>
-                    <Autocomplete
-                        // disablePortal
-                        options={pokemonNames}
-                        sx={{
-                        "& .MuiOutlinedInput-root": {
-                            "& fieldset": {
-                            border: "0px solid #ccc",   // normal border
-                            }
-                        },
-                        }}
-                        popupIcon={null}
-                        disableClearable
-                        autoSelect
-                        autoHighlight
-                        freeSolo={false}
-                        inputValue={newPokemonName}
-                        onInputChange={(event, newInputValue) => {setNewPokemonName(newInputValue)}}                          
-                        renderInput={
-                        (params) => <TextField 
-                            {...params} 
-                            size="small" 
-                            fullWidth
-                            sx={{
-                                "& .MuiInputBase-input": {
-                                height: "30px",      // optional: controls text height
-                                }
-                            }}
-                            InputProps={{
-                                ...params.InputProps as any, // ✅ cast here
-                            }}
-                        />
-                        }
-                    />
-                    </div>
-                    <div className="input-group">
-                    <label>Nickname</label>
                     <input
-                        type="text"
-                        placeholder="e.g., Sparky"
-                        value={newNickname}
-                        onChange={(e) => setNewNickname(e.target.value)}
+                      type="text"
+                      required
+                      spellCheck={false}
+                      value={newPokemonName}
+                      onChange={(e) => setNewPokemonName(e.target.value)}
+                      list="pokemonNames"
+                      ref={pokemonInputRef}
+                      onKeyDown={handleKeyDown}
                     />
-                    </div>
-                    <div className="input-group">
+                    <datalist id="pokemonNames" ref={pokemonNamesRef}>
+                      {pokemonNames.map((pokemon) => <option value={pokemon}>{pokemon}</option>)}
+                    </datalist>
+                  </div>
+                  <div className="input-group">
                     <label>Level</label>
                     <input
                         type="number"
@@ -138,14 +121,23 @@ export default function NewPokemonModal({ setPokemonList, setBannerMessage, setI
                         onFocus={(e) => e.target.select()}
                         required
                     />
+                  </div>
+                  <div className="input-group">
+                    <label>Nickname</label>
+                    <input
+                        type="text"
+                        spellCheck={false}
+                        value={newNickname}
+                        onChange={(e) => setNewNickname(e.target.value)}
+                    />
                     </div>
                 </div>
 
-                <div className="modal-actions">
+                <div className="add-pokemon-modal-actions">
                     <button type="button" className="cancel-button" onClick={() => setIsModalOpen(false)}>
                     Cancel
                     </button>
-                    <button type="submit" className="add-button">
+                    <button type="submit" className="add-button" disabled={!pokemonNames.includes(newPokemonName) || !newLevel}>
                     Add Pokémon
                     </button>
                 </div>

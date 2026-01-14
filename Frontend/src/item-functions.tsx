@@ -12,7 +12,7 @@ export async function removeItem(
     try {
         const response = await fetch(
             USER_POKEMON_API_URL + instanceID + '/item/null', 
-            {method: "PATCH"}
+            {method: "PATCH", credentials: 'include'}
         );
 
         if (response.ok) {
@@ -47,7 +47,7 @@ export async function giveItem(
     try {
     const response = await fetch(
         USER_POKEMON_API_URL + instanceID + '/item/' + item.name, 
-        {method: "PATCH"}
+        {method: "PATCH", credentials: "include"}
     );
 
     if (response.ok) {
@@ -87,7 +87,7 @@ const updateVariant = async(
 ) => {
     const response = await fetch(
         USER_POKEMON_API_URL + instanceID + '/variant/' + form, 
-        {method: "PATCH"}
+        {method: "PATCH", credentials: "include"}
     );
     if (response.ok) {
         const variant = variants.find(findFunc);

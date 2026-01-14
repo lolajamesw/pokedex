@@ -71,7 +71,7 @@ export default function MyPokemonStatsCard({ pokemon, updatePokemon, editable=tr
 
     const updateNature = async (newNature: string) => {
         const response = await fetch(
-            USER_POKEMON_API_URL + pokemon.id + '/nature/' + newNature, { method: "PATCH" }
+            USER_POKEMON_API_URL + pokemon.id + '/nature/' + newNature, { method: "PATCH", credentials: "include" }
         );
         if (response.ok) {
             updatePokemon((prev) => ({
@@ -105,6 +105,7 @@ export default function MyPokemonStatsCard({ pokemon, updatePokemon, editable=tr
     const commitSliderChange = () => {
         fetch(USER_POKEMON_API_URL + pokemon.id + '/evs-ivs', {
             method: "PATCH",
+            credentials: "include",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ instanceID: pokemon.id, hpEV: evs.hp, atkEV: evs.atk, defEV: evs.def,
                 spAtkEV: evs.spAtk, spDefEV: evs.spDef, speedEV: evs.speed, hpIV: ivs.hp, atkIV: ivs.atk, defIV: ivs.def,

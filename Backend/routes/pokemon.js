@@ -1,10 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const pokemonController = require('../controllers/pokemonController');
+const { validateToken } = require('../middleware/JWT');
 
+router.get('/', validateToken, pokemonController.getPokedex);
 router.get('/names', pokemonController.getNames);
 router.get('/types', pokemonController.getTypes);
-router.get('/:uID', pokemonController.getPokedex);
 router.get('/:pID/details', pokemonController.getPokemon);
 router.get('/:pID/moves', pokemonController.getAttacks);
 router.get('/:pID/evolutions', pokemonController.getEvolutions);

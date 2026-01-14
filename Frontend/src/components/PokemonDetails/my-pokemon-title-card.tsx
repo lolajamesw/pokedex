@@ -1,7 +1,6 @@
 import { Heart, Star, LogOut } from "lucide-react";
 import { useEffect, useState } from "react";
 
-import pokeIcon from "./../../assets/pokeIcon.png";
 import { MyPokemon, CardPokemon, Item } from "../../types/pokemon-details";
 import PokemonTitleCard from "./pokemon-title-card";
 import { Select, SelectContent, SelectItem, SelectTrigger } from "../ui/select";
@@ -46,7 +45,7 @@ export default function MyPokemonTitleCard({items, variants, pokemon, editable=t
     const ReleasePokemon = async () => {
     try {
         console.log("Releasing Pokemon: ", pokemon.nickname);
-        await fetch(USER_POKEMON_API_URL + pokemon.id, { method: "DELETE" });
+        await fetch(USER_POKEMON_API_URL + pokemon.id, { method: "DELETE", credentials: "include" });
         // Navigate back to myPokemon since this pokemon doesn't 
         // exist anymore and hence lacks a detail page
         location.href = '/my-pokemon'
@@ -63,7 +62,7 @@ export default function MyPokemonTitleCard({items, variants, pokemon, editable=t
         console.log("Marking Pokemon: ", pokemon.nickname);
         await fetch(
             USER_POKEMON_API_URL + pokemon.id + '/favourite/' + Number(!pokemon.favourite), 
-            { method: "PATCH" });
+            { method: "PATCH", credentials: "include" });
 
         // Update state optimistically
         updatePokemonDetail((prev) => (prev ? { ...prev, favourite: !prev.favourite } : prev));
@@ -77,7 +76,7 @@ export default function MyPokemonTitleCard({items, variants, pokemon, editable=t
         try {
             const response = await fetch(
                 USER_POKEMON_API_URL + pokemon.id + '/tera-type/' + type, 
-                { method: "PATCH" }
+                { method: "PATCH", credentials: "include" }
             );
             if (response.ok) setTeraType(type);
             else console.error("Error setting tera type")
@@ -135,7 +134,7 @@ export default function MyPokemonTitleCard({items, variants, pokemon, editable=t
                         )}
                         {pokemon.heldItemIcon && 
                             <img
-                                src={pokemon.heldItemIcon==="null" || !(pokemon.heldItemIcon) ? pokeIcon : pokemon.heldItemIcon}
+                                src={pokemon.heldItemIcon==="null" || !(pokemon.heldItemIcon) ? '/pokeIcon.png' : pokemon.heldItemIcon}
                                 alt={'what'}
                                 width={25}
                                 height={25}

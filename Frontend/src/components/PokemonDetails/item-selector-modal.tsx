@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { X, Star } from "lucide-react";
 
-import pokeIcon from "./../../assets/pokeIcon.png";
 import { MyPokemon, Item, CardPokemon } from "../../types/pokemon-details";
 import { USER_POKEMON_API_URL } from "../../constants";
 
@@ -28,7 +27,7 @@ export default function ItemSelectorModal({
         try {
         const response = await fetch(
             USER_POKEMON_API_URL + instanceID + '/item/' + item.name, 
-            { method: "PATCH" }
+            { method: "PATCH", credentials: "include" }
         );
 
         if (response.ok) {
@@ -119,7 +118,7 @@ export default function ItemSelectorModal({
                     onClick={() => toggleItemCollapse(item.name)}
                     >
                     <img
-                        src={item.icon==="null" ? pokeIcon : item.icon}
+                        src={item.icon==="null" ? '/pokeIcon.png' : item.icon}
                         alt={item.name}
                         width={35}
                         height={35}

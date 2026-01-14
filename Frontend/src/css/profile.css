@@ -454,11 +454,6 @@
   overflow-y: auto;
 }
 
-.modal-header {
-  padding: 1.5rem;
-  border-bottom: 1px solid #e5e7eb;
-}
-
 .modal-title {
   font-size: 1.125rem;
   font-weight: 600;

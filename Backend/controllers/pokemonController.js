@@ -2,7 +2,7 @@ const asyncHandler = require('../middleware/asyncHandler');
 const pokemonService = require('../services/pokemonService');
 
 exports.getPokedex = asyncHandler(async (req, res) => {
-    const uID = Number(req.params.uID);
+    const uID = Number(req.user.uID);
     const pokedex = await pokemonService.getPokedex(uID);
     if (!pokedex) return res.status(404).json({ message: 'Pokemon not found' });
     res.json(pokedex);

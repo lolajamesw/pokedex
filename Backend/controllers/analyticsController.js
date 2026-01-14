@@ -17,7 +17,7 @@ exports.getTeamExportText = asyncHandler(async (req, res) => {
 
 exports.getBestOpponent = asyncHandler(async (req, res) => {
     const pokemonName = req.params.name;
-    const uID = Number(req.params.uID);
+    const uID = Number(req.user.uID);
     const opponent = await analyticsService.getBestOpponent(pokemonName, uID);
     if (!opponent) return res.status(404).json({ message: 'Opponent(s) couldn\'t be decided' });
     res.json(opponent);

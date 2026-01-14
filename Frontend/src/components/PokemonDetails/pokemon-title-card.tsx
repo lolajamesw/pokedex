@@ -54,6 +54,7 @@ export default function PokemonTitleCard({ pokemon, nickname, level, topRight, s
                                 </div>
                                 {itemElement}
                                 <p className="text-white/90 max-w-2xl">{pokemon.description}</p>
+                                {/* <p className="text-white/90 max-w-2xl">{"The plant blooms\nwhen it is\nabsorbing solar\nenergy. It stays\non the move to\nseek sunlight."}</p> */}
                             </div>
                         </div>
                     </div>

@@ -9,8 +9,8 @@ const userRoutes = require('./user');
 
 router.use('/pokemon', pokemonRoutes);
 router.use('/analytics', analyticsRoutes);
-router.use('/users/base', userRoutes);
 router.use('/users/team', teamRoutes);
 router.use('/users/pokemon/:id', userPokemonRoutes);
+router.use('/users', userRoutes);
 
 module.exports = router;

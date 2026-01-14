@@ -25,7 +25,7 @@ export default function PokemonVariantCard<T extends PokedexPokemon>({ variants,
     }
 
     const setMegaStone = async(variant: CardPokemon) => {
-        const response = await fetch(USER_POKEMON_API_URL + instanceID + '/item/megaStone', { method: "PATCH" })
+        const response = await fetch(USER_POKEMON_API_URL + instanceID + '/item/megaStone', { method: "PATCH", credentials: "include" })
         if (response.ok) {
             const overviewRes = await fetch(USER_POKEMON_API_URL + instanceID);
             const overviewData: MyPokemon = await overviewRes.json();
@@ -51,7 +51,7 @@ export default function PokemonVariantCard<T extends PokedexPokemon>({ variants,
             try {
                 const response = await fetch(
                     USER_POKEMON_API_URL + instanceID + '/variant/' + variant.name, 
-                    { method: "PATCH" }
+                    { method: "PATCH", credentials: "include" }
                 );
                 if (variant.mega) {
                     setMegaStone(variant);
@@ -94,7 +94,7 @@ export default function PokemonVariantCard<T extends PokedexPokemon>({ variants,
                         <PokeCard
                         key={key}
                         pokemon={variant}
-                        onClick={() => {selectVariant(variant)}}
+                        onClick={editable ? () => {selectVariant(variant)} : undefined}
                         cornerVisible={currentForm === variant.form}
                         cornerElement = {
                             <div className="pokemon-badges">

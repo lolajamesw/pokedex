@@ -1,12 +1,16 @@
 const express = require('express');
 const router = express.Router();
-const userController = require('../controllers/userController');
+const controller = require('../controllers/userController');
+const { validateToken } = require("../middleware/JWT")
 
-router.get('/', userController.getUser);
-router.post('/create', userController.addUser);
-router.post('/login', userController.login);
-router.patch('/name', userController.setDisplayName);
-router.get('/search', userController.findUsers);
-router.get('/pokemon', userController.getUserPokemon);
+router.get('/', validateToken, controller.getUser);
+router.post('/register', controller.register)
+router.post('/create', controller.addUser);
+router.post('/login', controller.login);
+router.get('/auth', validateToken, controller.authenticate)
+router.patch('/name', validateToken, controller.setDisplayName);
+router.get('/search', controller.findUsers);
+router.get('/pokemon', validateToken, controller.getUserPokemon);
+router.post('/pokemon', validateToken, controller.addUserPokemon);
 
 module.exports = router;

@@ -21,12 +21,12 @@ export default function Profile() {
   const [newName, setNewName] = useState("");
 
   useEffect(() => {
-    fetch(TEAM_API_URL + '/' + localStorage.getItem("uID"))
+    fetch(TEAM_API_URL, {credentials: 'include'})
       .then((res) => res.json())
       .then((data) => setRawTeams(data))
       .catch((err) => console.error("Failed to fetch team summary:", err));
 
-    fetch(USER_API_URL + '/pokemon?uID=' + localStorage.getItem("uID"))
+    fetch(USER_API_URL + 'pokemon', {credentials: 'include'})
         .then((res) => res.json())
         .then((data) => setPokemonList(data))
         .catch((err) => console.error("Failed to fetch Pokémon:", err));
@@ -40,7 +40,7 @@ export default function Profile() {
         typeSummaries.push({
           tID: team.id,
           summary: await (await fetch(
-            ANALYTICS_API_URL + '/teams/type-summary/' + team.id
+            ANALYTICS_API_URL + 'teams/type-summary/' + team.id
           )).json()
         })
       }
@@ -62,14 +62,14 @@ export default function Profile() {
     try {
       console.log("Marking Pokemon: ", selectedPokemon.map((p)=>(p.nickname)));
       const response = await fetch(
-        TEAM_API_URL + '/' + activeTeam + '?instanceIDs=' 
+        TEAM_API_URL + activeTeam + '?instanceIDs=' 
         + JSON.stringify(selectedPokemon.map((p)=>(p.id))), 
         { method: "PATCH" }
       );
       console.log(activeTeam);
       console.log(selectedPokemon)
       if (response.ok) {
-        const teamSum = await fetch(ANALYTICS_API_URL + '/teams/type-summary/' + activeTeam)
+        const teamSum = await fetch(ANALYTICS_API_URL + 'teams/type-summary/' + activeTeam)
         const teamSumData = await teamSum.json();
         setTeams(teams.map((prev) => ({
           ...prev,
@@ -84,19 +84,12 @@ export default function Profile() {
     }
   }
 
-  const testFunc = async () => {
-    fetch("http://localhost:8081/api/users/team/47/Team%205", { method: "POST" })
-      .then(async r => { console.log('FETCH OK', r.status, r.statusText); console.log('headers:', [...r.headers]); console.log('body:', await r.text()); })
-      .catch(err => console.error('FETCH ERROR', err));
-  }
-
   const addTeam = async () => {
     try {
       console.log("Adding Team:", newName);
-      const uID = localStorage.getItem("uID") || '';
       const teamName = newName === "" ? `Team ${teams.length + 1}` : newName;
-      const encodedUrl = `${TEAM_API_URL}/${encodeURIComponent(uID)}/${encodeURIComponent(teamName)}`;
-      const response = await fetch(encodedUrl, { method: "POST" });
+      const encodedUrl = TEAM_API_URL + encodeURIComponent(teamName);
+      const response = await fetch(encodedUrl, { method: "POST", credentials: "include" });
 
       if (response.ok) {
         const ans = await response.json()
@@ -120,7 +113,7 @@ export default function Profile() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-red-50">
       <div className="profile-container">
-        <UserTitleCard pokemonCaught={pokemonList.length} uID={localStorage.getItem("uID") ?? '0'} editable={true}/>
+        <UserTitleCard pokemonCaught={pokemonList.length} editable/>
     
         {/* Pokemon on my Teams */}
         {teams.map((team) =>

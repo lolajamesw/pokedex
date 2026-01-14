@@ -16,13 +16,13 @@ export default function ViewProfile() {
   const [teams, setTeams] = useState<Team[]>([]);
 
   useEffect(() => {
-    fetch(TEAM_API_URL + '/' + uID)
+    fetch(TEAM_API_URL + '?uID=' + uID)
       .then((res) => res.json())
       .then((data) => {console.log(data);return data;})
       .then((data) => setRawTeams(data))
       .catch((err) => console.error("Failed to fetch team summary:", err));
 
-    fetch(USER_API_URL + '/pokemon?uID=' + uID)
+    fetch(USER_API_URL + 'pokemon?uID=' + uID)
       .then((res) => res.json())
       .then((data) => setPokemonList(data))
       .catch((err) => console.error("Failed to fetch Pokémon:", err));
@@ -35,7 +35,7 @@ export default function ViewProfile() {
         typeSummaries.push({
           tID: team.id,
           summary: await (await fetch(
-            ANALYTICS_API_URL + '/teams/type-summary/' + team.id
+            ANALYTICS_API_URL + 'teams/type-summary/' + team.id
           )).json()
         })
       }
@@ -56,7 +56,7 @@ export default function ViewProfile() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-red-50">
       <div className="profile-container">
-        <UserTitleCard pokemonCaught={pokemonList.length} uID={uID ?? '0'} editable={false}/>
+        <UserTitleCard pokemonCaught={pokemonList.length} uID={Number(uID) ?? 0} editable={false}/>
         {/* My Teams */} 
         {teams.map((team) => 
           <TeamCard 

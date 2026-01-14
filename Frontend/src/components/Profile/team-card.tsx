@@ -29,7 +29,7 @@ export default function TeamCard(props: Inputs) {
         if (!props.editable) return
         try {
         console.log("Forgetting Team");
-        const response = await fetch(TEAM_API_URL + '/' + id, { method: "DELETE" });
+        const response = await fetch(TEAM_API_URL + id, { method: "DELETE" });
         console.log('response: ' + response.ok)
         if (response.ok) {
           props.setTeams((teams) => teams.filter((team) => team.id !== props.team.id));

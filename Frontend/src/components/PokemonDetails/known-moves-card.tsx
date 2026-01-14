@@ -2,6 +2,7 @@ import { Swords, X, Plus } from "lucide-react"
 import { CardTitle } from "../ui/card";
 import { MyPokemon, AttackDetails } from "../../types/pokemon-details"
 import PokemonMovesCard from "./learnable-moves-card";
+import "./../../css/moves.css"
 import { POKEMON_API_URL, USER_POKEMON_API_URL } from "../../constants";
 
 
@@ -17,7 +18,7 @@ export default function MyPokemonMovesCard({ pokemon, updatePokemonDetail, edita
         try {
         const response = await fetch(
             USER_POKEMON_API_URL + pokemon.id + '/moves/' + moveToLearn.id, 
-            { method: "POST" }
+            { method: "POST", credentials: "include" }
         );
 
         if (response.ok) {
@@ -46,7 +47,7 @@ export default function MyPokemonMovesCard({ pokemon, updatePokemonDetail, edita
         try {
         const response = await fetch(
             USER_POKEMON_API_URL + pokemon.id + '/moves/' + moveToForget.id, 
-            { method: "DELETE" }
+            { method: "DELETE", credentials: "include" }
         );
 
         if (response.ok) {
@@ -92,40 +93,51 @@ export default function MyPokemonMovesCard({ pokemon, updatePokemonDetail, edita
                     <p>No moves learned yet. Learn moves from the section below.</p>
                     </div>
                 ) : (
-                <div className="space-y-3">
+                <div className="move-grid">
                     {pokemon.knownAttacks.map((move, index) => (
                     <div
                         key={index}
-                        className="flex flex-col sm:flex-row sm:items-center justify-between p-3 border rounded-lg hover:shadow-md"
+                        className={`move-card bg-${move.type.toLowerCase()}`}
                     >
-                        <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
-                            <h4 className="font-medium text-foreground">{move.name}</h4>
-                            <span className={`badge type-${move.type.toLowerCase()} text-white text-xs`}>{move.type}</span>
-                            <span className="badge badge-outline text-xs">{move.category}</span>
-                            {move.TM ? <span className="badge badge-tm text-white text-xs">T/M</span>:""}
+                        <div className="head">
+                            <h2 className="move-name">{move.name}</h2>
+                            {editable && 
+                                <button
+                                    onClick={() => forgetMove(move)}
+                                    className="p-1 rounded-full bg-red-100 text-red-600 hover:bg-red-200 transition-colors h-6 mt-1"
+                                    title="Forget this move"
+                                >
+                                    <X className="h-4 w-4" />
+                                </button>
+                            }
                         </div>
-                        <div className="flex gap-4 text-sm text-muted-foreground">
-                            <span>Power: {move.stats.power}</span>
-                            <span>Accuracy: {move.stats.accuracy}%</span>
-                            <span>PP: {move.stats.pp}</span>
-                        </div>
-                        </div>
-                        <div className="mt-2 sm:mt-0 flex items-center gap-2">
-                        {move.effect !== "" ? 
-                            <span className="badge badge-outline">
-                                {move.effect}
-                            </span> : <span></span>
-                        }
-                        {editable && 
-                            <button
-                                onClick={() => forgetMove(move)}
-                                className="p-1 rounded-full bg-red-100 text-red-600 hover:bg-red-200 transition-colors"
-                                title="Forget this move"
-                            >
-                                <X className="h-4 w-4" />
-                            </button>
-                        }
+                        <div className="move-body">
+                            <div className="move-categorization">
+                                <div className={`type outline-2 outline-slate-200/50 type-${move.type.toLowerCase()}`}>{move.type}</div>
+                                <div className={`category`}>
+                                    <img src={'/' + move.category.toLowerCase() + '-move.png'} width={35}/>
+                                </div>
+                                {move.TM && 
+                                    <div className="tm"><img src='/tm.png' width={35}/></div>
+                                }
+                            </div>
+                            <div className="move-stats bg-white/65">
+                                <div>
+                                    <h4 className="value-title">Power</h4>
+                                    <h1 className="value">{move.stats.power || "—"}</h1>
+                                </div>
+                                <div>
+                                    <h4 className="value-title">Accuracy</h4>
+                                    <h1 className="value">{move.stats.accuracy}</h1>
+                                </div>
+                                <div>
+                                    <h4 className="value-title">PP</h4>
+                                    <h1 className="value">{move.stats.pp}</h1>
+                                </div>
+                                <div className="description">
+                                    <p>{move.effect}</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     ))}
@@ -168,3 +180,33 @@ export default function MyPokemonMovesCard({ pokemon, updatePokemonDetail, edita
         </div>
     )
 }
+
+{/* <div className="flex-1">
+<div className="flex items-center gap-2 mb-1">
+    <h4 className="font-medium text-foreground">{move.name}</h4>
+    <span className={`badge type-${move.type.toLowerCase()} text-white text-xs`}>{move.type}</span>
+    <img src={'/' + move.category + '-move.png'} width={30}/>
+    {move.TM ? <span className="badge badge-tm text-white text-xs">T/M</span>:""}
+</div>
+<div className="flex gap-4 text-sm text-muted-foreground">
+    <span>Power: {move.stats.power}</span>
+    <span>Accuracy: {move.stats.accuracy}%</span>
+    <span>PP: {move.stats.pp}</span>
+</div>
+</div>
+<div className="mt-2 sm:mt-0 flex items-center gap-2">
+{move.effect !== "" ? 
+    <span className="badge badge-outline">
+        {move.effect}
+    </span> : <span></span>
+}
+{editable && 
+    <button
+        onClick={() => forgetMove(move)}
+        className="p-1 rounded-full bg-red-100 text-red-600 hover:bg-red-200 transition-colors"
+        title="Forget this move"
+    >
+        <X className="h-4 w-4" />
+    </button>
+}
+</div> */}

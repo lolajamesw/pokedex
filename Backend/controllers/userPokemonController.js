@@ -9,20 +9,12 @@ exports.getUserPokemon = asyncHandler(async (req, res) => {
   res.json(pokemon);
 });
 
-// POST /users/pokemon
-exports.addUserPokemon = asyncHandler(async (req, res) => {
-  uID = Number(req.params.id);
-  // prefer body: { name, nickname, level }
-  const { name, nickname, level = 100 } = req.body;
-  if (!uID || !name) return res.status(400).json({ message: 'uID and name required' });
-
-  const pokemon = await service.addUserPokemon(Number(uID), name, nickname, Number(level));
-  res.status(201).json(pokemon);
-});
-
 // DELETE /users/pokemon/:id
 exports.deleteUserPokemon = asyncHandler(async (req, res) => {
   const instanceID = Number(req.params.id);
+  const uID = Number(req.user.uID);
+  const validated = await service.validate(instanceID, uID);
+  if (!validated) res.status(400).json({error: "User Doesn't Own This Pokemon"})
   await service.deleteUserPokemon(instanceID);
   res.status(204).end();
 });
@@ -40,6 +32,9 @@ exports.setTeraType = asyncHandler(async (req, res) => {
   const instanceID = Number(req.params.id);
   const teraType = req.params.type;
   if (!teraType) return res.status(400).json({ message: 'teraType required' });
+  const uID = Number(req.user.uID);
+  const validated = await service.validate(instanceID, uID);
+  if (!validated) res.status(400).json({error: "User Doesn't Own This Pokemon"})
   const result = await service.setTeraType(instanceID, teraType);
   res.status(200).json(result);
 });
@@ -57,6 +52,9 @@ exports.setEVsIVs = asyncHandler(async (req, res) => {
   const instanceID = Number(req.params.id);
   const values = req.body.values || req.body;
   if (!values) return res.status(400).json({ message: 'EV/IV values required' });
+  const uID = Number(req.user.uID);
+  const validated = await service.validate(instanceID, uID);
+  if (!validated) res.status(400).json({error: "User Doesn't Own This Pokemon"})
   const EVsIVs = await service.setEVsIVs(instanceID, values);
   res.status(200).json(EVsIVs);
 });
@@ -74,6 +72,9 @@ exports.learnMove = asyncHandler(async (req, res) => {
   const instanceID = Number(req.params.id);
   const aID = Number(req.params.aID);
   if (!Number.isInteger(aID)) return res.status(400).json({ message: 'aID required' });
+  const uID = Number(req.user.uID);
+  const validated = await service.validate(instanceID, uID);
+  if (!validated) res.status(400).json({error: "User Doesn't Own This Pokemon"})
   const move = await service.learnMove(instanceID, aID);
   res.status(201).json(move);
 });
@@ -83,6 +84,9 @@ exports.forgetMove = asyncHandler(async (req, res) => {
   const instanceID = Number(req.params.id);
   const aID = Number(req.params.aID);
   if (!Number.isInteger(aID)) return res.status(400).json({ message: 'aID required' });
+  const uID = Number(req.user.uID);
+  const validated = await service.validate(instanceID, uID);
+  if (!validated) res.status(400).json({error: "User Doesn't Own This Pokemon"})
   await service.forgetMove(instanceID, aID);
   res.status(204).end();
 });
@@ -100,6 +104,9 @@ exports.setNature = asyncHandler(async (req, res) => {
   const instanceID = Number(req.params.id);
   const nature = req.params.nature;
   if (typeof nature === 'undefined') return res.status(400).json({ message: 'nature required' });
+  const uID = Number(req.user.uID);
+  const validated = await service.validate(instanceID, uID);
+  if (!validated) res.status(400).json({error: "User Doesn't Own This Pokemon"})
   const result = await service.setNature(instanceID, nature);
   res.status(200).json(result);
 });
@@ -109,6 +116,9 @@ exports.setAbility = asyncHandler(async (req, res) => {
   const instanceID = Number(req.params.id);
   const ability = req.params.ability === 'null' ? null : req.params.ability;
   if (typeof ability === 'undefined') return res.status(400).json({ message: 'ability required' });
+  const uID = Number(req.user.uID);
+  const validated = await service.validate(instanceID, uID);
+  if (!validated) res.status(400).json({error: "User Doesn't Own This Pokemon"})
   const result = await service.setAbility(instanceID, ability);
   res.status(200).json(result);
 });
@@ -118,6 +128,9 @@ exports.setVariant = asyncHandler(async (req, res) => {
   const instanceID = Number(req.params.id);
   const variant  = req.params.variant;
   if (typeof variant === 'undefined') return res.status(400).json({ message: 'variant required' });
+  const uID = Number(req.user.uID);
+  const validated = await service.validate(instanceID, uID);
+  if (!validated) res.status(400).json({error: "User Doesn't Own This Pokemon"})
   const result = await service.setVariant(instanceID, variant);
   res.status(200).json(result);
 });
@@ -127,6 +140,9 @@ exports.setFavourite = asyncHandler(async (req, res) => {
   const instanceID = Number(req.params.id);
   const favourite = Number(req.params.favourite);
   if (typeof favourite === 'undefined') return res.status(400).json({ message: 'favourite required' });
+  const uID = Number(req.user.uID);
+  const validated = await service.validate(instanceID, uID);
+  if (!validated) res.status(400).json({error: "User Doesn't Own This Pokemon"})
   const result = await service.setFavourite(instanceID, favourite);
   res.status(200).json(result);
 });
@@ -136,6 +152,9 @@ exports.setItem = asyncHandler(async (req, res) => {
   const instanceID = Number(req.params.id);
   const item = req.params.item === 'null' ? null : req.params.item;
   if (typeof item === 'undefined') return res.status(400).json({ message: 'item required' });
+  const uID = Number(req.user.uID);
+  const validated = await service.validate(instanceID, uID);
+  if (!validated) res.status(400).json({error: "User Doesn't Own This Pokemon"})
   const result = await service.setItem(instanceID, item);
   res.status(200).json(result);
 });

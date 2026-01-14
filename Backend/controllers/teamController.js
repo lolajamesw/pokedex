@@ -2,14 +2,14 @@ const asyncHandler = require('../middleware/asyncHandler');
 const teamsService = require('../services/teamsService');
 
 exports.getTeams = asyncHandler(async (req, res) => {
-    const uID = Number(req.params.uID);
+    const uID = req.query.uID ? Number(req.query.uID) : Number(req.user.uID);
     const teams = await teamsService.getTeams(uID);
     if (!teams) return res.status(404).json({ message: 'Teams not found' });
     res.json(teams);
 });
 
 exports.addTeam = asyncHandler(async (req, res) => {
-    const uID = Number(req.params.uID);
+    const uID = Number(req.user.uID);
     const name = req.params.name;
     const team = await teamsService.addTeam(uID, name);
     if (!team) return res.status(404).json({ message: 'Team not found' });

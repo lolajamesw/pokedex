@@ -5,18 +5,21 @@ import { USER_API_URL } from "../../constants";
 
 type Input = {
   pokemonCaught: number;
-  uID: string;
+  uID?: Number;
   editable: boolean;
 }
 
 export default function UserTitleCard({ pokemonCaught, uID, editable }: Input) {
-    const [user, setUser] = useState<User>({id: parseInt(uID), tradeCount: 0, displayName: "", username: "" })
+    const [user, setUser] = useState<User>({id: 0, tradeCount: 0, displayName: "", username: "" })
     const [isEditingName, setIsEditingName] = useState(false)
     const [editedDisplayName, setEditedDisplayName] = useState(user.displayName)
 
     useEffect(() => {
-        fetch(USER_API_URL + '?uID=' + uID)
+      console.log(uID)
+      console.log(USER_API_URL + (uID ? ('?uID=' + uID) : ''))
+        fetch(USER_API_URL + (uID ? ('?uID=' + uID) : ''), {credentials: "include"})
           .then((res) => res.json())
+          .then((res) => {console.log(res); console.log(uID); return res})
           .then((data) => setUser(data))
           .catch((err) => console.error("Failed to fetch user: ", err));
     }, [])
@@ -25,7 +28,7 @@ export default function UserTitleCard({ pokemonCaught, uID, editable }: Input) {
     try {
         console.log("Updating user's name");
         const response = await fetch(
-          USER_API_URL + '?uID=' + uID + '&name=' + editedDisplayName, 
+          USER_API_URL + '?name=' + editedDisplayName, 
           { method: "PATCH" }
         )
     } catch (err) {
@@ -91,8 +94,8 @@ export default function UserTitleCard({ pokemonCaught, uID, editable }: Input) {
                     <div className="stat-label">Trades</div>
                   </div>
                   <div className="stat-item">
-                    <div className="stat-number">{pokemonCaught}</div>
-                    <div className="stat-label">Pokémon Caught</div>
+                    {/* <div className="stat-number">{pokemonCaught}</div>
+                    <div className="stat-label">Pokémon Caught</div> */}
                   </div>
                 </div>
               </div>

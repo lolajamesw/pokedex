@@ -19,16 +19,19 @@ export default function CreateAccountPage() {
 
     try {
       const response = await fetch(
-        USER_API_URL + `/create?name=${name}&username=${username}&password=${password}`, 
-        { method: "POST" }
+        USER_API_URL + 'register', { 
+          method: "POST", 
+          credentials: 'include',
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: name,
+            username: username,
+            password: password,
+          }), 
+        }
       );
 
       if (response.ok) {
-        const data = await response.json();
-        const user = data.user;
-        setUsername("");
-        setPassword("");
-        localStorage.setItem("uID", user.uID);
         navigate("/pokedex");
       } else {
         const errMsg = await response.text();
@@ -89,7 +92,7 @@ export default function CreateAccountPage() {
               />
             </div>
           </div>
-          <button type="submit">Create Account</button>
+          <button className='login' type="submit">Create Account</button>
         </form>
         <div className='flex items-center my-4'>
           <div className="flex-grow h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent0"></div>

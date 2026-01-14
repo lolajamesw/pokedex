@@ -39,24 +39,24 @@
   --spacing-88: 22rem;
 
   /* Pokemon type colors */
-  --color-type-normal: 168 168 120;
-  --color-type-fire: 240 128 48;
-  --color-type-water: 104 144 240;
-  --color-type-electric: 248 208 48;
-  --color-type-grass: 120 200 80;
-  --color-type-ice: 152 216 216;
-  --color-type-fighting: 192 48 40;
-  --color-type-poison: 160 64 160;
-  --color-type-ground: 224 192 104;
-  --color-type-flying: 168 144 240;
-  --color-type-psychic: 248 88 136;
-  --color-type-bug: 168 184 32;
-  --color-type-rock: 184 160 56;
-  --color-type-ghost: 112 88 152;
-  --color-type-dragon: 112 56 248;
-  --color-type-dark: 112 88 72;
-  --color-type-steel: 184 184 208;
-  --color-type-fairy: 238 153 172;
+  --color-type-normal: 168, 168, 120;
+  --color-type-fire: 240, 128, 48;
+  --color-type-water: 104, 144, 240;
+  --color-type-electric: 248, 208, 48;
+  --color-type-grass: 120, 200, 80;
+  --color-type-ice: 152, 216, 216;
+  --color-type-fighting: 192, 48, 40;
+  --color-type-poison: 160, 64, 160;
+  --color-type-ground: 224, 192, 104;
+  --color-type-flying: 168, 144, 240;
+  --color-type-psychic: 248, 88, 136;
+  --color-type-bug: 168, 184, 32;
+  --color-type-rock: 184, 160, 56;
+  --color-type-ghost: 112, 88, 152;
+  --color-type-dragon: 112, 56, 248;
+  --color-type-dark: 112, 88, 72;
+  --color-type-steel: 184, 184, 208;
+  --color-type-fairy: 238, 153, 172;
 
   
   /* Stat colors */
@@ -182,6 +182,10 @@
     border-color: rgb(var(--color-border));
   }
 
+  .card-top {
+    @apply flex justify-between pr-6 items-center;
+  }
+
   .card-header {
     @apply flex flex-col space-y-1.5 p-6;
   }
@@ -197,7 +201,35 @@
   }
 
   .card-content {
-    @apply p-6 pt-0;
+    @apply p-6 pt-0 relative;
+  }
+
+  .filter-button {
+    @apply bg-slate-300 rounded-lg p-2 h-min text-white duration-100 ease-out
+  }
+
+  .filter-button:hover {
+    @apply scale-103 bg-slate-400
+  }
+
+  .filter-button:active {
+    @apply scale-98 bg-slate-500
+  }
+
+  .filter-modal {
+    @apply p-3 rounded-lg border absolute -top-6 right-6 bg-white flex flex-col gap-3
+  }
+
+  .filter-group {
+    @apply flex gap-3 items-center font-medium
+  }
+
+  .filter-group label {
+    @apply flex-3 min-w-30 text-right
+  }
+
+  .filter-group .input {
+    @apply flex-8
   }
 
   /* Badge components */
@@ -369,6 +401,61 @@
   }
   .type-dragon {
     background-color: rgb(var(--color-type-dragon));
+  }
+
+  .bg-normal {
+    background-color: rgb(var(--color-type-normal), 0.85);
+  }
+  .bg-fire {
+    background-color: rgba(var(--color-type-fire), 0.85);
+  }
+  .bg-water {
+    background-color: rgba(var(--color-type-water), 0.85);
+  }
+  .bg-electric {
+    background-color: rgba(var(--color-type-electric), 0.85);
+  }
+  .bg-grass {
+    background-color: rgba(var(--color-type-grass), 0.85);
+  }
+  .bg-ice {
+    background-color: rgba(var(--color-type-ice), 0.85);
+  }
+  .bg-fighting {
+    background-color: rgba(var(--color-type-fighting), 0.85);
+  }
+  .bg-poison {
+    background-color: rgba(var(--color-type-poison), 0.85);
+  }
+  .bg-ground {
+    background-color: rgba(var(--color-type-ground), 0.85);
+  }
+  .bg-flying {
+    background-color: rgba(var(--color-type-flying), 0.85);
+  }
+  .bg-psychic {
+    background-color: rgba(var(--color-type-psychic), 0.85);
+  }
+  .bg-bug {
+    background-color: rgba(var(--color-type-bug), 0.85);
+  }
+  .bg-rock {
+    background-color: rgba(var(--color-type-rock), 0.85);
+  }
+  .bg-ghost {
+    background-color: rgba(var(--color-type-ghost), 0.85);
+  }
+  .bg-dragon {
+    background-color: rgba(var(--color-type-dragon), 0.85);
+  }
+  .bg-dark {
+    background-color: rgba(var(--color-type-dark), 0.85);
+  }
+  .bg-fairy {
+    background-color: rgba(var(--color-type-fairy), 0.85);
+  }
+  .bg-steel {
+    background-color: rgba(var(--color-type-steel), 0.85);
   }
 
   /* Pokemon type gradient utilities */

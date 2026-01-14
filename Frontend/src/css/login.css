@@ -30,13 +30,13 @@
     font-family: "Poppins", sans-serif;
 }
 
-.input-group label {
+.auth-container .input-group label {
   font-weight: 400;
   margin-bottom: 4px;
   display: block;
 }
 
-.input-group input {
+.auth-container .input-group input {
   padding: 14px;
   border-width: 0px;
   border-bottom: 1px solid #ccc;
@@ -45,7 +45,7 @@
   margin-bottom: 1rem;
 }
 
-.input-group input:focus {
+.auth-container .input-group input:focus {
   outline: none;
   border-bottom: 1px solid #000;
 }
@@ -58,7 +58,7 @@
   margin-top: -15px;
 }
 
-button[type="submit"] {
+.auth-container button[type="submit"] {
   padding: 10px;
   background: linear-gradient(to bottom right, #ffd19d, #ffaaaa);
   color: white;
@@ -97,7 +97,7 @@ button[type="submit"] {
   background: var(--color-gray-200)
 }
 
-button[type="submit"]:hover {
+.auth-container button[type="submit"]:hover {
   background: linear-gradient(to bottom right, #ffce96, #ffa3a3);
   scale: 102%;
   box-shadow: #000;
@@ -111,6 +111,6 @@ button[type="submit"]:hover {
   /* text-decoration: underline; */
 }
 
-a {
+.auth-container a {
   color: var(--color-indigo-500)
 }

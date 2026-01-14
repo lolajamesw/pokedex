@@ -1,0 +1,127 @@
+@import "tailwindcss";
+
+
+@media (min-width: 700px) {
+    .move-grid {
+        grid-template-columns: repeat(2, 1fr);
+        display: grid;
+    }
+}
+
+/* @media (min-width: 1000px) {
+    .learnable-moves .move-grid {
+        grid-template-columns: repeat(3, 1fr);
+        display: grid;
+    }
+} */
+
+
+
+.move-card {
+    border: 1px solid var(--color-white);
+    border-radius: 20px;
+    padding-inline: calc(var(--spacing) * 3);
+    padding-bottom: calc(var(--spacing) * 3);
+    padding-top: calc(var(--spacing) * 1);
+    margin-block: calc(var(--spacing) * 2);
+    margin-inline:calc(var(--spacing) * 2);
+    row-gap: calc(var(--spacing) * 1);
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+}
+
+.move-card:hover {
+    box-shadow: var(--shadow-md);
+}
+
+.move-card .head {
+    display: flex;
+    justify-content: center;
+}
+
+.move-name {
+    text-align: center;
+    font-weight: 600;
+    font-size: var(--text-xl);
+    margin-right: auto;
+    margin-left: auto;
+    color: white;
+}
+
+.move-body {
+    display: flex;
+}
+
+.move-stats {
+    border: 1px solid var(--color-gray-200);
+    padding: 6px;
+    padding-block: 8px;
+    border-radius: 15px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    flex-grow: 1;
+}
+
+.value-title {
+    font-weight: 500;
+    color: var(--color-gray-700);
+    font-size: var(--text-sm);
+}
+
+.value {
+    font-weight: 600;
+    font-size: var(--text-base)
+}
+
+.move-stats .description {
+    grid-column: 1 / -1;
+}
+
+.move-categorization {
+    margin-right: calc(var(--spacing) * 4);
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    /* flex-grow: 1; */
+    min-width: 80px;
+    width: 20%;
+}
+
+.type {
+    display: flex;
+    grid-column: 1/-1;
+    border-radius: 1000000000000px;
+    color: white;
+    font-size: var(--text-lg);
+    font-weight: 600;
+    align-items: center;
+    justify-content: center;
+    margin-top: auto;
+}
+
+.category {
+    /* @apply col-span-2; */
+    display: flex;
+    justify-content: center;
+    padding-bottom: calc(var(--spacing) * 2);
+    width: 100%;
+}
+
+.tm {
+    @apply -ml-2;
+    display: flex;
+    justify-content: center;
+    padding-bottom: calc(var(--spacing) * 2);
+    width: 140%
+}
+
+img {
+  max-width: 100%;  /* prevents overflow */
+  display: block;   /* optional, removes inline spacing */
+  align-self: center;
+}
+
+button {
+    @apply h-min my-auto
+}

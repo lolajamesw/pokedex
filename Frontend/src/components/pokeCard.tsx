@@ -1,4 +1,5 @@
-import { CardPokemon, Nature, PokemonStats } from "../types/pokemon-details"
+import { CardPokemon, Nature } from "../types/pokemon-details"
+import React, { useMemo } from 'react'
 
 
 type PokeCardInput = {
@@ -33,7 +34,20 @@ switch (form.toLowerCase()) {
 }
 }
 
-export default function PokeCard({pokemon, nature, defaultDescription="", onClick, numberVisible=false, cornerVisible=false, cornerElement, extraElement}: PokeCardInput) { 
+const PokeCard = React.memo(function PokeCard({pokemon, nature, defaultDescription="", onClick, numberVisible=false, cornerVisible=false, cornerElement, extraElement}: PokeCardInput) { 
+    const title = useMemo(() => {
+        const num = numberVisible ? `#${pokemon.pID.toString().padStart(3, '0')}` : "";
+        const name = 'nickname' in pokemon && pokemon.nickname ? pokemon.nickname : pokemon.name;
+        return `${num} ${name}`;
+    }, [numberVisible, pokemon])
+    const typeBadges = useMemo(() =>
+        pokemon.types.map(type => (
+            <span key={type} className={`type-badge type-${type.toLowerCase()}`}>
+            {type}
+            </span>
+        )), 
+        [pokemon.types]
+    );
     return (
     <div
         className={`border bg-white rounded-lg cursor-pointer transition-all duration-200 hover:shadow-md ${
@@ -46,7 +60,7 @@ export default function PokeCard({pokemon, nature, defaultDescription="", onClic
         <div className="pokemon-card-header">
         <div className="pokemon-title-row">
             <h3 className="pokemon-title">
-                {`${numberVisible ? `#${pokemon.pID.toString().padStart(3, '0')}` : ""}  ${'nickname' in pokemon && pokemon.nickname ? pokemon.nickname : pokemon.name}`}
+                {title}
                 {'nickname' in pokemon && !!pokemon.nickname && <span className="pokemon-nickname">({pokemon.name})</span>}
             </h3>
             <div className="pokemon-badges">{cornerVisible && cornerElement}</div>
@@ -61,11 +75,7 @@ export default function PokeCard({pokemon, nature, defaultDescription="", onClic
         </div>
         <div className="flex flex-row items-center justify-between">
             <div className={`pokemon-types ${(pokemon.form && !extraElement) && "justify-center"} flex gap-1`}>
-                {pokemon.types.map((type: string) => (
-                <span key={type} className={`type-badge type-${type.toLowerCase()}`}>
-                    {type}
-                </span>
-                ))}
+                {typeBadges}
                 {(pokemon.form && !extraElement) &&
                     <span key={pokemon.form} className={`ml-3 badge ${getFormBadgeColor(pokemon.form)}`}>
                         {pokemon.form}
@@ -111,4 +121,6 @@ export default function PokeCard({pokemon, nature, defaultDescription="", onClic
         </div>
     </div>
     )
-}
+});
+
+export default PokeCard;

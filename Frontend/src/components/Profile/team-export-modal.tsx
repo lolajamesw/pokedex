@@ -15,7 +15,7 @@ export default function TeamExportModal({ isOpen, onClose, team }: Inputs) {
 
     useEffect(() => {
         if (!team) return;
-        fetch(ANALYTICS_API_URL + '/teams/export/' + team.id)
+        fetch(ANALYTICS_API_URL + 'teams/export/' + team.id)
             .then((res) => res.json())
             .then((data) => {setTeamText(data); console.log(data)})
             .catch((err) => console.error("Failed to fetch team summary:", err));

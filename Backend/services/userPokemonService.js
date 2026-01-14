@@ -1,5 +1,11 @@
 const userPokemonRepo = require('../repositories/userPokemonRepo');
 
+exports.validate = async(instanceID, userID) => {
+    if (!Number.isInteger(instanceID) || instanceID < 0) throw new Error('Invalid instance ID');
+    if (!Number.isInteger(userID) || userID < 0) throw new Error('Invalid User ID');
+    return await userPokemonRepo.validate(instanceID, userID)
+}
+
 exports.getUserPokemon = async (instanceID) => {
     if (!Number.isInteger(instanceID) || instanceID < 0) throw new Error('Invalid instance ID');
     return await userPokemonRepo.pokemon(instanceID);

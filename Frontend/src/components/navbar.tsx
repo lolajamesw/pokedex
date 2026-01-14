@@ -2,23 +2,24 @@
 
 import { useState, useRef, useEffect } from "react"
 import { useLocation, Link, useNavigate } from "react-router-dom"
-import { Menu, User, LogOut, BookOpen, ShoppingCart, Sword, UserSearch } from "lucide-react"
-import "./navbar.css"
+import { Menu, User, LogOut, BookOpen, ShoppingCart, Sword, UserSearch, Grid3x2 } from "lucide-react"
+import "./../css/navbar.css"
 import { USER_API_URL } from "../constants"
 import { User as UserType } from "../types/pokemon-details"
 
 const navigationItems = [
   { name: "Pokédex", href: "/pokedex", icon: BookOpen },
   { name: "My Pokémon", href: "/my-pokemon", icon: User },
+  { name: "Teams", href: "/profile", icon: Grid3x2 },
   { name: "Battle", href: "/battle", icon: Sword},
   { name: "Search User", href: "/search-user", icon: UserSearch }
 ]
 
 export default function Navbar({ currentPage, setCurrentPage }) {
-  const [user, setUser] = useState<UserType>({id: Number(localStorage.getItem("uID")), tradeCount: 0, displayName: "", username: "" })
+  const [user, setUser] = useState<UserType>({id: 0, tradeCount: 0, displayName: "", username: "" })
   const navigate = useNavigate();
   useEffect(() => {
-    fetch(USER_API_URL + '?uID=' + localStorage.getItem("uID"))
+    fetch(USER_API_URL, {credentials: 'include'})
       .then((res) => res.json())
       .then((data) => setUser(data))
       .catch((err) => console.error("Failed to fetch user:", err));
@@ -89,7 +90,6 @@ export default function Navbar({ currentPage, setCurrentPage }) {
               <button 
                 className="dropdown-item" 
                 onClick={() => {
-                  localStorage.removeItem("uID");
                   setShowProfileDropdown(false);
                   navigate("/login");
                 }}

@@ -3,11 +3,10 @@
 import { useState, useEffect } from "react"
 import { LogOut } from "lucide-react"
 import { Link } from "react-router-dom"
-import pokeIcon from "./assets/pokeIcon.png";
 import "./css/pokedex.css"
 import "./css/my-pokemon.css"
 import PokeCard from "./components/pokeCard";
-import { MyCardPokemon, Nature, natures, PokemonStats } from "./types/pokemon-details";
+import { MyCardPokemon, Nature, natures } from "./types/pokemon-details";
 import FilterAndSearchCard from "./components/filter-and-search-card";
 import NewPokemonModal from "./components/new-pokemon-modal";
 import { USER_API_URL, USER_POKEMON_API_URL } from "./constants";
@@ -18,10 +17,10 @@ export default function MyPokedex() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [bannerMessage, setBannerMessage] = useState("");
 
-    const ReleasePokemon = async (instanceID: number) => {
+  const ReleasePokemon = async (instanceID: number) => {
     try {
       console.log("Releasing Pokemon: ", instanceID);
-      await fetch(USER_POKEMON_API_URL + instanceID, {method: "DELETE"});
+      await fetch(USER_POKEMON_API_URL + instanceID, {method: "DELETE", credentials: "include"});
       setPokemonList(pokemonList.filter((pokemon) => pokemon.id !=instanceID));
     } catch (err) {
       console.error("Error releasing Pokémon: ", err);
@@ -43,7 +42,7 @@ export default function MyPokedex() {
 
   // Fetch pokemon details and update stats with getNewStat
   useEffect(() => {
-    fetch(USER_API_URL + '/pokemon?uID=' + localStorage.getItem("uID"))
+    fetch(USER_API_URL + 'pokemon', {credentials: 'include'})
       .then((res) => res.json())
       .then((data) => setPokemonList(data.map((p: any) => {
         p.stats = Object.fromEntries(
@@ -131,7 +130,7 @@ export default function MyPokedex() {
                 extraElement={pokemon.item != null ? (
                   <span>
                     <img
-                      src={pokemon.item==="null" ? pokeIcon : pokemon.item}
+                      src={pokemon.item==="null" ? '/pokeIcon.png' : pokemon.item}
                       alt={pokemon.item}
                       width={30}
                       height={30}

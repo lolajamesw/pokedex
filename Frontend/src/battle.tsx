@@ -7,11 +7,9 @@ import { useEffect, useState } from "react"
 import Autocomplete from '@mui/material/Autocomplete'
 import TextField from '@mui/material/TextField';
 import { Button } from "./components/ui/button"
-import { Input } from "./components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./components/ui/card"
-import { Badge } from "./components/ui/badge"
 import { Search, Zap, Shield, Sword } from "lucide-react"
-import { ANALYTICS_API_URL, POKEMON_API_URL } from "./constants"
+import { ANALYTICS_API_URL, POKEMON_API_URL, USER_API_URL } from "./constants"
 
 interface CounterPokemon {
   id: number
@@ -37,7 +35,7 @@ export default function PokemonCounterPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   useEffect(() => {
-      fetch(POKEMON_API_URL + 'names')
+      fetch(POKEMON_API_URL + 'names', {credentials: 'include'})
         .then((res) => res.json())
         .then((data) => setPokemonNames(data))
         .catch((err) => console.error("Failed to fetch Pokémon:", err));
@@ -52,9 +50,8 @@ export default function PokemonCounterPage() {
     setError("")
 
     try {
-      const uID = localStorage.getItem("uID");
       const name = pokemonName.trim().toLowerCase();
-      const response = await fetch(ANALYTICS_API_URL + `/opponents/${name}/${uID}`)
+      const response = await fetch(ANALYTICS_API_URL + 'opponents/' + name, {credentials: 'include'})
       if (!response.ok) {
         throw new Error("Failed to find counters")
       }

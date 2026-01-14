@@ -59,6 +59,28 @@ CREATE TABLE Pokedex (
     CHECK (HP >=0 AND atk >= 0 AND def >= 0 AND spAtk >= 0 AND spDef >= 0 AND speed >= 0)
 );
 
+CREATE TABLE Pokemon (
+	`key` VARCHAR(40) PRIMARY KEY,
+    pID INT NOT NULL,
+    species VARCHAR(40) NOT NULL,
+    name VARCHAR(40),
+    `default` BIT NOT NULL,
+    type1 VARCHAR(10) NOT NULL REFERENCES Types(type),
+    type2 VARCHAR(10) REFERENCES Types(type),
+    hp INT NOT NULL,
+    atk INT NOT NULL,
+    def INT NOT NULL,
+    spAtk INT NOT NULL,
+    spDef INT NOT NULL,
+    speed INT NOT NULL,
+    mega BIT NOT NULL,
+    legendary BIT NOT NULL,
+    mythical BIT NOT NULL,
+    generation INT NOT NULL,
+    description varchar(300),
+    img_suffix VARCHAR(10)
+);
+
 CREATE TABLE PokemonVariants (
 	pID INT REFERENCES Pokedex(pID) ON DELETE CASCADE,
     name VARCHAR(40) PRIMARY KEY,
@@ -156,10 +178,28 @@ CREATE TABLE Attacks(
     CHECK (power >=0 AND accuracy >= 0 AND PP >= 0)
 );
 
+CREATE TABLE Moves(
+	name VARCHAR(50) PRIMARY KEY,
+    type VARCHAR(10) NOT NULL REFERENCES Types(type), 
+	category VARCHAR(20), 
+	power INT, 
+	accuracy INT, 
+	PP INT, 
+	effect VARCHAR(100) NOT NULL,
+    tm BIT,
+    CHECK (power >=0 AND accuracy >= 0 AND PP >= 0)
+);
+
 CREATE TABLE LearnableAttacks(
 	pID INT NOT NULL REFERENCES Pokedex(pID),
     aID INT NOT NULL REFERENCES Attacks(aID),
     PRIMARY KEY (pID, aID)
+);
+
+CREATE TABLE LearnableMoves(
+	pID INT NOT NULL REFERENCES Pokedex(pID),
+    move VARCHAR(50) NOT NULL REFERENCES Moves(name),
+    PRIMARY KEY (pID, move)
 );
 
 CREATE TABLE CurrentAttacks(

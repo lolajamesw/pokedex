@@ -2,6 +2,7 @@ import { Search, SortAsc, SortDesc, SquaresIntersect, SquaresUnite } from "lucid
 import { useEffect, useState } from "react";
 import { CardPokemon, PokemonStats } from "../types/pokemon-details";
 import { Checkbox, ListItemText, MenuItem, Select, SelectChangeEvent, ToggleButton, ToggleButtonGroup, Tooltip } from "@mui/material";
+import { useSearchParams } from "react-router-dom";
 
 type Inputs<T extends CardPokemon> = {
     pokemonList: T[],
@@ -11,13 +12,31 @@ type Inputs<T extends CardPokemon> = {
 }
 
 export default function FilterAndSearchCard<T extends CardPokemon>({ pokemonList, setSortedPokemon, extraFilterLabel, extraFilterAttr } : Inputs<T>) {
-    const [searchTerm, setSearchTerm] = useState("");
-    const [filteredTypes, setFilteredTypes] = useState<string[]>([]);
-    const [sortBy, setSortBy] = useState("pID");
-    const [sortOrder, setSortOrder] = useState("asc");
+    const [searchParams, setSearchParams] = useSearchParams();
+    const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || "");
+    const [filteredTypes, setFilteredTypes] = useState<string[]>(JSON.parse(searchParams.get('types') || '[]'));
+    const [sortBy, setSortBy] = useState(searchParams.get('sortKey') || "pID");
+    const [sortOrder, setSortOrder] = useState(searchParams.get('order') || "asc");
     const [allTypes, setAllTypes] = useState<string[]>([]);
-    const [exactType, setExactType] = useState(false)
+    const [exactType, setExactType] = useState(Boolean(searchParams.get('exactType')) || false)
     const [extraFilter, setExtraFilter] = useState<boolean>(false);
+
+    const updateParams = () => {
+      setSearchParams((prev) => {
+        let q = new URLSearchParams();
+        if (searchTerm.length > 0) q.set('search', searchTerm);
+        if (filteredTypes.length > 0) q.set('types', JSON.stringify(filteredTypes));
+        if (sortBy !== 'pID') q.set('sortKey', sortBy);
+        if (sortOrder !== 'asc') q.set('order', sortOrder);
+        if (exactType) q.set('exactType', true.toString());
+        console.log(searchParams.entries())
+        console.log(q.entries())
+        console.log(q.entries() !== prev.entries())
+        if (q.entries() !== prev.entries()) q.set('page', '1');
+
+        return q
+      })
+    }
 
     useEffect(() => {
         setAllTypes(
@@ -48,9 +67,8 @@ export default function FilterAndSearchCard<T extends CardPokemon>({ pokemonList
             )
           );
           const matchesExtraFilter = !extraFilterAttr || !extraFilter || !!(pokemon[extraFilterAttr])
-    
           return matchesSearch && matchesType && matchesExtraFilter
-        })
+        });
         // Sort the pokemon that remain after filtering
         filtered.sort((a, b) => {
           let aValue, bValue
@@ -79,6 +97,7 @@ export default function FilterAndSearchCard<T extends CardPokemon>({ pokemonList
             return sortOrder === "asc" ? Number(aValue) - Number(bValue) : Number(bValue) - Number(aValue)
         })
         // Return the filtered and sorted pokemon
+        updateParams();
         setSortedPokemon(filtered);
       }, [searchTerm, sortBy, sortOrder, filteredTypes, extraFilter, exactType, pokemonList])
 

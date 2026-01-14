@@ -37,7 +37,7 @@ export default function AbilityCard({ abilities, instanceID, selectedAbility, ed
         try {
             const response = await fetch(
                 USER_POKEMON_API_URL + instanceID + '/ability/' + (newAbility ?? null),
-                { method: "PATCH" }
+                { method: "PATCH", credentials: "include" }
             );
             if (response.ok) {
                 setSetAbility(newAbility)
