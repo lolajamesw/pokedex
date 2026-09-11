@@ -1,4 +1,5 @@
 # Pokedex
+Pokédex is a full-stack Pokémon encyclopedia and team-building platform designed to make complex Pokémon data easy to explore and use. It combines a React frontend, Node.js/Express backend, and MySQL database to support Pokémon management, team building, matchup analysis, and more.
 ## Project Preview
 #### Pokedex Home Page
 ![Pokedex Home Page](./ProjectPreviewPics/Pokedex.png)
